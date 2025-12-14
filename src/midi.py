@@ -1,4 +1,5 @@
 import mido
+import os
 
 
 class MidiHandler:
@@ -15,14 +16,14 @@ class MidiHandler:
             print(f"  {out}")
 
     def echo(self):
-        if not self.inputs:
-            print("No MIDI inputs available")
+        input_name = os.environ.get("INPUT")
+        output_name = os.environ.get("OUTPUT")
+        if not input_name:
+            print("INPUT environment variable not set")
             return
-        if not self.outputs:
-            print("No MIDI outputs available")
+        if not output_name:
+            print("OUTPUT environment variable not set")
             return
-        input_name = next(inp for inp in self.inputs if "esi" not in inp.lower())
-        output_name = self.outputs[0]
         print(f"Echoing from {input_name} to {output_name}")
         try:
             with mido.open_input(input_name) as inp, mido.open_output(

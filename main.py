@@ -1,5 +1,8 @@
 import time
+from dotenv import load_dotenv
 from src.midi import MidiHandler
+
+load_dotenv()
 
 
 def main():
