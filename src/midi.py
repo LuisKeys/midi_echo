@@ -21,7 +21,7 @@ class MidiHandler:
         if not self.outputs:
             print("No MIDI outputs available")
             return
-        input_name = self.inputs[0]
+        input_name = next(inp for inp in self.inputs if "esi" not in inp.lower())
         output_name = self.outputs[0]
         print(f"Echoing from {input_name} to {output_name}")
         try:
