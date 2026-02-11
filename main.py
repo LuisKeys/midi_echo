@@ -8,12 +8,12 @@ load_dotenv()
 def main():
     handler = MidiHandler()
     handler.list()
-    while True:
-        try:
+    try:
+        while True:
             handler.echo()
             time.sleep(1)
-        except KeyboardInterrupt:
-            print("Error, reinitializing...")
+    except KeyboardInterrupt:
+        print("\nExiting...")
 
 
 if __name__ == "__main__":
