@@ -4,6 +4,8 @@ import logging
 import sys
 import threading
 from dotenv import load_dotenv
+from src.config import AppConfig
+from src.gui.context import AppContext
 from src.midi.ports import PortManager
 from src.midi.processor import MidiProcessor
 from src.midi.engine import MidiEngine
@@ -21,31 +23,23 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def run_engine(engine, inputs, output):
+def run_engine(engine, inputs, output, event_loop):
     """Function to run the MIDI engine in a separate thread."""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # Store the loop in the engine so it can be accessed
-    engine._loop = loop
-
     try:
-        loop.run_until_complete(engine.run(inputs, output))
+        event_loop.run_until_complete(engine.run(inputs, output))
     except Exception as e:
         logger.error(f"Engine thread error: {e}")
     finally:
-        loop.close()
+        event_loop.close()
 
 
 async def main():
+    # Load configuration from environment
+    config = AppConfig.from_env()
+
     port_manager = PortManager()
 
-    # Get configuration from environment
-    output_hint = os.getenv("OUTPUT")
-    verbose = os.getenv("VERBOSE", "false").lower() == "true"
-    list_ports = os.getenv("LIST_PORTS", "false").lower() == "true"
-
-    if list_ports:
+    if config.list_ports:
         print("\n--- Available MIDI Inputs ---")
         for p in port_manager.get_input_names():
             print(f"  {p}")
@@ -54,15 +48,15 @@ async def main():
             print(f"  {p}")
         return
 
-    if not output_hint:
+    if not config.output:
         logger.error("OUTPUT environment variable not set.")
         print("Please set OUTPUT in your .env file or environment.")
         return
 
-    output_name = port_manager.find_output_port(output_hint)
+    output_name = port_manager.find_output_port(config.output)
 
     if not output_name:
-        logger.error(f"Could not find output port matching: {output_hint}")
+        logger.error(f"Could not find output port matching: {config.output}")
         return
 
     input_names = port_manager.get_input_names()
@@ -74,36 +68,47 @@ async def main():
         logger.error("No valid input ports found.")
         return
 
-    processor = MidiProcessor(verbose=verbose)
+    processor = MidiProcessor(verbose=config.verbose)
     engine = MidiEngine(processor)
+
+    # Create event loop for MIDI engine
+    event_loop = asyncio.new_event_loop()
+
+    # Create application context
+    context = AppContext(
+        gui=None,  # Will be set after GUI is created
+        engine=engine,
+        processor=processor,
+        event_loop=event_loop,
+    )
 
     # Start MIDI engine in a background thread
     engine_thread = threading.Thread(
-        target=run_engine, args=(engine, filtered_inputs, output_name), daemon=True
+        target=run_engine,
+        args=(engine, filtered_inputs, output_name, event_loop),
+        daemon=True,
     )
     engine_thread.start()
 
-    # Wait a bit for the loop and queue to be initialized in the thread
-    while engine._loop is None or engine.queue is None:
+    # Wait for engine queue to be initialized
+    while engine.queue is None:
         await asyncio.sleep(0.1)
 
     # Start the GUI in the main thread
     logger.info("Starting GUI...")
-    app = MidiGui(engine, processor, engine._loop)
+    app = MidiGui(context, config)
 
     try:
         app.mainloop()
     finally:
         logger.info("GUI closed, stopping engine...")
-        # Use a thread-safe way to stop the engine
-        engine._loop.call_soon_threadsafe(engine._stop_event.set)
-        # Give it a moment to clean up
+        # Stop the engine
+        event_loop.call_soon_threadsafe(engine._stop_event.set)
         await asyncio.sleep(0.5)
 
 
 if __name__ == "__main__":
     try:
-        # We need a small async wrapper to start the main logic
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nExiting...")

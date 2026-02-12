@@ -1,126 +1,158 @@
+"""Main GUI window for MIDI Echo."""
+
 import customtkinter as ctk
 import logging
-import mido
-import asyncio
+from src.config import AppConfig
+from src.gui.context import AppContext
+from src.gui.components import Theme, ButtonPanel, ButtonSpec, PopupManager
+from src.gui.input import PressDetector
+from src.gui.handlers import (
+    TransposeHandler,
+    OctaveHandler,
+    ChannelHandler,
+    FXHandler,
+    ScaleHandler,
+    ArpHandler,
+    PresetHandler,
+    PanicHandler,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class MidiGui(ctk.CTk):
-    def __init__(self, engine, processor, loop):
+    """Main GUI window for MIDI Echo."""
+
+    def __init__(self, context: AppContext, config: AppConfig):
+        """Initialize MIDI GUI.
+
+        Args:
+            context: AppContext for dependency injection
+            config: AppConfig with configuration
+        """
+        ctk.set_appearance_mode("dark")
         super().__init__()
 
-        self.engine = engine
-        self.processor = processor
-        self.loop = loop
+        self.context = context
+        self.app_config = config
+        self.context.app_config = config
+        self.root = self
 
+        # Setup theme
+        self.theme = Theme(config)
+
+        # Setup window
         self.title("MIDI Echo - Live Performance")
-        self.geometry("600x400")
+        self.geometry(f"{config.window_width}x{config.window_height}")
+        self.configure(fg_color=self.theme.get_color("bg"))
 
-        # Color palette
-        self.colors = {
-            "cyan": "#00FFFF",
-            "violet": "#8A2BE2",
-            "aqua": "#7FFFD4",
-            "grey": "#808080",
-            "red": "#FF0000",
-            "bg": "#1A1A1A",
+        # Maximize window (platform-independent)
+        self.update_idletasks()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        self.geometry(f"{screen_width}x{screen_height}+0+0")
+        self.lift()
+        self.attributes("-topmost", True)
+        self.focus()
+
+        # Setup components
+        self.button_panel = ButtonPanel(self, self.theme)
+        self.popup_manager = PopupManager(self)
+        self.press_detector = PressDetector(config, self)
+
+        # Setup handlers
+        self.handlers = {
+            "TR": TransposeHandler(context),
+            "OC": OctaveHandler(context),
+            "CH": ChannelHandler(context),
+            "FX": FXHandler(context),
+            "SC": ScaleHandler(context),
+            "AR": ArpHandler(context),
+            "PS": PresetHandler(context),
+            "ST": PanicHandler(context),
         }
 
-        self.configure(fg_color=self.colors["bg"])
+        # Create buttons
+        self._create_buttons()
 
-        # Configure grid 4x2
-        self.grid_columnconfigure((0, 1, 2, 3), weight=1, uniform="equal")
-        self.grid_rowconfigure((0, 1), weight=1, uniform="equal")
+        # Force redraw to fix rendering glitches
+        self.after(100, self.button_panel.force_redraw)
 
-        # Buttons definition
-        self.buttons = {}
+        # Bind events
+        self.bind("<Escape>", lambda e: self.quit())
+        self.bind("<Configure>", lambda e: self._on_window_resize())
 
-        # Row 0
-        self._create_button("CH", 0, 0, self.colors["cyan"], self.toggle_channel)
-        self._create_button("FX", 0, 1, self.colors["violet"], self.toggle_fx)
-        self._create_button("PS", 0, 2, self.colors["cyan"], self.show_presets)
-        self._create_button("ST", 0, 3, self.colors["grey"], self.midi_panic)
+        # Update context
+        context.update_gui(self)
 
-        # Row 1
-        self._create_button("TR", 1, 0, self.colors["aqua"], self.change_transpose)
-        self._create_button("OC", 1, 1, self.colors["aqua"], self.change_octave)
-        self._create_button("SC", 1, 2, self.colors["aqua"], self.toggle_scale)
-        self._create_button("AR", 1, 3, self.colors["aqua"], self.toggle_arp)
+    def _create_buttons(self) -> None:
+        """Create all buttons for the interface."""
+        button_specs = [
+            # Row 0
+            ButtonSpec("FX", 0, 0, "violet", self.handlers["FX"].on_button_press),
+            ButtonSpec(
+                "TR",
+                0,
+                1,
+                "aqua",
+                self.handlers["TR"].on_button_press,
+                self.handlers["TR"].on_button_long_press,
+            ),
+            ButtonSpec(
+                "OC",
+                0,
+                2,
+                "aqua",
+                self.handlers["OC"].on_button_press,
+                self.handlers["OC"].on_button_long_press,
+            ),
+            ButtonSpec("SC", 0, 3, "aqua", self.handlers["SC"].on_button_press),
+            # Row 1
+            ButtonSpec("AR", 1, 0, "aqua", self.handlers["AR"].on_button_press),
+            ButtonSpec(
+                "CH",
+                1,
+                1,
+                "cyan",
+                self.handlers["CH"].on_button_press,
+                self.handlers["CH"].on_button_long_press,
+            ),
+            ButtonSpec("PS", 1, 2, "cyan", self.handlers["PS"].on_button_press),
+            ButtonSpec("ST", 1, 3, "grey", self.handlers["ST"].on_button_press),
+        ]
 
-    def _create_button(self, text, row, col, color, command):
-        btn = ctk.CTkButton(
-            self,
-            text=text,
-            font=("Arial", 32, "bold"),
-            fg_color=color,
-            text_color="black",
-            hover_color=color,  # Keep it bright
-            corner_radius=10,
-            command=command,
-        )
-        btn.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
-        self.buttons[text] = btn
+        for spec in button_specs:
+            # Create button with long-press handlers if available
+            if spec.long_press_handler:
 
-    # Handlers
-    def toggle_channel(self):
-        # Dummy rotation for now: None -> 0 -> 1 ...
-        if self.processor.output_channel is None:
-            self.processor.output_channel = 0
-        elif self.processor.output_channel >= 15:
-            self.processor.output_channel = None
-        else:
-            self.processor.output_channel += 1
+                def make_press_handler(handler_key, spec_ref):
+                    def on_press():
+                        self.press_detector.on_button_press(
+                            handler_key,
+                            (
+                                spec_ref.long_press_handler
+                                if spec_ref.long_press_handler
+                                else lambda: None
+                            ),
+                        )
 
-        ch_text = (
-            "BY"
-            if self.processor.output_channel is None
-            else str(self.processor.output_channel + 1)
-        )
-        self.buttons["CH"].configure(text=f"CH\n{ch_text}")
-        logger.info(f"Channel changed to: {self.processor.output_channel}")
+                    return on_press
 
-    def toggle_fx(self):
-        self.processor.fx_enabled = not self.processor.fx_enabled
-        new_color = self.colors["violet"] if self.processor.fx_enabled else "#4A4A4A"
-        self.buttons["FX"].configure(fg_color=new_color)
-        logger.info(f"FX enabled: {self.processor.fx_enabled}")
+                def make_release_handler(handler_key):
+                    def on_release():
+                        self.press_detector.on_button_release(spec.command)
 
-    def show_presets(self):
-        logger.info("PS pressed - Presets not implemented yet")
+                    return on_release
 
-    def midi_panic(self):
-        logger.info("ST pressed - MIDI PANIC")
-        self.buttons["ST"].configure(fg_color=self.colors["red"])
-        # Send All Notes Off to all 16 channels
-        for ch in range(16):
-            msg = mido.Message("control_change", channel=ch, control=123, value=0)
-            self.loop.call_soon_threadsafe(self.engine.queue.put_nowait, msg)
+                self.button_panel.create_button(
+                    spec,
+                    on_press=make_press_handler(spec.text, spec),
+                    on_release=make_release_handler(spec.text),
+                )
+            else:
+                self.button_panel.create_button(spec)
 
-        self.after(
-            500, lambda: self.buttons["ST"].configure(fg_color=self.colors["grey"])
-        )
-
-    def change_transpose(self):
-        self.processor.transpose = (self.processor.transpose + 1) % 13  # 0 to 12
-        self.buttons["TR"].configure(text=f"TR\n{self.processor.transpose}")
-        logger.info(f"Transpose: {self.processor.transpose}")
-
-    def change_octave(self):
-        self.processor.octave = self.processor.octave + 1
-        if self.processor.octave > 2:
-            self.processor.octave = -2
-        self.buttons["OC"].configure(text=f"OC\n{self.processor.octave}")
-        logger.info(f"Octave: {self.processor.octave}")
-
-    def toggle_scale(self):
-        self.processor.scale_enabled = not self.processor.scale_enabled
-        new_color = self.colors["aqua"] if self.processor.scale_enabled else "#4A4A4A"
-        self.buttons["SC"].configure(fg_color=new_color)
-        logger.info(f"Scale enabled: {self.processor.scale_enabled}")
-
-    def toggle_arp(self):
-        self.processor.arp_enabled = not self.processor.arp_enabled
-        new_color = self.colors["aqua"] if self.processor.arp_enabled else "#4A4A4A"
-        self.buttons["AR"].configure(fg_color=new_color)
-        logger.info(f"Arp enabled: {self.processor.arp_enabled}")
+    def _on_window_resize(self) -> None:
+        """Handle window resize event."""
+        self.theme.update_window_size(self.winfo_width(), self.winfo_height())
+        self.button_panel.update_font_sizes()
