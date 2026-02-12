@@ -87,6 +87,11 @@ class MidiGui(ctk.CTk):
         # Update context
         context.update_gui(self)
 
+        # Initialize button colors to match current state
+        for key, handler in self.handlers.items():
+            if hasattr(handler, "update_ui"):
+                handler.update_ui()
+
     def _create_buttons(self) -> None:
         """Create all buttons for the interface."""
         button_specs = [
@@ -110,7 +115,14 @@ class MidiGui(ctk.CTk):
             ),
             ButtonSpec("SC", 0, 3, "aqua", self.handlers["SC"].on_button_press),
             # Row 1
-            ButtonSpec("AR", 1, 0, "aqua", self.handlers["AR"].on_button_press),
+            ButtonSpec(
+                "AR",
+                1,
+                0,
+                "aqua",
+                self.handlers["AR"].on_button_press,
+                self.handlers["AR"].on_button_long_press,
+            ),
             ButtonSpec(
                 "CH",
                 1,
@@ -140,16 +152,16 @@ class MidiGui(ctk.CTk):
 
                     return on_press
 
-                def make_release_handler(handler_key):
+                def make_release_handler(handler_key, spec_ref):
                     def on_release():
-                        self.press_detector.on_button_release(spec.command)
+                        self.press_detector.on_button_release(spec_ref.command)
 
                     return on_release
 
                 self.button_panel.create_button(
                     spec,
                     on_press=make_press_handler(spec.text, spec),
-                    on_release=make_release_handler(spec.text),
+                    on_release=make_release_handler(spec.text, spec),
                 )
             else:
                 self.button_panel.create_button(spec)

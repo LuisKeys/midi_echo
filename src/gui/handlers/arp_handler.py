@@ -43,14 +43,6 @@ class ArpHandler(BaseHandler):
 
         self.update_ui()
         logger.info(f"Arp enabled: {self.context.processor.arp_enabled}")
-        # Toggle both the simple flag and the richer state container
-        self.context.processor.arp_enabled = not self.context.processor.arp_enabled
-        if hasattr(self.context.processor, "arp_state"):
-            self.context.processor.arp_state.enabled = (
-                self.context.processor.arp_enabled
-            )
-        self.update_ui()
-        logger.info(f"Arp enabled: {self.context.processor.arp_enabled}")
 
     def on_button_long_press(self) -> None:
         """Open the pattern editor popup on long press."""
@@ -103,19 +95,31 @@ class ArpHandler(BaseHandler):
     def update_ui(self) -> None:
         """Update button color based on arp state."""
         if not self.context.gui or not self.context.processor:
+            logger.warning("update_ui: missing gui or processor")
             return
 
         enabled = self.context.processor.arp_enabled
         if hasattr(self.context.processor, "arp_state"):
             enabled = self.context.processor.arp_state.enabled
 
-        new_color = "aqua" if enabled else None
+        logger.debug(f"update_ui: enabled={enabled}")
 
         btn = self.context.gui.button_panel.get_button("AR")
-        if btn:
-            if new_color:
-                btn.configure(
-                    fg_color=self.context.gui.theme.get_color_tuple(new_color)
-                )
-            else:
-                btn.configure(fg_color=("#4A4A4A", "#4A4A4A"))
+        if not btn:
+            logger.warning("update_ui: button 'AR' not found")
+            return
+
+        if enabled:
+            color_tuple = self.context.gui.theme.get_color_tuple("aqua")
+            logger.debug(f"update_ui: setting aqua color {color_tuple}")
+            btn.configure(fg_color=color_tuple, hover_color=color_tuple)
+        else:
+            logger.debug("update_ui: setting disabled color")
+            disabled_color = ("#4A4A4A", "#4A4A4A")
+            btn.configure(fg_color=disabled_color, hover_color=disabled_color)
+
+        # Force UI update
+        try:
+            btn.update_idletasks()
+        except Exception:
+            pass

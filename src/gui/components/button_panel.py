@@ -60,6 +60,10 @@ class ButtonPanel:
         """
         color = self.theme.get_color_tuple(spec.color_name)
 
+        # If press/release handlers are provided, use a no-op command
+        # so clicks don't also trigger the primary spec.command
+        cmd = (lambda: None) if (on_press and on_release) else spec.command
+
         btn = ctk.CTkButton(
             self.parent,
             text=spec.text,
@@ -68,7 +72,7 @@ class ButtonPanel:
             text_color="black",
             hover_color=color,
             corner_radius=10,
-            command=spec.command,
+            command=cmd,
         )
 
         # Place button in grid
