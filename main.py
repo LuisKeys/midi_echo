@@ -2,10 +2,12 @@ import asyncio
 import os
 import logging
 import sys
+import threading
 from dotenv import load_dotenv
 from src.midi.ports import PortManager
 from src.midi.processor import MidiProcessor
 from src.midi.engine import MidiEngine
+from src.gui.app import MidiGui
 
 # Load environment variables
 load_dotenv()
@@ -17,6 +19,22 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
+
+
+def run_engine(engine, inputs, output):
+    """Function to run the MIDI engine in a separate thread."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # Store the loop in the engine so it can be accessed
+    engine._loop = loop
+
+    try:
+        loop.run_until_complete(engine.run(inputs, output))
+    except Exception as e:
+        logger.error(f"Engine thread error: {e}")
+    finally:
+        loop.close()
 
 
 async def main():
@@ -59,19 +77,33 @@ async def main():
     processor = MidiProcessor(verbose=verbose)
     engine = MidiEngine(processor)
 
+    # Start MIDI engine in a background thread
+    engine_thread = threading.Thread(
+        target=run_engine, args=(engine, filtered_inputs, output_name), daemon=True
+    )
+    engine_thread.start()
+
+    # Wait a bit for the loop and queue to be initialized in the thread
+    while engine._loop is None or engine.queue is None:
+        await asyncio.sleep(0.1)
+
+    # Start the GUI in the main thread
+    logger.info("Starting GUI...")
+    app = MidiGui(engine, processor, engine._loop)
+
     try:
-        await engine.run(filtered_inputs, output_name)
-    except KeyboardInterrupt:
-        pass
-    except Exception as e:
-        print(f"Error during execution: {e}")
-        logger.error(f"Execution error: {e}")
+        app.mainloop()
     finally:
-        await engine.stop()
+        logger.info("GUI closed, stopping engine...")
+        # Use a thread-safe way to stop the engine
+        engine._loop.call_soon_threadsafe(engine._stop_event.set)
+        # Give it a moment to clean up
+        await asyncio.sleep(0.5)
 
 
 if __name__ == "__main__":
     try:
+        # We need a small async wrapper to start the main logic
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nExiting...")

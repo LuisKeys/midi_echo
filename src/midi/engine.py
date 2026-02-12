@@ -11,20 +11,22 @@ class MidiEngine:
 
     def __init__(self, processor: MidiProcessor):
         self.processor = processor
-        self.queue = asyncio.Queue()
+        self.queue = None
         self.inputs = []
         self.output = None
         self._running = False
         self._loop = None
-        self._stop_event = asyncio.Event()
+        self._stop_event = None
 
     def _callback(self, msg):
         """Thread-safe callback to push messages into the async queue."""
-        if self._loop and self._loop.is_running():
+        if self._loop and self._loop.is_running() and self.queue:
             self._loop.call_soon_threadsafe(self.queue.put_nowait, msg)
 
     async def run(self, input_names: list[str], output_name: str):
         self._loop = asyncio.get_running_loop()
+        self.queue = asyncio.Queue()
+        self._stop_event = asyncio.Event()
         self._running = True
         self._stop_event.clear()
 
