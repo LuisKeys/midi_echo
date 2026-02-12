@@ -82,6 +82,15 @@ async def main():
         event_loop=event_loop,
     )
 
+    # Create ArpEngine and attach to context (engine runs in event_loop)
+    try:
+        from src.midi.arp_engine import ArpEngine
+
+        arp_engine = ArpEngine(processor.arp_state, engine, event_loop)
+        context.arp_engine = arp_engine
+    except Exception:
+        arp_engine = None
+
     # Start MIDI engine in a background thread
     engine_thread = threading.Thread(
         target=run_engine,
@@ -102,6 +111,13 @@ async def main():
         app.mainloop()
     finally:
         logger.info("GUI closed, stopping engine...")
+        # Stop ArpEngine if present
+        try:
+            if getattr(context, "arp_engine", None):
+                event_loop.call_soon_threadsafe(context.arp_engine.stop)
+        except Exception:
+            pass
+
         # Stop the engine
         event_loop.call_soon_threadsafe(engine._stop_event.set)
         await asyncio.sleep(0.5)

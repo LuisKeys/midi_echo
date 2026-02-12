@@ -1,5 +1,6 @@
 import mido
 import logging
+from src.midi.arp_state import ArpState
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,10 @@ class MidiProcessor:
         self.octave = 0
         self.fx_enabled = False
         self.scale_enabled = False
+        # Backwards-compatible boolean flag
         self.arp_enabled = False
+        # Full arpeggiator state container
+        self.arp_state: ArpState = ArpState()
         self.error_state = False
 
     def process(self, msg: mido.Message) -> mido.Message | None:
