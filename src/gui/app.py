@@ -37,6 +37,8 @@ class MidiGui(ctk.CTk):
         self.app_config = config
         self.context.app_config = config
         self.root = self
+        # Alias to the underlying Tk root for components expecting `tk_root`
+        self.tk_root = self
 
         # Setup theme
         self.theme = Theme(config)

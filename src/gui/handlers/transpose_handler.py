@@ -19,6 +19,7 @@ class TransposeHandler(BaseHandler):
         super().__init__(context)
         self.is_repeating = False
         self._value_label = None  # Reference to popup value label
+        self._repeat_job = None
 
     def on_button_press(self) -> None:
         """Show transpose popup."""
@@ -120,12 +121,30 @@ class TransposeHandler(BaseHandler):
 
             def on_minus_press():
                 self.is_repeating = True
-                self._repeat_adjust(-self.context.app_config.long_press_increment)
+                # Start repeating only after long-press threshold
+                if self.context.gui:
+                    # schedule start of repeating; store job id so we can cancel
+                    self._repeat_job = self.context.gui.tk_root.after(
+                        self.context.app_config.long_press_threshold,
+                        lambda: self._repeat_adjust(
+                            -self.context.app_config.long_press_increment
+                        ),
+                    )
 
             def on_minus_release():
-                self.is_repeating = False
+                # If the repeat job is still pending, cancel and perform a single step
+                if self.context.gui and getattr(self, "_repeat_job", None):
+                    try:
+                        self.context.gui.tk_root.after_cancel(self._repeat_job)
+                    except Exception:
+                        pass
+                    self._repeat_job = None
+                    # single click already handled by button `command`; nothing to do
+                else:
+                    # repeating had started; stop it
+                    self.is_repeating = False
 
-            btn_minus.bind("<Button-1>", lambda e: on_minus_press())
+            btn_minus.bind("<ButtonPress-1>", lambda e: on_minus_press())
             btn_minus.bind("<ButtonRelease-1>", lambda e: on_minus_release())
 
             # Zero button
@@ -164,12 +183,26 @@ class TransposeHandler(BaseHandler):
 
             def on_plus_press():
                 self.is_repeating = True
-                self._repeat_adjust(self.context.app_config.long_press_increment)
+                if self.context.gui:
+                    self._repeat_job = self.context.gui.tk_root.after(
+                        self.context.app_config.long_press_threshold,
+                        lambda: self._repeat_adjust(
+                            self.context.app_config.long_press_increment
+                        ),
+                    )
 
             def on_plus_release():
-                self.is_repeating = False
+                if self.context.gui and getattr(self, "_repeat_job", None):
+                    try:
+                        self.context.gui.tk_root.after_cancel(self._repeat_job)
+                    except Exception:
+                        pass
+                    self._repeat_job = None
+                    # single click already handled by button `command`;
+                else:
+                    self.is_repeating = False
 
-            btn_plus.bind("<Button-1>", lambda e: on_plus_press())
+            btn_plus.bind("<ButtonPress-1>", lambda e: on_plus_press())
             btn_plus.bind("<ButtonRelease-1>", lambda e: on_plus_release())
 
         if self.context.gui.popup_manager:
@@ -180,6 +213,10 @@ class TransposeHandler(BaseHandler):
 
     def _repeat_adjust(self, increment: int) -> None:
         """Repeat adjustment during long press."""
+        # Clear scheduled start job once repeating begins
+        if getattr(self, "_repeat_job", None):
+            self._repeat_job = None
+
         if self.is_repeating:
             self.adjust_transpose(increment)
             if self.context.gui:
