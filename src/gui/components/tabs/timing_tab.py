@@ -16,9 +16,12 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         state.timing.bpm,
         callback=lambda v: setattr(state.timing, "bpm", v),
         config=config,
-        tap_callback=lambda: context.gui.arp_handler.tap_tempo(),
+        tap_callback=lambda: context.gui.handlers["AR"].tap_tempo(),
     )
     bpm_widget.pack(fill="x", padx=10, pady=10)
+    # Store reference in handler for display updates
+    if hasattr(context.gui, "handlers") and "AR" in context.gui.handlers:
+        context.gui.handlers["AR"]._bpm_widget = bpm_widget
 
     # Division
     div_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")

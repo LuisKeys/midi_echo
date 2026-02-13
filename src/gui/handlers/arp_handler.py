@@ -17,6 +17,8 @@ class ArpHandler(BaseHandler):
         super().__init__(context)
         # store recent tap timestamps for tap-tempo
         self._tap_times: list[float] = []
+        # store reference to BPM widget for display updates
+        self._bpm_widget = None
 
     def on_button_press(self) -> None:
         """Toggle arpeggiator enabled state."""
@@ -75,10 +77,17 @@ class ArpHandler(BaseHandler):
             avg = sum(intervals) / len(intervals)
             if avg > 0:
                 bpm = int(round(60.0 / avg))
-                self.context.processor.arp_state.bpm = max(20, min(300, bpm))
-                logger.info(
-                    f"Tap tempo BPM set to {self.context.processor.arp_state.bpm}"
-                )
+                bpm = max(20, min(300, bpm))
+                try:
+                    self.context.processor.arp_state.timing.bpm = bpm
+                    logger.info(
+                        f"Tap tempo BPM set to {self.context.processor.arp_state.timing.bpm}"
+                    )
+                    # Update the BPM widget display immediately if available
+                    if self._bpm_widget:
+                        self._bpm_widget.set_value(bpm)
+                except AttributeError as e:
+                    logger.error(f"Failed to set BPM: {e}")
                 self.update_ui()
 
     def open_tempo_editor(self) -> None:

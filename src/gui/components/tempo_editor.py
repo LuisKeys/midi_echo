@@ -19,13 +19,13 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
     frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
     frame.pack(expand=True, fill="both", padx=10, pady=10)
 
-    label = ctk.CTkLabel(frame, text=f"BPM: {state.bpm}", font=("Arial", 20))
+    label = ctk.CTkLabel(frame, text=f"BPM: {state.timing.bpm}", font=("Arial", 20))
     label.pack(pady=(8, 12))
 
     def on_change(val):
         try:
             bpm = int(float(val))
-            state.bpm = bpm
+            state.timing.bpm = bpm
             label.configure(text=f"BPM: {bpm}")
         except Exception:
             pass
@@ -33,7 +33,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
     slider = ctk.CTkSlider(
         frame, from_=20, to=300, number_of_steps=280, command=on_change
     )
-    slider.set(state.bpm)
+    slider.set(state.timing.bpm)
     slider.pack(fill="x", padx=12, pady=8)
 
     def on_close():
