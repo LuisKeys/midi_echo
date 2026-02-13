@@ -1,7 +1,7 @@
 """Velocity tab for the ARP control interface."""
 
 import customtkinter as ctk
-from ..widgets import IncrementDecrementWidget
+from ..widgets import IncrementDecrementWidget, SquareDropdown
 
 
 def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -18,7 +18,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
     mode_label.pack(side="left", padx=10)
 
     vel_mode_var = ctk.StringVar(value=state.velocity.mode)
-    vel_mode_menu = ctk.CTkOptionMenu(
+    vel_mode_menu = SquareDropdown(
         mode_frame,
         values=["ORIGINAL", "FIXED", "RAMP_UP", "RAMP_DOWN", "RANDOM", "ACCENT_FIRST"],
         variable=vel_mode_var,

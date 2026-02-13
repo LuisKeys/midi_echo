@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 from src.midi.arp.state_validator import ArpState
+from ..widgets import SquareDropdown
 
 
 def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -17,7 +18,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     latch_label.pack(side="left", padx=10)
 
     latch_var = ctk.StringVar(value=state.latch)
-    latch_menu = ctk.CTkOptionMenu(
+    latch_menu = SquareDropdown(
         latch_frame,
         values=["OFF", "ON", "HOLD"],
         variable=latch_var,

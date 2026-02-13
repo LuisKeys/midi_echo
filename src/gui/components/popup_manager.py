@@ -176,7 +176,7 @@ class PopupMenu(ctk.CTkFrame):
     def _create_layout(self) -> None:
         """Create popup layout."""
         # Top bar with title and close button
-        top_frame = ctk.CTkFrame(self, fg_color="#2A2A2A")
+        top_frame = ctk.CTkFrame(self, fg_color="#2A2A2A", corner_radius=0)
         top_frame.pack(fill="x", padx=10, pady=10)
 
         title_label = ctk.CTkLabel(
@@ -204,7 +204,7 @@ class PopupMenu(ctk.CTkFrame):
         self.popup_manager.register_element("close_btn", close_btn)
 
         # Content frame
-        content_frame = ctk.CTkFrame(self, fg_color="#2A2A2A")
+        content_frame = ctk.CTkFrame(self, fg_color="#2A2A2A", corner_radius=0)
         content_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         # Build content

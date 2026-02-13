@@ -170,3 +170,124 @@ class IncrementDecrementWidget(ctk.CTkFrame):
     def set_value(self, val):
         self.current_val = val
         self.value_label.configure(text=str(val))
+
+
+class SquareDropdown(ctk.CTkFrame):
+    """A custom dropdown menu with squared corners and touch-friendly sizing."""
+
+    def __init__(
+        self,
+        parent,
+        values,
+        variable=None,
+        command=None,
+        width=150,
+        height=50,
+        **kwargs,
+    ):
+        """Initialize dropdown with squared corners and large touch targets.
+
+        Args:
+            parent: Parent widget
+            values: List of values for the dropdown
+            variable: StringVar to track the selected value
+            command: Callback when selection changes
+            width: Width of the dropdown
+            height: Height of the dropdown
+            **kwargs: Additional arguments to pass to CTkFrame
+        """
+        super().__init__(parent, fg_color="#555555", corner_radius=0, **kwargs)
+
+        self.values = values
+        self.variable = variable
+        self.command = command
+        self.width = width
+        self.height = height
+        self._dropdown_open = False
+        self._dropdown_window = None
+
+        # Create the button to show current value
+        self.button = ctk.CTkButton(
+            self,
+            text=variable.get() if variable else values[0],
+            width=width,
+            height=height,
+            corner_radius=0,
+            font=("Arial", 20),
+            command=self._toggle_dropdown,
+        )
+        self.button.pack(fill="both", expand=True)
+
+    def _toggle_dropdown(self):
+        """Toggle the dropdown menu open/closed."""
+        if self._dropdown_open:
+            self._close_dropdown()
+        else:
+            self._open_dropdown()
+
+    def _open_dropdown(self):
+        """Open the dropdown menu."""
+        self._dropdown_open = True
+
+        # Get the position of the button
+        self.update_idletasks()
+        x = self.winfo_rootx()
+        y = self.winfo_rooty() + self.height
+
+        # Create dropdown window
+        self._dropdown_window = ctk.CTkToplevel(self.master)
+        self._dropdown_window.geometry(f"{self.width}+{x}+{y}")
+        self._dropdown_window.overrideredirect(True)
+        self._dropdown_window.attributes("-topmost", True)
+
+        # Create frame for items
+        frame = ctk.CTkFrame(self._dropdown_window, fg_color="#2A2A2A", corner_radius=0)
+        frame.pack(fill="both", expand=True)
+
+        # Add buttons for each value
+        for value in self.values:
+            btn = ctk.CTkButton(
+                frame,
+                text=value,
+                height=60,
+                corner_radius=0,
+                font=("Arial", 24),
+                command=lambda v=value: self._select_value(v),
+            )
+            btn.pack(fill="x", padx=2, pady=2)
+
+        # Close dropdown when clicking outside
+        def close_on_focus_out(event=None):
+            if self._dropdown_window and not self._dropdown_window.winfo_exists():
+                self._dropdown_open = False
+                return
+            self._close_dropdown()
+
+        self._dropdown_window.bind("<FocusOut>", close_on_focus_out)
+        self._dropdown_window.focus()
+
+    def _close_dropdown(self):
+        """Close the dropdown menu."""
+        self._dropdown_open = False
+        if self._dropdown_window and self._dropdown_window.winfo_exists():
+            self._dropdown_window.destroy()
+        self._dropdown_window = None
+
+    def _select_value(self, value):
+        """Select a dropdown value."""
+        if self.variable:
+            self.variable.set(value)
+        self.button.configure(text=value)
+        if self.command:
+            self.command(value)
+        self._close_dropdown()
+
+    def configure(self, **kwargs):
+        """Configure widget - handle font specially."""
+        font = kwargs.pop("font", None)
+        if font:
+            # Configure the button font
+            self.button.configure(font=font)
+        # Handle any other configuration
+        if kwargs:
+            super().configure(**kwargs)

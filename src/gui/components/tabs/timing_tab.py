@@ -1,7 +1,7 @@
 """Timing tab for the ARP control interface."""
 
 import customtkinter as ctk
-from ..widgets import IncrementDecrementWidget
+from ..widgets import IncrementDecrementWidget, SquareDropdown
 
 
 def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -37,7 +37,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     div_label.pack(side="left", padx=10)
 
     div_var = ctk.StringVar(value=state.timing.division)
-    div_menu = ctk.CTkOptionMenu(
+    div_menu = SquareDropdown(
         div_frame,
         values=["1/4", "1/8", "1/16", "1/32", "TRIPLET", "DOTTED"],
         variable=div_var,

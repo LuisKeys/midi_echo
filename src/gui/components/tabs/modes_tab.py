@@ -1,7 +1,7 @@
 """Modes tab for the ARP control interface."""
 
 import customtkinter as ctk
-from ..widgets import IncrementDecrementWidget
+from ..widgets import IncrementDecrementWidget, SquareDropdown
 
 
 def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -18,7 +18,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     mode_label.pack(side="left", padx=10)
 
     mode_var = ctk.StringVar(value=state.mode)
-    mode_menu = ctk.CTkOptionMenu(
+    mode_menu = SquareDropdown(
         mode_frame,
         values=["UP", "DOWN", "UPDOWN", "RANDOM", "CHORD"],
         variable=mode_var,
@@ -50,7 +50,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     dir_label.pack(side="left", padx=10)
 
     dir_var = ctk.StringVar(value=state.octave_dir)
-    dir_menu = ctk.CTkOptionMenu(
+    dir_menu = SquareDropdown(
         dir_frame,
         values=["UP", "DOWN", "BOTH"],
         variable=dir_var,
@@ -68,7 +68,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     reset_label.pack(side="left", padx=10)
 
     reset_var = ctk.StringVar(value=state.reset_mode)
-    reset_menu = ctk.CTkOptionMenu(
+    reset_menu = SquareDropdown(
         reset_frame,
         values=["NEW_CHORD", "FIRST_NOTE", "FREE_RUN"],
         variable=reset_var,
