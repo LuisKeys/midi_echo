@@ -50,8 +50,10 @@ class ArpHandler(BaseHandler):
             return
 
         popup = self.context.gui.popup_manager.create_popup(
-            "Pattern Editor",
+            "ARP Control",
             lambda parent: build_pattern_editor(parent, self.context),
+            width=700,
+            height=600,
         )
         popup.show()
 

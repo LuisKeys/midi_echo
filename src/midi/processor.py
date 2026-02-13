@@ -1,5 +1,6 @@
 import mido
 import logging
+import time
 from src.midi.arp.state_validator import ArpState
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,9 @@ class MidiProcessor:
         # Full arpeggiator state container
         self.arp_state: ArpState = ArpState()
         self.error_state = False
+        # Clock sync
+        self.last_clock_time = None
+        self.clock_intervals = []
 
     def process(self, msg: mido.Message) -> mido.Message | None:
         """
@@ -31,11 +35,19 @@ class MidiProcessor:
         if self.verbose and msg.type not in ["clock", "active_sensing"]:
             logger.info(f"Processing: {msg}")
 
+        # Handle clock for external sync
+        if msg.type == "clock" and self.arp_state.external_sync:
+            self._handle_clock()
+
         # Clone message to avoid side effects on the original
         if msg.is_meta:
             return msg
 
         new_msg = msg.copy()
+
+        # Handle arpeggiator input notes
+        if self.arp_enabled and new_msg.type in ["note_on", "note_off"]:
+            self._update_arp_notes(new_msg)
 
         # Apply transformations for note messages
         if new_msg.type in ["note_on", "note_off", "aftertouch", "polytouch"]:
@@ -53,3 +65,37 @@ class MidiProcessor:
             new_msg.channel = self.output_channel
 
         return new_msg
+
+    def _update_arp_notes(self, msg: mido.Message) -> None:
+        """Update held notes for arpeggiator based on input."""
+        if msg.type == "note_on" and msg.velocity > 0:
+            self.arp_state.held_notes.add(msg.note)
+            self._update_arp_mask()
+        elif msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
+            if self.arp_state.latch != "HOLD":
+                self.arp_state.held_notes.discard(msg.note)
+                self._update_arp_mask()
+
+    def _handle_clock(self) -> None:
+        """Handle MIDI clock message for external sync."""
+        current_time = time.time()
+        if self.last_clock_time is not None:
+            interval = current_time - self.last_clock_time
+            self.clock_intervals.append(interval)
+            if len(self.clock_intervals) > 24:  # Keep last 24 intervals
+                self.clock_intervals.pop(0)
+            if len(self.clock_intervals) >= 6:  # Need some samples
+                avg_interval = sum(self.clock_intervals) / len(self.clock_intervals)
+                quarter_time = avg_interval * 24  # 24 clocks per quarter
+                bpm = 60.0 / quarter_time
+                self.arp_state.timing.bpm = int(max(20, min(300, bpm)))
+        self.last_clock_time = current_time
+
+    def _update_arp_mask(self) -> None:
+        """Update pattern mask based on held notes."""
+        self.arp_state.pattern.mask = [False] * 12
+        for note in self.arp_state.held_notes:
+            semitone = note % 12
+            self.arp_state.pattern.mask[semitone] = True
+        # Update chord memory
+        self.arp_state.chord_memory = sorted(list(self.arp_state.held_notes))

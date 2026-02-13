@@ -119,6 +119,9 @@ class ArpState:
     mode: str = "UP"  # UP, DOWN, UPDOWN, RANDOM, CHORD
     latch: str = "OFF"  # OFF, ON, HOLD
 
+    # External sync
+    external_sync: bool = False
+
     # Octave control
     octave: int = 1  # 1..4
     octave_dir: str = "UP"  # UP, DOWN, BOTH
@@ -126,6 +129,10 @@ class ArpState:
 
     # Gate control (0..100 percent of step duration)
     gate_pct: int = 50
+
+    # Held notes for pattern generation
+    held_notes: set[int] = field(default_factory=set)
+    chord_memory: list[int] = field(default_factory=list)
 
     # Nested configuration objects
     timing: TimingConfig = field(default_factory=TimingConfig)
@@ -173,6 +180,7 @@ class ArpState:
             "octave": self.octave,
             "octave_dir": self.octave_dir,
             "latch": self.latch,
+            "external_sync": self.external_sync,
             "bpm": self.timing.bpm,
             "division": self.timing.division,
             "swing": self.timing.swing,
@@ -182,6 +190,8 @@ class ArpState:
             "fixed_velocity": self.velocity.fixed_velocity,
             "pattern_mask": self.pattern.mask,
             "accents": self.pattern.accents,
+            "held_notes": list(self.held_notes),
+            "chord_memory": self.chord_memory,
         }
 
     @classmethod
@@ -225,8 +235,11 @@ class ArpState:
             octave=d.get("octave", 1),
             octave_dir=d.get("octave_dir", "UP"),
             latch=d.get("latch", "OFF"),
+            external_sync=d.get("external_sync", False),
             reset_mode=d.get("reset_mode", "NEW_CHORD"),
             gate_pct=d.get("gate_pct", 50),
+            held_notes=set(d.get("held_notes", [])),
+            chord_memory=d.get("chord_memory", []),
             timing=timing_cfg,
             velocity=velocity_cfg,
             pattern=pattern_cfg,

@@ -147,6 +147,9 @@ class ArpEngine:
                 bpm=self.state.timing.bpm,
                 gate_pct=self.state.gate_pct,
             )
+            # If latch is HOLD, sustain notes longer
+            if self.state.latch == "HOLD":
+                gate_duration = max(gate_duration, 5.0)  # At least 5 seconds
             asyncio.create_task(self._schedule_note_off(note, gate_duration))
 
     async def _schedule_note_off(self, note: int, delay: float) -> None:

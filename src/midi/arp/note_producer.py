@@ -59,7 +59,7 @@ class NoteProducer:
             MIDI note (0..127).
         """
         # Pattern represents 12 semitones in an octave
-        base_note = self.BASE_NOTE + (step_idx % 12)
+        base_note = self.BASE_NOTE + step_idx
 
         # Octave offset: octave 1 = no offset, octave 2 = +12, etc.
         octave = max(1, min(4, int(octave)))
@@ -96,7 +96,7 @@ class NoteProducer:
 
         elif vel_mode == "RAMP_DOWN":
             # Velocity decreases from step 0 to 11
-            ratio = (11 - step_idx) / 11.0 if step_idx < 11 else 1.0
+            ratio = (11 - step_idx) / 11.0
             vel = int(
                 self.RAMP_MIN_VEL + ratio * (self.RAMP_MAX_VEL - self.RAMP_MIN_VEL)
             )
