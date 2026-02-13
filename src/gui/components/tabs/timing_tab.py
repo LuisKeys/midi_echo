@@ -7,6 +7,9 @@ from ..widgets import IncrementDecrementWidget
 def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     """Build the Timing tab with BPM, division, swing, gate, sync."""
     config = context.app_config
+    theme = context.gui.theme
+    pm = context.gui.popup_manager
+
     # BPM control
     bpm_widget = IncrementDecrementWidget(
         parent,
@@ -17,8 +20,11 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         callback=lambda v: setattr(state.timing, "bpm", v),
         config=config,
         tap_callback=lambda: context.gui.handlers["AR"].tap_tempo(),
+        theme=theme,
     )
     bpm_widget.pack(fill="x", padx=10, pady=10)
+    pm.register_element("content_elements", bpm_widget)
+
     # Store reference in handler for display updates
     if hasattr(context.gui, "handlers") and "AR" in context.gui.handlers:
         context.gui.handlers["AR"]._bpm_widget = bpm_widget
@@ -51,8 +57,10 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         callback=lambda v: setattr(state.timing, "swing", v),
         config=config,
         suffix="%",
+        theme=theme,
     )
     swing_widget.pack(fill="x", padx=10, pady=(0, 10))
+    pm.register_element("content_elements", swing_widget)
 
     # Gate
     gate_widget = IncrementDecrementWidget(
@@ -64,8 +72,10 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         callback=lambda v: setattr(state, "gate_pct", v),
         config=config,
         suffix="%",
+        theme=theme,
     )
     gate_widget.pack(fill="x", padx=10, pady=(0, 10))
+    pm.register_element("content_elements", gate_widget)
 
     # External sync
     sync_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
@@ -80,3 +90,14 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         font=("Arial", 14),
     )
     sync_check.pack(side="left", padx=10)
+
+    def update_font_sizes():
+        font_size = theme.get_font_size("label_small")
+
+        div_label.configure(font=("Arial", font_size))
+        div_menu.configure(font=("Arial", font_size))
+        sync_check.configure(font=("Arial", font_size))
+
+    parent.update_font_sizes = update_font_sizes
+    pm.register_element("content_elements", parent)
+    update_font_sizes()

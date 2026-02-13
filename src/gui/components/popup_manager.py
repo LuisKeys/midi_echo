@@ -113,7 +113,15 @@ class PopupManager:
             key: Element identifier
             element: The widget element
         """
-        self.popup_elements[key] = element
+        if key == "content_elements":
+            self.popup_elements[key].append(element)
+        else:
+            self.popup_elements[key] = element
+
+    def update_font_sizes(self) -> None:
+        """Update font sizes for all popup elements."""
+        if self.active_popup and hasattr(self.active_popup, "update_font_sizes"):
+            self.active_popup.update_font_sizes()
 
     def is_popup_open(self) -> bool:
         """Check if a popup is currently open."""
@@ -206,18 +214,34 @@ class PopupMenu(ctk.CTkFrame):
         """Show the popup.
 
         Args:
-            x: X position (centers on parent if None)
-            y: Y position (centers on parent if None)
+            x: X position (deprecated, centered by default)
+            y: Y position (deprecated, centered by default)
         """
-        self.parent.update_idletasks()
-
-        if x is None or y is None:
-            x = (self.parent.winfo_width() - self.popup_width) // 2
-            y = (self.parent.winfo_height() - self.popup_height) // 2
-
-        self.place(x=x, y=y)
+        self.place(relx=0.5, rely=0.5, relwidth=0.8, relheight=0.8, anchor="center")
         self.lift()
         self.focus()
+        self.update_font_sizes()
+
+    def update_font_sizes(self) -> None:
+        """Update font sizes of popup UI elements (dimensions stay fixed)."""
+        theme = self.popup_manager.theme
+
+        # Update title
+        title_label = self.popup_manager.popup_elements.get("title_label")
+        if title_label:
+            font_size = theme.get_font_size("popup_title")
+            title_label.configure(font=("Arial", font_size, "bold"))
+
+        # Update close button
+        close_btn = self.popup_manager.popup_elements.get("close_btn")
+        if close_btn:
+            font_size = theme.get_font_size("popup_close")
+            close_btn.configure(font=("Arial", font_size, "bold"))
+
+        # Update content elements
+        for element in self.popup_manager.popup_elements.get("content_elements", []):
+            if hasattr(element, "update_font_sizes"):
+                element.update_font_sizes()
 
     def close(self) -> None:
         """Close the popup."""

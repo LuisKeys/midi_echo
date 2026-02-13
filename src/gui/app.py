@@ -167,6 +167,14 @@ class MidiGui(ctk.CTk):
                 self.button_panel.create_button(spec)
 
     def _on_window_resize(self) -> None:
-        """Handle window resize event."""
+        """Handle window resize event (debounced)."""
+        if hasattr(self, "_resize_job") and self._resize_job:
+            self.after_cancel(self._resize_job)
+        self._resize_job = self.after(100, self._apply_resize)
+
+    def _apply_resize(self) -> None:
+        """Apply deferred resize updates."""
+        self._resize_job = None
         self.theme.update_window_size(self.winfo_width(), self.winfo_height())
         self.button_panel.update_font_sizes()
+        self.popup_manager.update_font_sizes()

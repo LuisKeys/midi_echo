@@ -6,6 +6,7 @@ import logging
 
 def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     """Build the Pattern tab with step buttons, accents, and held notes."""
+    theme = context.gui.theme
     # Validation
     if not state or not hasattr(state, "pattern") or not state.pattern:
         logging.warning("Invalid state for pattern tab, using defaults")
@@ -16,12 +17,28 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     if not isinstance(state.pattern.accents, list) or len(state.pattern.accents) != 12:
         logging.warning("Invalid pattern accents, resetting to all False")
         state.pattern.accents = [False] * 12
+
     # Pattern grid
     grid_frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
     grid_frame.pack(expand=True, fill="both", padx=10, pady=10)
 
     buttons = []
     accent_buttons = []
+
+    def update_font_sizes():
+        """Update font sizes of buttons (dimensions handled by grid weights)."""
+        font_size = theme.get_font_size("label_small")
+
+        for btn in buttons:
+            btn.configure(font=("Arial", font_size))
+        for btn in accent_buttons:
+            btn.configure(font=("Arial", font_size))
+
+        held_label.configure(font=("Arial", font_size))
+
+    parent.update_font_sizes = update_font_sizes
+    if hasattr(context.gui, "popup_manager"):
+        context.gui.popup_manager.register_element("content_elements", parent)
 
     def refresh_ui():
         """Refresh UI elements to match current state."""
@@ -60,6 +77,12 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
 
         return _toggle
 
+    # Configure grid weights so buttons fill available space
+    for c in range(4):
+        grid_frame.grid_columnconfigure(c, weight=1, uniform="col")
+    for r in range(6):
+        grid_frame.grid_rowconfigure(r, weight=1, uniform="row")
+
     # Step buttons
     for r in range(3):
         for c in range(4):
@@ -69,13 +92,11 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             btn = ctk.CTkButton(
                 grid_frame,
                 text=text,
-                width=80,
-                height=60,
                 fg_color=fg,
                 corner_radius=0,
                 command=make_toggle(idx),
             )
-            btn.grid(row=r, column=c, padx=4, pady=4)
+            btn.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
             buttons.append(btn)
 
     # Accent buttons below
@@ -86,13 +107,11 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             btn = ctk.CTkButton(
                 grid_frame,
                 text="A",
-                width=80,
-                height=40,
                 fg_color=fg,
                 corner_radius=0,
                 command=make_accent_toggle(idx),
             )
-            btn.grid(row=4 + r, column=c, padx=4, pady=2)
+            btn.grid(row=3 + r, column=c, padx=2, pady=2, sticky="nsew")
             accent_buttons.append(btn)
 
     # Held notes display
@@ -121,6 +140,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Initial refresh
     refresh_ui()
+    update_font_sizes()
 
     # Set up periodic refresh for external state changes
     def schedule_refresh():

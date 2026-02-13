@@ -6,6 +6,9 @@ from src.midi.arp.state_validator import ArpState
 
 def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     """Build the Advanced tab with latch, enable, save/load."""
+    theme = context.gui.theme
+    pm = context.gui.popup_manager
+
     # Latch
     latch_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
     latch_frame.pack(fill="x", padx=10, pady=10)
@@ -61,6 +64,19 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         command=lambda: _load_preset(state),
     )
     load_btn.pack(side="left", padx=10)
+
+    def update_font_sizes():
+        font_size = theme.get_font_size("label_small")
+
+        latch_label.configure(font=("Arial", font_size))
+        latch_menu.configure(font=("Arial", font_size))
+        enable_check.configure(font=("Arial", font_size))
+        save_btn.configure(font=("Arial", font_size))
+        load_btn.configure(font=("Arial", font_size))
+
+    parent.update_font_sizes = update_font_sizes
+    pm.register_element("content_elements", parent)
+    update_font_sizes()
 
 
 def _save_preset(state):

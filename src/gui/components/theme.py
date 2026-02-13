@@ -24,13 +24,17 @@ class Theme:
         "overlay": "#3D1A6D",
     }
 
-    # Base font sizes at reference window resolution
+    # Base font sizes at reference window resolution (600x400)
     BASE_FONT_SIZES = {
-        "popup_title": 36,
-        "popup_value": 33,
-        "popup_button": 42,
-        "popup_close": 42,
+        "popup_title": 20,
+        "popup_value": 18,
+        "popup_button": 20,
+        "popup_close": 16,
         "main_button": 32,
+        "tab_text": 14,
+        "label_small": 14,
+        "label_medium": 16,
+        "increment_button": 14,
     }
 
     def __init__(self, config: AppConfig):
@@ -75,13 +79,18 @@ class Theme:
         Returns:
             Calculated font size in points
         """
-        # Calculate scale factor based on window size
+        base_size = self.BASE_FONT_SIZES.get(element_type, 12)
+        return int(base_size * self.get_scale())
+
+    def get_scale(self) -> float:
+        """Get the current scaling factor based on window dimensions.
+
+        Returns:
+            Scale factor where 1.0 is the base resolution
+        """
         width_scale = self.current_width / self.config.base_window_width
         height_scale = self.current_height / self.config.base_window_height
-        scale = (width_scale + height_scale) / 2
-
-        base_size = self.BASE_FONT_SIZES.get(element_type, 12)
-        return int(base_size * scale)
+        return (width_scale + height_scale) / 2
 
     def update_window_size(self, width: int, height: int) -> None:
         """Update current window size for font scaling.

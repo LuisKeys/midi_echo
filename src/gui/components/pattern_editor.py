@@ -25,8 +25,12 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
         return
 
     # Main tabview
-    tabview = ctk.CTkTabview(parent, width=750, height=550)
+    tabview = ctk.CTkTabview(parent)
     tabview.pack(expand=True, fill="both", padx=10, pady=10)
+
+    # Register tabview for font scaling
+    if hasattr(parent.master, "popup_manager"):
+        parent.master.popup_manager.register_element("content_elements", tabview)
 
     # Pattern Tab
     tabview.add("Pattern")

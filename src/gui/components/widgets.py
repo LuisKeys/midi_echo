@@ -18,6 +18,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         config=None,
         suffix=None,
         tap_callback=None,
+        theme=None,
     ):
         super().__init__(parent, fg_color="#2A2A2A")
         self.min_val = min_val
@@ -25,6 +26,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.step = step
         self.callback = callback
         self.config = config
+        self.theme = theme
         self.current_val = initial_val
 
         # Label
@@ -75,6 +77,31 @@ class IncrementDecrementWidget(ctk.CTkFrame):
                 corner_radius=0,
             )
             self.tap_btn.pack(side="right", padx=10)
+
+        # Apply initial scaling
+        if self.theme:
+            self.update_font_sizes()
+
+    def update_font_sizes(self) -> None:
+        """Update font sizes based on theme (dimensions stay fixed)."""
+        if not self.theme:
+            return
+
+        label_font_size = self.theme.get_font_size("label_small")
+        value_font_size = self.theme.get_font_size("label_medium")
+        btn_font_size = self.theme.get_font_size("increment_button")
+
+        self.label.configure(font=("Arial", label_font_size))
+        self.value_label.configure(font=("Arial", value_font_size))
+
+        for btn in [self.minus_btn, self.plus_btn]:
+            btn.configure(font=("Arial", btn_font_size))
+
+        if hasattr(self, "suffix_label"):
+            self.suffix_label.configure(font=("Arial", label_font_size))
+
+        if hasattr(self, "tap_btn"):
+            self.tap_btn.configure(font=("Arial", label_font_size))
 
     def start_decr(self):
         self.minus_holding = True

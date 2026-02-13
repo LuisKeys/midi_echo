@@ -10,6 +10,8 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         parent: Parent frame provided by PopupMenu
         context: AppContext with access to processor and gui
     """
+    theme = context.gui.theme
+    pm = context.gui.popup_manager
     state = getattr(context.processor, "arp_state", None)
     if state is None:
         lbl = ctk.CTkLabel(parent, text="No arpeggiator state found.")
@@ -44,3 +46,13 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
 
     btn = ctk.CTkButton(frame, text="Close", command=on_close, corner_radius=0)
     btn.pack(pady=12)
+
+    def update_font_sizes():
+        font_size = theme.get_font_size("label_medium")
+
+        label.configure(font=("Arial", font_size))
+        btn.configure(font=("Arial", theme.get_font_size("label_small")))
+
+    frame.update_font_sizes = update_font_sizes
+    pm.register_element("content_elements", frame)
+    update_font_sizes()

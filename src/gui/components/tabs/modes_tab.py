@@ -7,6 +7,9 @@ from ..widgets import IncrementDecrementWidget
 def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     """Build the Modes tab with mode, octave, direction, reset."""
     config = context.app_config
+    theme = context.gui.theme
+    pm = context.gui.popup_manager
+
     # Mode
     mode_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
     mode_frame.pack(fill="x", padx=10, pady=10)
@@ -34,8 +37,10 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         state.octave,
         callback=lambda v: setattr(state, "octave", v),
         config=config,
+        theme=theme,
     )
     oct_widget.pack(fill="x", padx=10, pady=(0, 10))
+    pm.register_element("content_elements", oct_widget)
 
     # Octave direction
     dir_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
@@ -72,3 +77,17 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         height=50,
     )
     reset_menu.pack(side="left", padx=10)
+
+    def update_font_sizes():
+        font_size = theme.get_font_size("label_small")
+
+        mode_label.configure(font=("Arial", font_size))
+        mode_menu.configure(font=("Arial", font_size))
+        dir_label.configure(font=("Arial", font_size))
+        dir_menu.configure(font=("Arial", font_size))
+        reset_label.configure(font=("Arial", font_size))
+        reset_menu.configure(font=("Arial", font_size))
+
+    parent.update_font_sizes = update_font_sizes
+    pm.register_element("content_elements", parent)
+    update_font_sizes()
