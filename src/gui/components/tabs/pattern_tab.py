@@ -1,10 +1,21 @@
 """Pattern tab for the ARP control interface."""
 
 import customtkinter as ctk
+import logging
 
 
 def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     """Build the Pattern tab with step buttons, accents, and held notes."""
+    # Validation
+    if not state or not hasattr(state, "pattern") or not state.pattern:
+        logging.warning("Invalid state for pattern tab, using defaults")
+        # Could set defaults, but for now, just proceed assuming it's ok
+    if not isinstance(state.pattern.mask, list) or len(state.pattern.mask) != 12:
+        logging.warning("Invalid pattern mask, resetting to all True")
+        state.pattern.mask = [True] * 12
+    if not isinstance(state.pattern.accents, list) or len(state.pattern.accents) != 12:
+        logging.warning("Invalid pattern accents, resetting to all False")
+        state.pattern.accents = [False] * 12
     # Pattern grid
     grid_frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
     grid_frame.pack(expand=True, fill="both", padx=10, pady=10)
@@ -12,25 +23,37 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     buttons = []
     accent_buttons = []
 
-    def make_toggle(i: int):
-        def _toggle():
-            state.pattern.mask[i] = not state.pattern.mask[i]
-            btn = buttons[i]
+    def refresh_ui():
+        """Refresh UI elements to match current state."""
+        for i, btn in enumerate(buttons):
             btn.configure(
                 fg_color="#00FF00" if state.pattern.mask[i] else ("#333333", "#333333")
             )
+        for i, btn in enumerate(accent_buttons):
+            btn.configure(
+                fg_color=(
+                    "#FFFF00" if state.pattern.accents[i] else ("#555555", "#555555")
+                )
+            )
+        # Update held notes
+        held_text = (
+            ", ".join(str(n) for n in sorted(state.held_notes))
+            if state.held_notes
+            else "None"
+        )
+        held_label.configure(text=f"Held Notes: {held_text}")
+
+    def make_toggle(i: int):
+        def _toggle():
+            state.pattern.mask[i] = not state.pattern.mask[i]
+            refresh_ui()
 
         return _toggle
 
     def make_accent_toggle(i: int):
         def _toggle():
             state.pattern.accents[i] = not state.pattern.accents[i]
-            btn = accent_buttons[i]
-            btn.configure(
-                fg_color=(
-                    "#FFFF00" if state.pattern.accents[i] else ("#555555", "#555555")
-                )
-            )
+            refresh_ui()
 
         return _toggle
 
@@ -52,19 +75,20 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             buttons.append(btn)
 
     # Accent buttons below
-    for c in range(4):
-        idx = c
-        fg = "#FFFF00" if state.pattern.accents[idx] else ("#555555", "#555555")
-        btn = ctk.CTkButton(
-            grid_frame,
-            text="A",
-            width=80,
-            height=40,
-            fg_color=fg,
-            command=make_accent_toggle(idx),
-        )
-        btn.grid(row=3, column=c, padx=4, pady=2)
-        accent_buttons.append(btn)
+    for r in range(3):
+        for c in range(4):
+            idx = r * 4 + c
+            fg = "#FFFF00" if state.pattern.accents[idx] else ("#555555", "#555555")
+            btn = ctk.CTkButton(
+                grid_frame,
+                text="A",
+                width=80,
+                height=40,
+                fg_color=fg,
+                command=make_accent_toggle(idx),
+            )
+            btn.grid(row=4 + r, column=c, padx=4, pady=2)
+            accent_buttons.append(btn)
 
     # Held notes display
     held_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
@@ -84,18 +108,18 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     def recall_chord():
         if state.chord_memory:
             state.pattern.mask = [False] * 12
+            state.pattern.accents = [False] * 12  # Reset accents
             for note in state.chord_memory:
                 semitone = note % 12
                 state.pattern.mask[semitone] = True
-            # Update buttons
-            for i, btn in enumerate(buttons):
-                btn.configure(
-                    fg_color=(
-                        "#00FF00" if state.pattern.mask[i] else ("#333333", "#333333")
-                    )
-                )
+            refresh_ui()
 
-    recall_btn = ctk.CTkButton(
-        held_frame, text="Recall Chord", width=120, height=50, command=recall_chord
-    )
-    recall_btn.pack(side="right", padx=10)
+    # Initial refresh
+    refresh_ui()
+
+    # Set up periodic refresh for external state changes
+    def schedule_refresh():
+        refresh_ui()
+        parent.after(1000, schedule_refresh)  # Refresh every second
+
+    schedule_refresh()
