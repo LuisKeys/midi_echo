@@ -24,9 +24,17 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
         lbl.pack()
         return
 
+    theme = context.gui.theme
+
     # Main tabview
     tabview = ctk.CTkTabview(parent)
     tabview.pack(expand=True, fill="both", padx=10, pady=10)
+
+    # Configure tab appearance for touch-friendly interface
+    if hasattr(tabview, "_segmented_button"):
+        # Increase font size for tabs
+        tab_font_size = theme.get_font_size("tab_text")
+        tabview._segmented_button.configure(font=("Arial", tab_font_size))
 
     # Register tabview for font scaling
     if hasattr(parent.master, "popup_manager"):

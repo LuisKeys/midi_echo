@@ -31,7 +31,7 @@ class Theme:
         "popup_button": 20,
         "popup_close": 16,
         "main_button": 32,
-        "tab_text": 14,
+        "tab_text": 18,
         "label_small": 14,
         "label_medium": 16,
         "increment_button": 14,
