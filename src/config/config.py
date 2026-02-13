@@ -29,6 +29,9 @@ class AppConfig:
     base_window_width: int  # Reference width for font scaling
     base_window_height: int  # Reference height for font scaling
 
+    # UI Configuration - Button Hold
+    hold_increment_rate: int  # milliseconds between increments when holding button
+
     @classmethod
     def from_env(cls) -> "AppConfig":
         """Load configuration from environment variables."""
@@ -43,4 +46,5 @@ class AppConfig:
             window_height=int(os.getenv("WINDOW_HEIGHT", "400")),
             base_window_width=600,
             base_window_height=400,
+            hold_increment_rate=int(os.getenv("HOLD_INCREMENT_RATE", "50")),
         )
