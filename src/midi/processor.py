@@ -1,6 +1,6 @@
 import mido
 import logging
-from src.midi.arp_state import ArpState
+from src.midi.arp.state_validator import ArpState
 
 logger = logging.getLogger(__name__)
 
