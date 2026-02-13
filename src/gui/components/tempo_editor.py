@@ -42,5 +42,5 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         except Exception:
             pass
 
-    btn = ctk.CTkButton(frame, text="Close", command=on_close)
+    btn = ctk.CTkButton(frame, text="Close", command=on_close, corner_radius=0)
     btn.pack(pady=12)

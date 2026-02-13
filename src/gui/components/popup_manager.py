@@ -150,7 +150,7 @@ class PopupMenu(ctk.CTkFrame):
             height: Popup height
         """
         super().__init__(
-            parent, fg_color="#2A2A2A", corner_radius=10, width=width, height=height
+            parent, fg_color="#2A2A2A", corner_radius=0, width=width, height=height
         )
 
         self.parent = parent
@@ -196,6 +196,7 @@ class PopupMenu(ctk.CTkFrame):
             hover_color="#FF0000",
             width=60,
             height=60,
+            corner_radius=0,
             command=self.close,
         )
         close_btn.pack(side="right")

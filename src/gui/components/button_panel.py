@@ -71,7 +71,7 @@ class ButtonPanel:
             fg_color=color,
             text_color="black",
             hover_color=color,
-            corner_radius=10,
+            corner_radius=0,
             command=cmd,
         )
 

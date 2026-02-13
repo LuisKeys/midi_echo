@@ -47,6 +47,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Save Preset",
         width=120,
         height=50,
+        corner_radius=0,
         command=lambda: _save_preset(state),
     )
     save_btn.pack(side="left", padx=10)
@@ -56,6 +57,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Load Preset",
         width=120,
         height=50,
+        corner_radius=0,
         command=lambda: _load_preset(state),
     )
     load_btn.pack(side="left", padx=10)

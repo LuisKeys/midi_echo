@@ -72,6 +72,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 width=80,
                 height=60,
                 fg_color=fg,
+                corner_radius=0,
                 command=make_toggle(idx),
             )
             btn.grid(row=r, column=c, padx=4, pady=4)
@@ -88,6 +89,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 width=80,
                 height=40,
                 fg_color=fg,
+                corner_radius=0,
                 command=make_accent_toggle(idx),
             )
             btn.grid(row=4 + r, column=c, padx=4, pady=2)

@@ -35,7 +35,9 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.minus_holding = False
         self.minus_timer = None
 
-        self.minus_btn = ctk.CTkButton(self, text="-", width=80, height=50)
+        self.minus_btn = ctk.CTkButton(
+            self, text="-", width=80, height=50, corner_radius=0
+        )
         self.minus_btn.bind("<ButtonPress-1>", lambda e: self.start_decr())
         self.minus_btn.bind("<ButtonRelease-1>", lambda e: self.stop_decr())
         self.minus_btn.pack(side="left", padx=5)
@@ -50,7 +52,9 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.plus_holding = False
         self.plus_timer = None
 
-        self.plus_btn = ctk.CTkButton(self, text="+", width=80, height=50)
+        self.plus_btn = ctk.CTkButton(
+            self, text="+", width=80, height=50, corner_radius=0
+        )
         self.plus_btn.bind("<ButtonPress-1>", lambda e: self.start_incr())
         self.plus_btn.bind("<ButtonRelease-1>", lambda e: self.stop_incr())
         self.plus_btn.pack(side="left", padx=5)
@@ -63,7 +67,12 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         # Tap button
         if tap_callback:
             self.tap_btn = ctk.CTkButton(
-                self, text="Tap", width=80, height=50, command=tap_callback
+                self,
+                text="Tap",
+                width=80,
+                height=50,
+                command=tap_callback,
+                corner_radius=0,
             )
             self.tap_btn.pack(side="right", padx=10)
 

@@ -115,6 +115,7 @@ class TransposeHandler(BaseHandler):
                 text_color="black",
                 width=100,
                 height=100,
+                corner_radius=0,
                 command=lambda: self.adjust_transpose(-1),
             )
             btn_minus.pack(side="left", padx=5, pady=5, fill="both", expand=True)
@@ -160,6 +161,7 @@ class TransposeHandler(BaseHandler):
                 text_color="black",
                 width=100,
                 height=100,
+                corner_radius=0,
                 command=lambda: self.adjust_transpose(reset=True),
             )
             btn_zero.pack(side="left", padx=5, pady=5, fill="both", expand=True)
@@ -177,6 +179,7 @@ class TransposeHandler(BaseHandler):
                 text_color="black",
                 width=100,
                 height=100,
+                corner_radius=0,
                 command=lambda: self.adjust_transpose(1),
             )
             btn_plus.pack(side="left", padx=5, pady=5, fill="both", expand=True)
