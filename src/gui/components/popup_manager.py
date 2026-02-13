@@ -2,6 +2,8 @@
 
 import customtkinter as ctk
 from typing import Callable, Dict, Optional, Any
+from .theme import Theme
+from .lightbox import Lightbox
 
 
 class PopupManager:
@@ -13,15 +15,17 @@ class PopupManager:
     - Tracking popup elements for font updates
     """
 
-    def __init__(self, parent: ctk.CTk):
+    def __init__(self, parent: ctk.CTk, theme: Theme):
         """Initialize popup manager.
 
         Args:
             parent: Parent widget (the main GUI window)
+            theme: Theme instance for styling
         """
         self.parent = parent
+        self.theme = theme
         self.active_popup: Optional[ctk.CTkFrame] = None
-        self.overlay: Optional[ctk.CTkFrame] = None
+        self.overlay: Optional[Lightbox] = None
 
         # Track popup elements for dynamic updates
         self.popup_elements: Dict[str, Any] = {
@@ -77,9 +81,8 @@ class PopupManager:
         if self.active_popup:
             try:
                 if self.overlay:
-                    self.overlay.place_forget()
-                    self.overlay.destroy()
-                self.overlay = None
+                    self.overlay.hide()
+
                 self.active_popup.place_forget()
                 self.active_popup.destroy()
             except Exception:
@@ -92,26 +95,16 @@ class PopupManager:
                 "content_elements": [],
             }
 
-    def _create_overlay(self) -> ctk.CTkFrame:
-        """Create a semi-transparent overlay with click-to-close functionality."""
-        # Use a dark theme-tinted color (dark violet) instead of pure black
-        overlay_color = "#3D1A6D"
-        overlay = ctk.CTkFrame(self.parent, fg_color=overlay_color)
-        overlay.place(x=0, y=0, relwidth=1, relheight=1)
-        overlay.configure(fg_color=(overlay_color, overlay_color))
+    def _create_overlay(self) -> Lightbox:
+        """Create or show the reusable lightbox overlay."""
+        if not self.overlay:
+            # Create the reusable lightbox if it doesn't exist
+            self.overlay = Lightbox(
+                self.parent, self.theme, command=self._close_current
+            )
 
-        try:
-            # Increased opacity from 0.5 to 0.65 for better visual separation
-            overlay.attributes("-alpha", 0.65)
-        except Exception:
-            pass  # May not be supported on all platforms
-
-        # Bind click event on overlay to close popup
-        overlay.bind("<Button-1>", lambda e: self._close_current())
-
-        overlay.lower()
-        self.overlay = overlay
-        return overlay
+        self.overlay.show()
+        return self.overlay
 
     def register_element(self, key: str, element: Any) -> None:
         """Register a popup element for tracking.

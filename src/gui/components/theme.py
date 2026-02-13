@@ -21,6 +21,7 @@ class Theme:
         "grey": "#E8E8E8",
         "red": "#FF0000",
         "bg": "#1A1A1A",
+        "overlay": "#3D1A6D",
     }
 
     # Base font sizes at reference window resolution

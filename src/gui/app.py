@@ -59,7 +59,7 @@ class MidiGui(ctk.CTk):
 
         # Setup components
         self.button_panel = ButtonPanel(self, self.theme)
-        self.popup_manager = PopupManager(self)
+        self.popup_manager = PopupManager(self, self.theme)
         self.press_detector = PressDetector(config, self)
 
         # Setup handlers
