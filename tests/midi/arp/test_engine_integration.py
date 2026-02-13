@@ -95,6 +95,7 @@ async def test_timing_loop_basic(arp_state, mock_engine):
     """Test basic timing loop execution."""
     arp_state.enabled = True
     arp_state.held_notes = {60}  # Add a held note to trigger generation
+    arp_state.pattern.notes = [60]  # Update notes
     engine = ArpEngine(arp_state, mock_engine)
 
     # Create a short test: enable, wait for a few cycles, disable
@@ -138,6 +139,8 @@ class TestArpEngineMode:
             octave=1,
             pattern=PatternConfig(mask=[True, False, True, False] + [False] * 8),
         )
+        state.held_notes = {60, 62}  # C4, D4
+        state.pattern.notes = [60, 62]  # Filtered by mask
         engine = ArpEngine(state, mock_engine, event_loop=asyncio.get_event_loop())
 
         engine.start()
@@ -156,6 +159,8 @@ class TestArpEngineMode:
             octave=1,
             pattern=PatternConfig(mask=[True] * 12),
         )
+        state.held_notes = {60, 62, 64}  # C4, D4, E4
+        state.pattern.notes = [60, 62, 64]
         engine = ArpEngine(state, mock_engine, event_loop=asyncio.get_event_loop())
 
         engine.start()
@@ -183,6 +188,8 @@ class TestArpEngineBackwardCompatibility:
 
     def test_build_active_order(self, arp_state, mock_engine):
         """Test legacy _build_active_order method."""
+        arp_state.held_notes = set(range(12))  # Set held notes for all semitones
+        arp_state.pattern.notes = list(range(12))  # Update notes
         engine = ArpEngine(arp_state, mock_engine)
 
         engine._build_active_order()
@@ -193,6 +200,8 @@ class TestArpEngineBackwardCompatibility:
 
     def test_choose_index(self, arp_state, mock_engine):
         """Test legacy _choose_index method."""
+        arp_state.held_notes = set(range(12))
+        arp_state.pattern.notes = list(range(12))
         engine = ArpEngine(arp_state, mock_engine)
 
         engine._build_active_order()
@@ -213,6 +222,8 @@ class TestArpEngineVelocityModes:
             velocity=VelocityConfig(mode="FIXED", fixed_velocity=100),
             pattern=PatternConfig(mask=[True] * 12),
         )
+        state.held_notes = {60}
+        state.pattern.notes = [60]
         engine = ArpEngine(state, mock_engine, event_loop=asyncio.get_event_loop())
 
         engine.start()
@@ -229,6 +240,8 @@ class TestArpEngineVelocityModes:
             enabled=True,
             velocity=VelocityConfig(mode="RAMP_UP"),
         )
+        state.held_notes = {60}
+        state.pattern.notes = [60]
         engine = ArpEngine(state, mock_engine, event_loop=asyncio.get_event_loop())
 
         engine.start()
@@ -247,6 +260,8 @@ class TestArpEngineGateDuration:
             gate_pct=100,  # Full beat duration
             timing=TimingConfig(bpm=120),
         )
+        state.held_notes = {60}
+        state.pattern.notes = [60]
         engine = ArpEngine(state, mock_engine, event_loop=asyncio.get_event_loop())
 
         engine.start()
@@ -261,6 +276,8 @@ class TestArpEngineGateDuration:
             gate_pct=10,  # Very short
             timing=TimingConfig(bpm=120),
         )
+        state.held_notes = {60}
+        state.pattern.notes = [60]
         engine = ArpEngine(state, mock_engine, event_loop=asyncio.get_event_loop())
 
         engine.start()

@@ -26,53 +26,14 @@ class NoteProducer:
         """Initialize note producer."""
         pass
 
-    def produce_note(self, step_idx: int, state: ArpState) -> Tuple[int, int]:
-        """Generate MIDI note and velocity for a pattern step.
+    def calculate_velocity(
+        self, step_idx: int, total_steps: int, state: ArpState
+    ) -> int:
+        """Calculate velocity for a note at a given position in the sequence.
 
         Args:
-            step_idx: Index in the 12-step pattern (0..11)
-            state: Current ArpState
-
-        Returns:
-            Tuple of (note, velocity) where both are in MIDI range [0..127].
-        """
-        # Calculate note pitch
-        note = self._calculate_note(step_idx, state.octave)
-
-        # Calculate velocity based on mode
-        velocity = self._calculate_velocity(step_idx, state)
-
-        # Apply accent boost if enabled
-        if self._should_accent(step_idx, state):
-            velocity = self._apply_accent(velocity)
-
-        return note, velocity
-
-    def _calculate_note(self, step_idx: int, octave: int) -> int:
-        """Calculate MIDI note value from pattern step and octave.
-
-        Args:
-            step_idx: Index in 12-step pattern (0..11, representing C..B)
-            octave: Octave offset (1..4, where 1 is base octave)
-
-        Returns:
-            MIDI note (0..127).
-        """
-        # Pattern represents 12 semitones in an octave
-        base_note = self.BASE_NOTE + step_idx
-
-        # Octave offset: octave 1 = no offset, octave 2 = +12, etc.
-        octave = max(1, min(4, int(octave)))
-        octave_offset = (octave - 1) * 12
-
-        note = base_note + octave_offset
-        return max(self.MIN_NOTE, min(self.MAX_NOTE, note))
-
-    def _calculate_velocity(self, step_idx: int, state: ArpState) -> int:
-        """Calculate velocity based on velocity mode in state.
-
-        Args:
-            step_idx: Index in 12-step pattern
+            step_idx: Current position in the expanded note sequence
+            total_steps: Total number of notes in the expanded sequence
             state: Current ArpState
 
         Returns:
@@ -87,23 +48,24 @@ class NoteProducer:
             return random.randint(self.RAMP_MIN_VEL, self.RAMP_MAX_VEL)
 
         elif vel_mode == "RAMP_UP":
-            # Velocity increases from step 0 to 11
-            ratio = step_idx / 11.0 if step_idx > 0 else 0
+            ratio = step_idx / (total_steps - 1) if total_steps > 1 else 0
             vel = int(
                 self.RAMP_MIN_VEL + ratio * (self.RAMP_MAX_VEL - self.RAMP_MIN_VEL)
             )
             return self._clamp_velocity(vel)
 
         elif vel_mode == "RAMP_DOWN":
-            # Velocity decreases from step 0 to 11
-            ratio = (11 - step_idx) / 11.0
+            ratio = (
+                (total_steps - 1 - step_idx) / (total_steps - 1)
+                if total_steps > 1
+                else 0
+            )
             vel = int(
                 self.RAMP_MIN_VEL + ratio * (self.RAMP_MAX_VEL - self.RAMP_MIN_VEL)
             )
             return self._clamp_velocity(vel)
 
         elif vel_mode == "ACCENT_FIRST":
-            # First step is accented, others are lower
             if step_idx == 0:
                 return self.RAMP_MAX_VEL
             else:
@@ -112,20 +74,21 @@ class NoteProducer:
         else:  # ORIGINAL or unknown
             return self._clamp_velocity(state.velocity.fixed_velocity)
 
-    def _should_accent(self, step_idx: int, state: ArpState) -> bool:
-        """Check if this step should have an accent applied.
+    def should_accent(self, note: int, state: ArpState) -> bool:
+        """Check if a note should have an accent applied based on its semitone.
 
         Args:
-            step_idx: Index in 12-step pattern
+            note: MIDI note number
             state: Current ArpState
 
         Returns:
-            True if step should be accented.
+            True if note should be accented.
         """
+        semitone = note % 12
         return (
             state.pattern.accents
-            and step_idx < len(state.pattern.accents)
-            and state.pattern.accents[step_idx]
+            and semitone < len(state.pattern.accents)
+            and state.pattern.accents[semitone]
         )
 
     def _apply_accent(self, velocity: int) -> int:

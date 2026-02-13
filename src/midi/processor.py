@@ -54,8 +54,8 @@ class MidiProcessor:
 
         new_msg = original_msg.copy()
 
-        # Handle arpeggiator input notes
-        if self.arp_enabled and new_msg.type in ["note_on", "note_off"]:
+        # Handle arpeggiator input notes (only real input, not arp-generated)
+        if self.arp_enabled and new_msg.type in ["note_on", "note_off"] and not is_arp:
             self._update_arp_notes(new_msg)
 
         # Drop input notes when arp is enabled (only allow arp-generated notes)
@@ -83,11 +83,11 @@ class MidiProcessor:
         """Update held notes for arpeggiator based on input."""
         if msg.type == "note_on" and msg.velocity > 0:
             self.arp_state.held_notes.add(msg.note)
-            self._update_arp_mask()
+            self._update_arp_pattern()
         elif msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
             if self.arp_state.latch != "HOLD":
                 self.arp_state.held_notes.discard(msg.note)
-                self._update_arp_mask()
+                self._update_arp_pattern()
 
     def _handle_clock(self) -> None:
         """Handle MIDI clock message for external sync."""
@@ -104,11 +104,14 @@ class MidiProcessor:
                 self.arp_state.timing.bpm = int(max(20, min(300, bpm)))
         self.last_clock_time = current_time
 
-    def _update_arp_mask(self) -> None:
-        """Update pattern mask based on held notes."""
-        self.arp_state.pattern.mask = [False] * 12
-        for note in self.arp_state.held_notes:
-            semitone = note % 12
-            self.arp_state.pattern.mask[semitone] = True
+    def _update_arp_pattern(self) -> None:
+        """Update pattern notes based on held notes and mask."""
+        self.arp_state.pattern.notes = sorted(
+            [
+                note
+                for note in self.arp_state.held_notes
+                if self.arp_state.pattern.mask[note % 12]
+            ]
+        )
         # Update chord memory
         self.arp_state.chord_memory = sorted(list(self.arp_state.held_notes))

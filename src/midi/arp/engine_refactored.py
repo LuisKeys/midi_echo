@@ -8,6 +8,8 @@ import asyncio
 import logging
 from typing import Optional
 
+from typing import List
+
 from .dispatcher import MidiDispatcher
 from .modes import create_mode
 from .note_producer import NoteProducer
@@ -62,6 +64,8 @@ class ArpEngine:
         if self._running:
             return
         self._running = True
+        self._step = 0
+        self._position = 0
         self._task = self._loop.create_task(self._timing_loop())
 
     def stop(self) -> None:
@@ -87,28 +91,80 @@ class ArpEngine:
         """
         try:
             while self._running and self.state and self.state.enabled:
-                # Calculate timing for this step
-                timing = self._timing_calc.calculate_timing(
-                    bpm=self.state.timing.bpm,
-                    division=self.state.timing.division,
-                    swing_pct=self.state.timing.swing,
-                    step_number=self._step,
-                    tempo_mul=self.state.timing.tempo_mul,
-                )
+                try:
+                    # Calculate timing for this step
+                    timing = self._timing_calc.calculate_timing(
+                        bpm=self.state.timing.bpm,
+                        division=self.state.timing.division,
+                        swing_pct=self.state.timing.swing,
+                        step_number=self._step,
+                        tempo_mul=self.state.timing.tempo_mul,
+                    )
 
-                # Process this step (generate and dispatch notes)
-                await self._process_step()
+                    # Process this step (generate and dispatch notes)
+                    await self._process_step()
 
-                # Sleep for calculated interval and swing
-                await asyncio.sleep(timing.total_sleep)
+                    # Sleep for calculated interval and swing
+                    await asyncio.sleep(timing.total_sleep)
 
-                self._step += 1
+                    self._step += 1
+                except asyncio.CancelledError:
+                    raise  # Re-raise cancellation to outer handler
+                except Exception:
+                    logger.exception("ArpEngine step error, continuing")
+                    await asyncio.sleep(0.05)  # Brief pause on error
 
         except asyncio.CancelledError:
             # Normal shutdown via stop()
             return
         except Exception:
             logger.exception("ArpEngine timing loop error")
+
+    def _build_expanded_notes(self) -> List[int]:
+        """Build the full note sequence by expanding held notes across octave range.
+
+        Uses state.octave (1-4) to determine how many octaves to span,
+        and state.octave_dir (UP/DOWN/BOTH) to determine direction.
+
+        Returns:
+            Sorted list of MIDI notes covering the octave range.
+        """
+        base_notes = list(self.state.pattern.notes)  # already sorted
+        if not base_notes:
+            return []
+
+        octave_range = max(1, min(4, self.state.octave))
+        if octave_range == 1:
+            return base_notes
+
+        expanded = []
+        direction = (self.state.octave_dir or "UP").upper()
+
+        if direction == "UP":
+            for oct in range(octave_range):
+                for note in base_notes:
+                    n = note + oct * 12
+                    if 0 <= n <= 127:
+                        expanded.append(n)
+        elif direction == "DOWN":
+            for oct in range(octave_range - 1, -1, -1):
+                for note in base_notes:
+                    n = note - oct * 12
+                    if 0 <= n <= 127:
+                        expanded.append(n)
+            expanded.sort()
+        else:  # BOTH
+            # Go down (octave_range // 2) and up (octave_range - octave_range // 2 - 1)
+            down_count = (octave_range - 1) // 2
+            up_count = octave_range - 1 - down_count
+            for oct in range(-down_count, up_count + 1):
+                for note in base_notes:
+                    n = note + oct * 12
+                    if 0 <= n <= 127:
+                        expanded.append(n)
+            expanded.sort()
+
+        return expanded
 
     async def _process_step(self) -> None:
         """Process a single step: generate and dispatch note.
@@ -117,11 +173,17 @@ class ArpEngine:
         Otherwise produces a note, calculates velocity, dispatches note_on
         and schedules note_off based on gate percentage.
         """
+        # Build expanded notes across octave range
+        expanded_notes = self._build_expanded_notes()
+
+        if not expanded_notes:
+            return
+
         # Get the mode strategy for current mode
         mode = create_mode(self.state.mode)
 
-        # Build list of active note indices from pattern
-        active_indices = mode.build_active_indices(self.state.pattern.mask)
+        # Build list of active note indices
+        active_indices = mode.build_active_indices(expanded_notes)
 
         if not active_indices:
             return
@@ -130,15 +192,18 @@ class ArpEngine:
         idx, new_pos = mode.choose_next(active_indices, self._position)
         self._position = new_pos
 
-        # Get the actual step index in the pattern
+        # Get the actual step index in expanded notes
         step_idx = active_indices[idx]
 
-        # Check if this step is marked to play in pattern
-        if not self.state.pattern.mask[step_idx]:
-            return
-
         # Produce note and velocity
-        note, velocity = self._note_producer.produce_note(step_idx, self.state)
+        note = expanded_notes[step_idx]
+        velocity = self._note_producer.calculate_velocity(
+            step_idx, len(expanded_notes), self.state
+        )
+
+        # Apply accent if enabled for this note's semitone
+        if self._note_producer.should_accent(note, self.state):
+            velocity = self._note_producer._apply_accent(velocity)
 
         # Send note_on message
         if self._dispatcher.send_note_on(note, velocity):
@@ -177,9 +242,14 @@ class ArpEngine:
             if not self._dispatcher.has_queue():
                 return
 
+            # Build expanded notes
+            expanded_notes = self._build_expanded_notes()
+            if not expanded_notes:
+                return
+
             # Get mode strategy
             mode = create_mode(self.state.mode)
-            active_indices = mode.build_active_indices(self.state.pattern.mask)
+            active_indices = mode.build_active_indices(expanded_notes)
 
             if not active_indices:
                 return
@@ -191,11 +261,14 @@ class ArpEngine:
                 idx, position = mode.choose_next(active_indices, position)
                 step_idx = active_indices[idx]
 
-                if not self.state.pattern.mask[step_idx]:
-                    continue
+                note = expanded_notes[step_idx]
+                velocity = self._note_producer.calculate_velocity(
+                    step_idx, len(expanded_notes), self.state
+                )
 
-                # Produce note for preview
-                note, velocity = self._note_producer.produce_note(step_idx, self.state)
+                # Apply accent if enabled
+                if self._note_producer.should_accent(note, self.state):
+                    velocity = self._note_producer._apply_accent(velocity)
 
                 # Send note_on and note_off with short delay
                 if self._dispatcher.send_note_on(note, velocity):
@@ -211,8 +284,9 @@ class ArpEngine:
 
         Kept for backward compatibility. Do not use in new code.
         """
+        expanded = self._build_expanded_notes()
         mode = create_mode(self.state.mode)
-        active = mode.build_active_indices(self.state.pattern.mask)
+        active = mode.build_active_indices(expanded)
         # Store in a temporary attribute for any legacy code that checks it
         self._active_order = active
 

@@ -46,6 +46,9 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     def make_toggle(i: int):
         def _toggle():
             state.pattern.mask[i] = not state.pattern.mask[i]
+            # Update pattern notes when mask changes
+            if context.processor:
+                context.processor._update_arp_pattern()
             refresh_ui()
 
         return _toggle
@@ -119,7 +122,11 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Set up periodic refresh for external state changes
     def schedule_refresh():
-        refresh_ui()
-        parent.after(1000, schedule_refresh)  # Refresh every second
+        try:
+            if parent.winfo_exists():
+                refresh_ui()
+                parent.after(250, schedule_refresh)  # Refresh 4x/second
+        except Exception:
+            pass  # Widget destroyed, stop refreshing
 
     schedule_refresh()

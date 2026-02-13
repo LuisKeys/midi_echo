@@ -13,14 +13,14 @@ class ArpMode(ABC):
     """Abstract base class for arpeggiator playback modes."""
 
     @abstractmethod
-    def build_active_indices(self, pattern_mask: List[bool]) -> List[int]:
-        """Build list of active note indices from pattern mask.
+    def build_active_indices(self, notes: List[int]) -> List[int]:
+        """Build list of active note indices from pattern notes.
 
         Args:
-            pattern_mask: List of 12 booleans indicating which notes are active.
+            notes: List of MIDI notes in the pattern.
 
         Returns:
-            List of indices (0..11) that are currently active, in playing order.
+            List of indices (0..len(notes)-1) that are currently active, in playing order.
         """
         pass
 
@@ -47,9 +47,9 @@ class ArpMode(ABC):
 class UpMode(ArpMode):
     """Play notes in ascending order."""
 
-    def build_active_indices(self, pattern_mask: List[bool]) -> List[int]:
-        """Return active indices in ascending order."""
-        return [i for i, active in enumerate(pattern_mask) if active]
+    def build_active_indices(self, notes: List[int]) -> List[int]:
+        """Return indices in ascending order of notes."""
+        return list(range(len(notes)))
 
     def choose_next(
         self, active_indices: List[int], current_position: int
@@ -66,10 +66,9 @@ class UpMode(ArpMode):
 class DownMode(ArpMode):
     """Play notes in descending order."""
 
-    def build_active_indices(self, pattern_mask: List[bool]) -> List[int]:
-        """Return active indices in descending order."""
-        active = [i for i, v in enumerate(pattern_mask) if v]
-        return list(reversed(active))
+    def build_active_indices(self, notes: List[int]) -> List[int]:
+        """Return indices in descending order of notes."""
+        return list(reversed(range(len(notes))))
 
     def choose_next(
         self, active_indices: List[int], current_position: int
@@ -86,18 +85,17 @@ class DownMode(ArpMode):
 class UpDownMode(ArpMode):
     """Play notes ascending then descending, bouncing at endpoints."""
 
-    def build_active_indices(self, pattern_mask: List[bool]) -> List[int]:
+    def build_active_indices(self, notes: List[int]) -> List[int]:
         """Return path: up + down (excluding endpoints to avoid repetition)."""
-        active = [i for i, v in enumerate(pattern_mask) if v]
-        if not active:
+        if not notes:
             return []
-        if len(active) == 1:
-            return active
+        if len(notes) == 1:
+            return [0]
 
         # Up path: all notes
-        up = active
+        up = list(range(len(notes)))
         # Down path: all notes except first and last (to avoid repeating endpoints)
-        down = list(reversed(active))[1:-1] if len(active) > 2 else []
+        down = list(reversed(range(1, len(notes) - 1))) if len(notes) > 2 else []
 
         return up + down
 
@@ -116,9 +114,9 @@ class UpDownMode(ArpMode):
 class RandomMode(ArpMode):
     """Play notes in random order."""
 
-    def build_active_indices(self, pattern_mask: List[bool]) -> List[int]:
-        """Return all active indices (randomness applied per-note)."""
-        return [i for i, active in enumerate(pattern_mask) if active]
+    def build_active_indices(self, notes: List[int]) -> List[int]:
+        """Return all indices (randomness applied per-note)."""
+        return list(range(len(notes)))
 
     def choose_next(
         self, active_indices: List[int], current_position: int
@@ -143,9 +141,9 @@ class ChordMode(ArpMode):
     When implemented, will play all notes at once rather than sequentially.
     """
 
-    def build_active_indices(self, pattern_mask: List[bool]) -> List[int]:
-        """Return all active indices."""
-        return [i for i, active in enumerate(pattern_mask) if active]
+    def build_active_indices(self, notes: List[int]) -> List[int]:
+        """Return all indices."""
+        return list(range(len(notes)))
 
     def choose_next(
         self, active_indices: List[int], current_position: int

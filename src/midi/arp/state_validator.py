@@ -81,11 +81,20 @@ class PatternConfig:
     """Pattern and accent configuration for arpeggiator."""
 
     mask: List[bool] = field(default_factory=lambda: [True] * 12)
+    notes: List[int] = field(default_factory=list)
     accents: List[bool] = field(default_factory=lambda: [False] * 12)
 
     def __post_init__(self) -> None:
         self.mask = self._validate_pattern(self.mask)
+        self.notes = self._validate_notes(self.notes)
         self.accents = self._validate_pattern(self.accents)
+
+    @staticmethod
+    def _validate_notes(notes: List[int]) -> List[int]:
+        """Ensure notes is a list of valid MIDI notes."""
+        if not isinstance(notes, list):
+            return []
+        return [max(0, min(127, int(n))) for n in notes]
 
     @staticmethod
     def _validate_pattern(pattern: List[bool]) -> List[bool]:
@@ -102,7 +111,7 @@ class PatternConfig:
 
     @classmethod
     def from_dict(cls, d: dict) -> "PatternConfig":
-        return cls(**{k: v for k, v in d.items() if k in ("mask", "accents")})
+        return cls(**{k: v for k, v in d.items() if k in ("mask", "notes", "accents")})
 
 
 @dataclass
@@ -189,6 +198,7 @@ class ArpState:
             "velocity_mode": self.velocity.mode,
             "fixed_velocity": self.velocity.fixed_velocity,
             "pattern_mask": self.pattern.mask,
+            "pattern_notes": self.pattern.notes,
             "accents": self.pattern.accents,
             "held_notes": list(self.held_notes),
             "chord_memory": self.chord_memory,
@@ -226,6 +236,7 @@ class ArpState:
         else:
             pattern_cfg = PatternConfig(
                 mask=d.get("pattern_mask", [True] * 12),
+                notes=d.get("pattern_notes", []),
                 accents=d.get("accents", [False] * 12),
             )
 

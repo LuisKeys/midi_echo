@@ -20,21 +20,21 @@ class TestUpMode:
         self.mode = UpMode()
 
     def test_build_active_indices_all_active(self):
-        """Test with all pattern steps active."""
-        pattern = [True] * 12
-        indices = self.mode.build_active_indices(pattern)
+        """Test with all notes."""
+        notes = list(range(12))
+        indices = self.mode.build_active_indices(notes)
         assert indices == list(range(12))
 
     def test_build_active_indices_sparse(self):
-        """Test with sparse pattern."""
-        pattern = [True, False, True, False] + [False] * 8
-        indices = self.mode.build_active_indices(pattern)
-        assert indices == [0, 2]
+        """Test with sparse notes."""
+        notes = [60, 62]
+        indices = self.mode.build_active_indices(notes)
+        assert indices == [0, 1]
 
     def test_build_active_indices_empty(self):
-        """Test with no active notes."""
-        pattern = [False] * 12
-        indices = self.mode.build_active_indices(pattern)
+        """Test with no notes."""
+        notes = []
+        indices = self.mode.build_active_indices(notes)
         assert indices == []
 
     def test_choose_next_advances_linearly(self):
@@ -65,16 +65,16 @@ class TestDownMode:
         self.mode = DownMode()
 
     def test_build_active_indices_reversed(self):
-        """Test that active indices are reversed."""
-        pattern = [True] * 12
-        indices = self.mode.build_active_indices(pattern)
+        """Test that indices are reversed."""
+        notes = list(range(12))
+        indices = self.mode.build_active_indices(notes)
         assert indices == list(range(11, -1, -1))
 
     def test_build_active_indices_sparse(self):
-        """Test with sparse pattern."""
-        pattern = [True, False, True, False] + [False] * 8
-        indices = self.mode.build_active_indices(pattern)
-        assert indices == [2, 0]  # Reversed relative order
+        """Test with sparse notes."""
+        notes = [60, 62]
+        indices = self.mode.build_active_indices(notes)
+        assert indices == [1, 0]  # Reversed
 
     def test_choose_next_advances_linearly(self):
         """Test that position advances sequentially."""
@@ -94,35 +94,33 @@ class TestUpDownMode:
 
     def test_build_active_indices_simple(self):
         """Test UP + DOWN path construction."""
-        pattern = [True, False, True, False, True, False] + [False] * 6
-        indices = self.mode.build_active_indices(pattern)
-        # Active: [0, 2, 4]
-        # UP: [0, 2, 4]
-        # DOWN (excluding endpoints): [2]
-        # Result: [0, 2, 4, 2]
-        assert indices == [0, 2, 4, 2]
+        notes = [60, 62, 64]  # 0, 2, 4 semitones
+        indices = self.mode.build_active_indices(notes)
+        # UP: [0, 1, 2]
+        # DOWN (excluding endpoints): [1]
+        # Result: [0, 1, 2, 1]
+        assert indices == [0, 1, 2, 1]
 
     def test_build_active_indices_single_note(self):
-        """Test with single active note."""
-        pattern = [True] + [False] * 11
-        indices = self.mode.build_active_indices(pattern)
+        """Test with single note."""
+        notes = [60]
+        indices = self.mode.build_active_indices(notes)
         assert indices == [0]
 
     def test_build_active_indices_two_notes(self):
-        """Test with two active notes."""
-        pattern = [True, False, True] + [False] * 9
-        indices = self.mode.build_active_indices(pattern)
-        assert indices == [0, 2]
+        """Test with two notes."""
+        notes = [60, 62]
+        indices = self.mode.build_active_indices(notes)
+        assert indices == [0, 1]
 
     def test_build_active_indices_three_notes(self):
-        """Test with three active notes."""
-        pattern = [True, False, True, False, True] + [False] * 7
-        indices = self.mode.build_active_indices(pattern)
-        # Active: [0, 2, 4]
-        # UP: [0, 2, 4]
-        # DOWN (reverse [0, 2, 4] is [4, 2, 0], minus endpoints): [2]
-        # Result: [0, 2, 4, 2]
-        assert indices == [0, 2, 4, 2]
+        """Test with three notes."""
+        notes = [60, 62, 64]
+        indices = self.mode.build_active_indices(notes)
+        # UP: [0, 1, 2]
+        # DOWN (reverse [0, 1, 2] is [2, 1, 0], minus endpoints): [1]
+        # Result: [0, 1, 2, 1]
+        assert indices == [0, 1, 2, 1]
 
 
 class TestRandomMode:
@@ -133,10 +131,10 @@ class TestRandomMode:
         self.mode = RandomMode()
 
     def test_build_active_indices_returns_all_active(self):
-        """Test that all active indices are returned."""
-        pattern = [True, False, True, False] + [False] * 8
-        indices = self.mode.build_active_indices(pattern)
-        assert set(indices) == {0, 2}
+        """Test that all indices are returned."""
+        notes = [60, 62]
+        indices = self.mode.build_active_indices(notes)
+        assert set(indices) == {0, 1}
 
     def test_choose_next_returns_random_index(self):
         """Test that choose_next returns valid random index."""
@@ -161,10 +159,10 @@ class TestChordMode:
         self.mode = ChordMode()
 
     def test_build_active_indices_returns_all(self):
-        """Test that all active indices are returned."""
-        pattern = [True, False, True] + [False] * 9
-        indices = self.mode.build_active_indices(pattern)
-        assert indices == [0, 2]
+        """Test that all indices are returned."""
+        notes = [60, 62]
+        indices = self.mode.build_active_indices(notes)
+        assert indices == [0, 1]
 
     def test_choose_next_currently_sequential(self):
         """Test that CHORD currently behaves like UP (placeholder)."""
