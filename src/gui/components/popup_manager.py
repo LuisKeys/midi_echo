@@ -191,7 +191,7 @@ class PopupMenu(ctk.CTkFrame):
         close_btn = ctk.CTkButton(
             top_frame,
             text="✕",
-            font=("Arial", 24, "bold"),
+            font=("Arial", 8, "bold"),
             fg_color="#555555",
             text_color="white",
             hover_color="#FF0000",
