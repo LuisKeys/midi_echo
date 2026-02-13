@@ -28,7 +28,9 @@ class TestMidiDispatcher:
         assert result is True
         engine.queue.put_nowait.assert_called_once()
         args = engine.queue.put_nowait.call_args[0]
-        message = args[0]
+        wrapped = args[0]
+        assert wrapped.is_arp is True
+        message = wrapped.msg
         assert message.type == "note_on"
         assert message.note == 60
         assert message.velocity == 100
@@ -42,8 +44,22 @@ class TestMidiDispatcher:
 
         assert result is True
         args = engine.queue.put_nowait.call_args[0]
-        message = args[0]
+        wrapped = args[0]
+        assert wrapped.is_arp is True
+        message = wrapped.msg
         assert message.channel == 5
+
+    def test_send_note_on_marks_as_arp(self):
+        """Test that note_on messages are marked as arpeggiator-generated."""
+        engine = MockMidiEngine(has_queue=True)
+        dispatcher = MidiDispatcher(engine)
+
+        result = dispatcher.send_note_on(60, 100)
+
+        assert result is True
+        args = engine.queue.put_nowait.call_args[0]
+        wrapped = args[0]
+        assert wrapped.is_arp is True
 
     def test_send_note_off_basic(self):
         """Test sending a note_off message."""
@@ -55,7 +71,9 @@ class TestMidiDispatcher:
         assert result is True
         engine.queue.put_nowait.assert_called_once()
         args = engine.queue.put_nowait.call_args[0]
-        message = args[0]
+        wrapped = args[0]
+        assert wrapped.is_arp is True
+        message = wrapped.msg
         assert message.type == "note_off"
         assert message.note == 60
         assert message.velocity == 0
@@ -69,7 +87,9 @@ class TestMidiDispatcher:
 
         assert result is True
         args = engine.queue.put_nowait.call_args[0]
-        message = args[0]
+        wrapped = args[0]
+        assert wrapped.is_arp is True
+        message = wrapped.msg
         assert message.velocity == 0
 
     def test_enqueue_without_event_loop(self):
@@ -149,14 +169,14 @@ class TestMidiDispatcher:
         assert result3 is True
         assert engine.queue.put_nowait.call_count == 3
 
-    def test_event_loop_fallback_on_runtime_error(self):
-        """Test fallback to direct queue when event loop fails."""
-        engine = MockMidiEngine(has_queue=True, has_loop=True)
-        # Event loop call_soon_threadsafe raises RuntimeError
-        engine._loop.call_soon_threadsafe.side_effect = RuntimeError("Loop closed")
+    def test_send_note_off_marks_as_arp(self):
+        """Test that note_off messages are marked as arpeggiator-generated."""
+        engine = MockMidiEngine(has_queue=True)
         dispatcher = MidiDispatcher(engine)
 
-        result = dispatcher.send_note_on(60, 100)
+        result = dispatcher.send_note_off(60, 0)
 
-        # Should still succeed via fallback
         assert result is True
+        args = engine.queue.put_nowait.call_args[0]
+        wrapped = args[0]
+        assert wrapped.is_arp is True

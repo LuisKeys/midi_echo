@@ -2,6 +2,7 @@ import mido
 import logging
 import time
 from src.midi.arp.state_validator import ArpState
+from src.midi.message_wrapper import MidiMessageWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -26,28 +27,40 @@ class MidiProcessor:
         self.last_clock_time = None
         self.clock_intervals = []
 
-    def process(self, msg: mido.Message) -> mido.Message | None:
+    def process(self, msg) -> mido.Message | None:
         """
         Process an incoming MIDI message.
         Returns the message (possibly modified) to be sent, or None if it should be dropped.
         """
+        # Unwrap if it's a wrapper
+        if isinstance(msg, MidiMessageWrapper):
+            original_msg = msg.msg
+            is_arp = msg.is_arp
+        else:
+            original_msg = msg
+            is_arp = False
+
         # Ignore clock and sensing by default to reduce noise in logs
-        if self.verbose and msg.type not in ["clock", "active_sensing"]:
-            logger.info(f"Processing: {msg}")
+        if self.verbose and original_msg.type not in ["clock", "active_sensing"]:
+            logger.info(f"Processing: {original_msg}")
 
         # Handle clock for external sync
-        if msg.type == "clock" and self.arp_state.external_sync:
+        if original_msg.type == "clock" and self.arp_state.external_sync:
             self._handle_clock()
 
         # Clone message to avoid side effects on the original
-        if msg.is_meta:
-            return msg
+        if original_msg.is_meta:
+            return original_msg
 
-        new_msg = msg.copy()
+        new_msg = original_msg.copy()
 
         # Handle arpeggiator input notes
         if self.arp_enabled and new_msg.type in ["note_on", "note_off"]:
             self._update_arp_notes(new_msg)
+
+        # Drop input notes when arp is enabled (only allow arp-generated notes)
+        if new_msg.type in ["note_on", "note_off"] and self.arp_enabled and not is_arp:
+            return None
 
         # Apply transformations for note messages
         if new_msg.type in ["note_on", "note_off", "aftertouch", "polytouch"]:

@@ -2,6 +2,7 @@ import asyncio
 import mido
 import logging
 from .processor import MidiProcessor
+from .message_wrapper import MidiMessageWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,8 @@ class MidiEngine:
     def _callback(self, msg):
         """Thread-safe callback to push messages into the async queue."""
         if self._loop and self._loop.is_running() and self.queue:
-            self._loop.call_soon_threadsafe(self.queue.put_nowait, msg)
+            wrapped_msg = MidiMessageWrapper(msg, is_arp=False)
+            self._loop.call_soon_threadsafe(self.queue.put_nowait, wrapped_msg)
 
     async def run(self, input_names: list[str], output_name: str):
         self._loop = asyncio.get_running_loop()

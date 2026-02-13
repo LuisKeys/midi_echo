@@ -9,6 +9,8 @@ from typing import Optional
 
 import mido
 
+from src.midi.message_wrapper import MidiMessageWrapper
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +40,8 @@ class MidiDispatcher:
             message = mido.Message(
                 "note_on", note=note, velocity=velocity, channel=channel
             )
-            return self._enqueue_message(message)
+            wrapped_message = MidiMessageWrapper(message, is_arp=True)
+            return self._enqueue_message(wrapped_message)
         except Exception as e:
             logger.debug(f"Error creating note_on message: {e}")
             return False
@@ -58,7 +61,8 @@ class MidiDispatcher:
             message = mido.Message(
                 "note_off", note=note, velocity=velocity, channel=channel
             )
-            return self._enqueue_message(message)
+            wrapped_message = MidiMessageWrapper(message, is_arp=True)
+            return self._enqueue_message(wrapped_message)
         except Exception as e:
             logger.debug(f"Error creating note_off message: {e}")
             return False

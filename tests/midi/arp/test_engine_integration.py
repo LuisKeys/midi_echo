@@ -22,7 +22,7 @@ class MockMidiEngine:
         """Initialize mock engine."""
         self.queue = MagicMock()
         self.queue.put_nowait = Mock()
-        self._loop = asyncio.new_event_loop()
+        # self._loop = asyncio.new_event_loop()  # Remove to force direct enqueue
 
 
 @pytest.fixture
@@ -94,7 +94,8 @@ class TestArpEngineBasic:
 async def test_timing_loop_basic(arp_state, mock_engine):
     """Test basic timing loop execution."""
     arp_state.enabled = True
-    engine = ArpEngine(arp_state, mock_engine, event_loop=asyncio.get_event_loop())
+    arp_state.held_notes = {60}  # Add a held note to trigger generation
+    engine = ArpEngine(arp_state, mock_engine)
 
     # Create a short test: enable, wait for a few cycles, disable
     engine.start()
