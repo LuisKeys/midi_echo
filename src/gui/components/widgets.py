@@ -226,17 +226,25 @@ class SquareDropdown(ctk.CTkFrame):
             self._open_dropdown()
 
     def _open_dropdown(self):
-        """Open the dropdown menu."""
+        """Open the dropdown menu directly below the button."""
         self._dropdown_open = True
 
-        # Get the position of the button
+        # Force update to get accurate widget dimensions
         self.update_idletasks()
-        x = self.winfo_rootx()
-        y = self.winfo_rooty() + self.height
 
-        # Create dropdown window
-        self._dropdown_window = ctk.CTkToplevel(self.master)
-        self._dropdown_window.geometry(f"{self.width}+{x}+{y}")
+        # Get the absolute position of this dropdown button
+        x = self.winfo_rootx()
+        y = self.winfo_rooty() + self.winfo_height()
+        width = self.winfo_width()
+
+        # Get root window
+        root = self
+        while root.master:
+            root = root.master
+
+        # Create dropdown window positioned below the button
+        self._dropdown_window = ctk.CTkToplevel(root)
+        self._dropdown_window.geometry(f"{width}x300+{x}+{y}")
         self._dropdown_window.overrideredirect(True)
         self._dropdown_window.attributes("-topmost", True)
 
@@ -254,7 +262,7 @@ class SquareDropdown(ctk.CTkFrame):
                 font=("Arial", 24),
                 command=lambda v=value: self._select_value(v),
             )
-            btn.pack(fill="x", padx=2, pady=2)
+            btn.pack(fill="x", padx=0, pady=1)
 
         # Close dropdown when clicking outside
         def close_on_focus_out(event=None):
