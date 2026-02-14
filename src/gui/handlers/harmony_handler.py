@@ -82,7 +82,7 @@ class HarmonyHandler(BaseHandler):
                 ),
                 text_color=self.context.gui.theme.get_color("text_black"),
             )
-            title_label.pack(pady=(8, 12))
+            title_label.pack(pady=(20, 10))
 
             # Checkboxes for intervals
             current_intervals = self.context.processor.harmony_state.intervals
@@ -103,7 +103,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            major_3rd_cb.pack(pady=4, anchor="w")
+            major_3rd_cb.pack(pady=10, anchor="w")
 
             minor_3rd_cb = ctk.CTkCheckBox(
                 frame,
@@ -116,7 +116,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            minor_3rd_cb.pack(pady=4, anchor="w")
+            minor_3rd_cb.pack(pady=10, anchor="w")
 
             fifth_cb = ctk.CTkCheckBox(
                 frame,
@@ -129,7 +129,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            fifth_cb.pack(pady=4, anchor="w")
+            fifth_cb.pack(pady=10, anchor="w")
 
             octave_cb = ctk.CTkCheckBox(
                 frame,
@@ -142,7 +142,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            octave_cb.pack(pady=4, anchor="w")
+            octave_cb.pack(pady=10, anchor="w")
 
         if self.context.gui.popup_manager:
             popup = self.context.gui.popup_manager.create_popup(

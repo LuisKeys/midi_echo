@@ -28,7 +28,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         expand=True,
         fill="both",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=LayoutSpacing.CONTAINER_PADY,
+        pady=20,
     )
 
     label = ctk.CTkLabel(
@@ -37,7 +37,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         font=("Arial", 20),
         text_color=theme.get_color("text_black"),
     )
-    label.pack(pady=(8, 12))
+    label.pack(pady=(20, 10))
 
     def on_change(val):
         try:
@@ -51,7 +51,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         frame, from_=20, to=300, number_of_steps=280, command=on_change
     )
     slider.set(state.timing.bpm)
-    slider.pack(fill="x", padx=12, pady=8)
+    slider.pack(fill="x", padx=12, pady=10)
 
     def on_close():
         try:
@@ -60,7 +60,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
             pass
 
     btn = ctk.CTkButton(frame, text="Close", command=on_close, corner_radius=0)
-    btn.pack(pady=12)
+    btn.pack(pady=20)
 
     def update_font_sizes():
         font_size = theme.get_font_size("label_medium")

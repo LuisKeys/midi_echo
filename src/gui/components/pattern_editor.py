@@ -37,7 +37,7 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
         expand=True,
         fill="both",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=LayoutSpacing.CONTAINER_PADY,
+        pady=20,
     )
 
     # Configure tab appearance for touch-friendly interface

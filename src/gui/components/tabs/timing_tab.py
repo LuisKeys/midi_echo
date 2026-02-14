@@ -24,9 +24,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         theme=theme,
         label_width=theme.get_label_width(),
     )
-    bpm_widget.pack(
-        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
-    )
+    bpm_widget.pack(fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=20)
     pm.register_element("content_elements", bpm_widget)
 
     # Store reference in handler for display updates
@@ -38,7 +36,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     div_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
 
     div_label = ctk.CTkLabel(
@@ -85,7 +83,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     swing_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
     pm.register_element("content_elements", swing_widget)
 
@@ -105,7 +103,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     gate_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
     pm.register_element("content_elements", gate_widget)
 
@@ -114,7 +112,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     sync_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
 
     sync_var = ctk.BooleanVar(value=state.external_sync)

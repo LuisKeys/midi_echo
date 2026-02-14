@@ -78,7 +78,7 @@ class ScaleHandler(BaseHandler):
             root_frame.pack(
                 fill="x",
                 padx=LayoutSpacing.CONTAINER_PADX,
-                pady=(LayoutSpacing.CONTAINER_PADY, 0),
+                pady=(20, 10),
             )
 
             root_label = ctk.CTkLabel(
@@ -116,7 +116,7 @@ class ScaleHandler(BaseHandler):
             type_frame.pack(
                 fill="x",
                 padx=LayoutSpacing.CONTAINER_PADX,
-                pady=(0, LayoutSpacing.CONTAINER_PADY),
+                pady=(10, 20),
             )
 
             type_label = ctk.CTkLabel(

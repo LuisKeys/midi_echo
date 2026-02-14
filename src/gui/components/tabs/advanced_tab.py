@@ -12,9 +12,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Latch
     latch_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
-    latch_frame.pack(
-        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
-    )
+    latch_frame.pack(fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=20)
 
     latch_label = ctk.CTkLabel(
         latch_frame,
@@ -49,7 +47,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     enable_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
 
     enable_var = ctk.BooleanVar(value=state.enabled)
@@ -68,7 +66,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     preset_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
 
     save_btn = ctk.CTkButton(

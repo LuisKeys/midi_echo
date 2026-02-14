@@ -13,9 +13,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Mode
     mode_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
-    mode_frame.pack(
-        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
-    )
+    mode_frame.pack(fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=20)
 
     mode_label = ctk.CTkLabel(
         mode_frame,
@@ -60,7 +58,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
     fixed_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, LayoutSpacing.CONTAINER_PADY),
+        pady=(0, 20),
     )
     pm.register_element("content_elements", fixed_widget)
 
