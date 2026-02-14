@@ -1,6 +1,7 @@
 """Tempo editor popup builder."""
 
 import customtkinter as ctk
+from .layout_utils import LayoutSpacing
 
 
 def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
@@ -19,7 +20,12 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         return
 
     frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
-    frame.pack(expand=True, fill="both", padx=10, pady=10)
+    frame.pack(
+        expand=True,
+        fill="both",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=LayoutSpacing.CONTAINER_PADY,
+    )
 
     label = ctk.CTkLabel(frame, text=f"BPM: {state.timing.bpm}", font=("Arial", 20))
     label.pack(pady=(8, 12))

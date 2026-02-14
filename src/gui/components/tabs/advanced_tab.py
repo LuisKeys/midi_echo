@@ -3,6 +3,7 @@
 import customtkinter as ctk
 from src.midi.arp.state_validator import ArpState
 from ..widgets import SquareDropdown
+from ..layout_utils import LayoutSpacing
 
 
 def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -12,10 +13,15 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Latch
     latch_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    latch_frame.pack(fill="x", padx=10, pady=10)
+    latch_frame.pack(
+        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
+    )
 
-    latch_label = ctk.CTkLabel(latch_frame, text="Latch:", font=("Arial", 14))
-    latch_label.pack(side="left", padx=10)
+    latch_label = ctk.CTkLabel(
+        latch_frame, text="Latch:", font=("Arial", 14), anchor="e"
+    )
+    latch_label.configure(width=theme.get_label_width())
+    latch_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     latch_var = ctk.StringVar(value=state.latch)
     latch_menu = SquareDropdown(
@@ -26,11 +32,15 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
     )
-    latch_menu.pack(side="left", padx=10)
+    latch_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Enable toggle
     enable_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    enable_frame.pack(fill="x", padx=10, pady=(0, 10))
+    enable_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
     enable_var = ctk.BooleanVar(value=state.enabled)
     enable_check = ctk.CTkCheckBox(
@@ -40,11 +50,15 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         command=lambda: setattr(state, "enabled", enable_var.get()),
         font=("Arial", 14),
     )
-    enable_check.pack(side="left", padx=10)
+    enable_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Save/Load
     preset_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    preset_frame.pack(fill="x", padx=10, pady=(0, 10))
+    preset_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
     save_btn = ctk.CTkButton(
         preset_frame,
@@ -54,7 +68,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         corner_radius=0,
         command=lambda: _save_preset(state),
     )
-    save_btn.pack(side="left", padx=10)
+    save_btn.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     load_btn = ctk.CTkButton(
         preset_frame,
@@ -64,16 +78,23 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         corner_radius=0,
         command=lambda: _load_preset(state),
     )
-    load_btn.pack(side="left", padx=10)
+    load_btn.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     def update_font_sizes():
-        font_size = theme.get_font_size("label_small")
+        try:
+            if not parent.winfo_exists():
+                return
+            font_size = theme.get_font_size("label_small")
 
-        latch_label.configure(font=("Arial", font_size))
-        latch_menu.configure(font=("Arial", font_size))
-        enable_check.configure(font=("Arial", font_size))
-        save_btn.configure(font=("Arial", font_size))
-        load_btn.configure(font=("Arial", font_size))
+            latch_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+            latch_menu.configure(font=("Arial", font_size))
+            enable_check.configure(font=("Arial", font_size))
+            save_btn.configure(font=("Arial", font_size))
+            load_btn.configure(font=("Arial", font_size))
+        except Exception:
+            pass  # Widget might be destroyed
 
     parent.update_font_sizes = update_font_sizes
     pm.register_element("content_elements", parent)

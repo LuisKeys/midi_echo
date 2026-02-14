@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 import logging
+from ..layout_utils import LayoutSpacing
 
 
 def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -20,21 +21,33 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Pattern grid
     grid_frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
-    grid_frame.pack(expand=True, fill="both", padx=10, pady=10)
+    grid_frame.pack(
+        expand=True,
+        fill="both",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=LayoutSpacing.CONTAINER_PADY,
+    )
 
     buttons = []
     accent_buttons = []
 
     def update_font_sizes():
         """Update font sizes of buttons (dimensions handled by grid weights)."""
-        font_size = theme.get_font_size("label_small")
+        try:
+            if not parent.winfo_exists():
+                return
+            font_size = theme.get_font_size("label_small")
 
-        for btn in buttons:
-            btn.configure(font=("Arial", font_size))
-        for btn in accent_buttons:
-            btn.configure(font=("Arial", font_size))
+            for btn in buttons:
+                btn.configure(font=("Arial", font_size))
+            for btn in accent_buttons:
+                btn.configure(font=("Arial", font_size))
 
-        held_label.configure(font=("Arial", font_size))
+            held_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+        except Exception:
+            pass  # Widget might be destroyed
 
     parent.update_font_sizes = update_font_sizes
     if hasattr(context.gui, "popup_manager"):
@@ -58,7 +71,9 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             if state.held_notes
             else "None"
         )
-        held_label.configure(text=f"Held Notes: {held_text}")
+        held_label.configure(
+            text=f"Held Notes: {held_text}", width=theme.get_label_width(), anchor="e"
+        )
 
     def make_toggle(i: int):
         def _toggle():
@@ -96,7 +111,13 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 corner_radius=0,
                 command=make_toggle(idx),
             )
-            btn.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
+            btn.grid(
+                row=r,
+                column=c,
+                padx=LayoutSpacing.GRID_CELL_PADX,
+                pady=LayoutSpacing.GRID_CELL_PADY,
+                sticky="nsew",
+            )
             buttons.append(btn)
 
     # Accent buttons below
@@ -111,12 +132,22 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 corner_radius=0,
                 command=make_accent_toggle(idx),
             )
-            btn.grid(row=3 + r, column=c, padx=2, pady=2, sticky="nsew")
+            btn.grid(
+                row=3 + r,
+                column=c,
+                padx=LayoutSpacing.GRID_CELL_PADX,
+                pady=LayoutSpacing.GRID_CELL_PADY,
+                sticky="nsew",
+            )
             accent_buttons.append(btn)
 
     # Held notes display
     held_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    held_frame.pack(fill="x", padx=10, pady=(0, 10))
+    held_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
     held_text = (
         ", ".join(str(n) for n in sorted(state.held_notes))
@@ -124,9 +155,10 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
         else "None"
     )
     held_label = ctk.CTkLabel(
-        held_frame, text=f"Held Notes: {held_text}", font=("Arial", 14)
+        held_frame, text=f"Held Notes: {held_text}", font=("Arial", 14), anchor="e"
     )
-    held_label.pack(side="left", padx=10)
+    held_label.configure(width=theme.get_label_width())
+    held_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Chord memory recall
     def recall_chord():

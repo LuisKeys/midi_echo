@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 from ..widgets import IncrementDecrementWidget, SquareDropdown
+from ..layout_utils import LayoutSpacing
 
 
 def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -12,10 +13,15 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Mode
     mode_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    mode_frame.pack(fill="x", padx=10, pady=10)
+    mode_frame.pack(
+        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
+    )
 
-    mode_label = ctk.CTkLabel(mode_frame, text="Velocity Mode:", font=("Arial", 14))
-    mode_label.pack(side="left", padx=10)
+    mode_label = ctk.CTkLabel(
+        mode_frame, text="Velocity Mode:", font=("Arial", 14), anchor="e"
+    )
+    mode_label.configure(width=theme.get_label_width())
+    mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     vel_mode_var = ctk.StringVar(value=state.velocity.mode)
     vel_mode_menu = SquareDropdown(
@@ -26,7 +32,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
     )
-    vel_mode_menu.pack(side="left", padx=10)
+    vel_mode_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Fixed velocity
     fixed_widget = IncrementDecrementWidget(
@@ -38,15 +44,27 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
         callback=lambda v: setattr(state.velocity, "fixed_velocity", v),
         config=config,
         theme=theme,
+        label_width=theme.get_label_width(),
     )
-    fixed_widget.pack(fill="x", padx=10, pady=(0, 10))
+    fixed_widget.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
     pm.register_element("content_elements", fixed_widget)
 
     def update_font_sizes():
-        font_size = theme.get_font_size("label_small")
+        try:
+            if not parent.winfo_exists():
+                return
+            font_size = theme.get_font_size("label_small")
 
-        mode_label.configure(font=("Arial", font_size))
-        vel_mode_menu.configure(font=("Arial", font_size))
+            mode_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+            vel_mode_menu.configure(font=("Arial", font_size))
+        except Exception:
+            pass  # Widget might be destroyed
 
     parent.update_font_sizes = update_font_sizes
     pm.register_element("content_elements", parent)

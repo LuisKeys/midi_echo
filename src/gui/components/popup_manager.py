@@ -4,6 +4,7 @@ import customtkinter as ctk
 from typing import Callable, Dict, Optional, Any
 from .theme import Theme
 from .lightbox import Lightbox
+from .layout_utils import LayoutSpacing
 
 
 class PopupManager:
@@ -26,6 +27,7 @@ class PopupManager:
         self.theme = theme
         self.active_popup: Optional[ctk.CTkFrame] = None
         self.overlay: Optional[Lightbox] = None
+        self._transitioning = False  # Flag to prevent updates during transitions
 
         # Track popup elements for dynamic updates
         self.popup_elements: Dict[str, Any] = {
@@ -52,6 +54,9 @@ class PopupManager:
         Returns:
             PopupMenu instance
         """
+        # Set transitioning flag
+        self._transitioning = True
+
         # Close any existing popup
         if self.active_popup:
             self._close_current()
@@ -74,11 +79,16 @@ class PopupManager:
         )
 
         self.active_popup = popup
+
+        # Clear transitioning flag after a short delay
+        self.parent.after(150, lambda: setattr(self, "_transitioning", False))
+
         return popup
 
     def _close_current(self) -> None:
         """Close the currently active popup."""
         if self.active_popup:
+            self._transitioning = True
             try:
                 if self.overlay:
                     self.overlay.hide()
@@ -94,6 +104,7 @@ class PopupManager:
                 "close_btn": None,
                 "content_elements": [],
             }
+            self._transitioning = False
 
     def _create_overlay(self) -> Lightbox:
         """Create or show the reusable lightbox overlay."""
@@ -120,8 +131,22 @@ class PopupManager:
 
     def update_font_sizes(self) -> None:
         """Update font sizes for all popup elements."""
-        if self.active_popup and hasattr(self.active_popup, "update_font_sizes"):
-            self.active_popup.update_font_sizes()
+        # Skip if transitioning (opening/closing)
+        if self._transitioning:
+            return
+
+        if not self.active_popup:
+            return
+        if not hasattr(self.active_popup, "update_font_sizes"):
+            return
+
+        try:
+            # Only update if popup still exists and is visible
+            if self.active_popup.winfo_exists() and self.active_popup.winfo_ismapped():
+                self.active_popup.update_font_sizes()
+        except Exception:
+            # Popup might have been destroyed
+            pass
 
     def is_popup_open(self) -> bool:
         """Check if a popup is currently open."""
@@ -177,7 +202,11 @@ class PopupMenu(ctk.CTkFrame):
         """Create popup layout."""
         # Top bar with title and close button
         top_frame = ctk.CTkFrame(self, fg_color="#2A2A2A", corner_radius=0)
-        top_frame.pack(fill="x", padx=10, pady=10)
+        top_frame.pack(
+            fill="x",
+            padx=LayoutSpacing.CONTAINER_PADX,
+            pady=LayoutSpacing.CONTAINER_PADY,
+        )
 
         title_label = ctk.CTkLabel(
             top_frame,
@@ -205,7 +234,12 @@ class PopupMenu(ctk.CTkFrame):
 
         # Content frame
         content_frame = ctk.CTkFrame(self, fg_color="#2A2A2A", corner_radius=0)
-        content_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        content_frame.pack(
+            fill="both",
+            expand=True,
+            padx=LayoutSpacing.CONTAINER_PADX,
+            pady=(0, LayoutSpacing.CONTAINER_PADY),
+        )
 
         # Build content
         self.content_builder(content_frame)
@@ -220,28 +254,42 @@ class PopupMenu(ctk.CTkFrame):
         self.place(relx=0.5, rely=0.5, relwidth=0.8, relheight=0.8, anchor="center")
         self.lift()
         self.focus()
-        self.update_font_sizes()
+        # Update fonts after layout is complete
+        self.after(50, self.update_font_sizes)
 
     def update_font_sizes(self) -> None:
         """Update font sizes of popup UI elements (dimensions stay fixed)."""
         theme = self.popup_manager.theme
 
-        # Update title
-        title_label = self.popup_manager.popup_elements.get("title_label")
-        if title_label:
-            font_size = theme.get_font_size("popup_title")
-            title_label.configure(font=("Arial", font_size, "bold"))
+        try:
+            # Check if popup still exists
+            if not self.winfo_exists():
+                return
 
-        # Update close button
-        close_btn = self.popup_manager.popup_elements.get("close_btn")
-        if close_btn:
-            font_size = theme.get_font_size("popup_close")
-            close_btn.configure(font=("Arial", font_size, "bold"))
+            # Update title
+            title_label = self.popup_manager.popup_elements.get("title_label")
+            if title_label and title_label.winfo_exists():
+                font_size = theme.get_font_size("popup_title")
+                title_label.configure(font=("Arial", font_size, "bold"))
 
-        # Update content elements
-        for element in self.popup_manager.popup_elements.get("content_elements", []):
-            if hasattr(element, "update_font_sizes"):
-                element.update_font_sizes()
+            # Update close button
+            close_btn = self.popup_manager.popup_elements.get("close_btn")
+            if close_btn and close_btn.winfo_exists():
+                font_size = theme.get_font_size("popup_close")
+                close_btn.configure(font=("Arial", font_size, "bold"))
+
+            # Update content elements
+            for element in self.popup_manager.popup_elements.get(
+                "content_elements", []
+            ):
+                if hasattr(element, "update_font_sizes"):
+                    try:
+                        if hasattr(element, "winfo_exists") and element.winfo_exists():
+                            element.update_font_sizes()
+                    except Exception:
+                        pass  # Element might have been destroyed
+        except Exception:
+            pass  # Popup might be in invalid state
 
     def close(self) -> None:
         """Close the popup."""

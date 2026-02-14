@@ -83,6 +83,9 @@ class MidiGui(ctk.CTk):
         # Bind events
         self.bind("<Escape>", lambda e: self.quit())
         self.bind("<Configure>", lambda e: self._on_window_resize())
+        self._resize_job = None
+        self._last_resize_width = 0
+        self._last_resize_height = 0
 
         # Update context
         context.update_gui(self)
@@ -175,6 +178,18 @@ class MidiGui(ctk.CTk):
     def _apply_resize(self) -> None:
         """Apply deferred resize updates."""
         self._resize_job = None
-        self.theme.update_window_size(self.winfo_width(), self.winfo_height())
+        new_width = self.winfo_width()
+        new_height = self.winfo_height()
+
+        # Only update if the main window size actually changed
+        if (
+            new_width == self._last_resize_width
+            and new_height == self._last_resize_height
+        ):
+            return
+
+        self._last_resize_width = new_width
+        self._last_resize_height = new_height
+        self.theme.update_window_size(new_width, new_height)
         self.button_panel.update_font_sizes()
         self.popup_manager.update_font_sizes()

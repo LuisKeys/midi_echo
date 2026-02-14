@@ -4,6 +4,7 @@ import customtkinter as ctk
 from typing import Callable, Dict, Optional, Any
 from dataclasses import dataclass
 from src.gui.components.theme import Theme
+from src.gui.components.layout_utils import LayoutSpacing
 
 
 @dataclass
@@ -76,7 +77,13 @@ class ButtonPanel:
         )
 
         # Place button in grid
-        btn.grid(row=spec.row, column=spec.col, padx=10, pady=10, sticky="nsew")
+        btn.grid(
+            row=spec.row,
+            column=spec.col,
+            padx=LayoutSpacing.MAIN_BUTTON_PADX,
+            pady=LayoutSpacing.MAIN_BUTTON_PADY,
+            sticky="nsew",
+        )
 
         # Store reference
         self.buttons[spec.text] = btn

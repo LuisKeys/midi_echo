@@ -100,7 +100,12 @@ class TransposeHandler(BaseHandler):
 
             # Buttons row
             buttons_frame = ctk.CTkFrame(frame, fg_color="#2A2A2A")
-            buttons_frame.pack(fill="both", expand=True, padx=5, pady=5)
+            buttons_frame.pack(
+                fill="both",
+                expand=True,
+                padx=LayoutSpacing.CONTROL_BUTTON_PADX,
+                pady=LayoutSpacing.CONTROL_BUTTON_PADY,
+            )
 
             # Minus button
             btn_minus = ctk.CTkButton(
@@ -118,7 +123,13 @@ class TransposeHandler(BaseHandler):
                 corner_radius=0,
                 command=lambda: self.adjust_transpose(-1),
             )
-            btn_minus.pack(side="left", padx=5, pady=5, fill="both", expand=True)
+            btn_minus.pack(
+                side="left",
+                padx=LayoutSpacing.CONTROL_BUTTON_PADX,
+                pady=LayoutSpacing.CONTROL_BUTTON_PADY,
+                fill="both",
+                expand=True,
+            )
 
             def on_minus_press():
                 self.is_repeating = True
@@ -164,7 +175,13 @@ class TransposeHandler(BaseHandler):
                 corner_radius=0,
                 command=lambda: self.adjust_transpose(reset=True),
             )
-            btn_zero.pack(side="left", padx=5, pady=5, fill="both", expand=True)
+            btn_zero.pack(
+                side="left",
+                padx=LayoutSpacing.CONTROL_BUTTON_PADX,
+                pady=LayoutSpacing.CONTROL_BUTTON_PADY,
+                fill="both",
+                expand=True,
+            )
 
             # Plus button
             btn_plus = ctk.CTkButton(
@@ -182,7 +199,13 @@ class TransposeHandler(BaseHandler):
                 corner_radius=0,
                 command=lambda: self.adjust_transpose(1),
             )
-            btn_plus.pack(side="left", padx=5, pady=5, fill="both", expand=True)
+            btn_plus.pack(
+                side="left",
+                padx=LayoutSpacing.CONTROL_BUTTON_PADX,
+                pady=LayoutSpacing.CONTROL_BUTTON_PADY,
+                fill="both",
+                expand=True,
+            )
 
             def on_plus_press():
                 self.is_repeating = True

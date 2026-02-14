@@ -1,6 +1,7 @@
 """Reusable GUI widgets for the MIDI Echo application."""
 
 import customtkinter as ctk
+from src.gui.components.layout_utils import LayoutSpacing
 
 
 class IncrementDecrementWidget(ctk.CTkFrame):
@@ -19,19 +20,22 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         suffix=None,
         tap_callback=None,
         theme=None,
+        label_width=None,
     ):
         super().__init__(parent, fg_color="#2A2A2A")
         self.min_val = min_val
         self.max_val = max_val
         self.step = step
         self.callback = callback
-        self.config = config
         self.theme = theme
+        self.label_width = label_width
         self.current_val = initial_val
 
         # Label
-        self.label = ctk.CTkLabel(self, text=label_text, font=("Arial", 14))
-        self.label.pack(side="left", padx=10)
+        self.label = ctk.CTkLabel(self, text=label_text, font=("Arial", 14), anchor="e")
+        if self.label_width is not None:
+            self.label.configure(width=self.label_width)
+        self.label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
         # Minus button with hold logic
         self.minus_holding = False
@@ -42,13 +46,15 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         )
         self.minus_btn.bind("<ButtonPress-1>", lambda e: self.start_decr())
         self.minus_btn.bind("<ButtonRelease-1>", lambda e: self.stop_decr())
-        self.minus_btn.pack(side="left", padx=5)
+        self.minus_btn.pack(side="left", padx=LayoutSpacing.CONTROL_BUTTON_PADX)
 
         # Value display
         self.value_label = ctk.CTkLabel(
-            self, text=str(self.current_val), font=("Arial", 16)
+            self, text=str(self.current_val), font=("Arial", 16), anchor="center"
         )
-        self.value_label.pack(side="left", padx=10)
+        if self.theme:
+            self.value_label.configure(width=self.theme.get_value_width())
+        self.value_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
         # Plus button with hold logic
         self.plus_holding = False
@@ -59,12 +65,12 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         )
         self.plus_btn.bind("<ButtonPress-1>", lambda e: self.start_incr())
         self.plus_btn.bind("<ButtonRelease-1>", lambda e: self.stop_incr())
-        self.plus_btn.pack(side="left", padx=5)
+        self.plus_btn.pack(side="left", padx=LayoutSpacing.CONTROL_BUTTON_PADX)
 
         # Suffix label
         if suffix:
             self.suffix_label = ctk.CTkLabel(self, text=suffix, font=("Arial", 14))
-            self.suffix_label.pack(side="left", padx=5)
+            self.suffix_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
         # Tap button
         if tap_callback:
@@ -76,7 +82,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
                 command=tap_callback,
                 corner_radius=0,
             )
-            self.tap_btn.pack(side="right", padx=10)
+            self.tap_btn.pack(side="right", padx=LayoutSpacing.ELEMENT_PADX)
 
         # Apply initial scaling
         if self.theme:
@@ -87,12 +93,29 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         if not self.theme:
             return
 
+        # Check if widget still exists
+        try:
+            if not self.winfo_exists():
+                return
+        except Exception:
+            return
+
         label_font_size = self.theme.get_font_size("label_small")
         value_font_size = self.theme.get_font_size("label_medium")
         btn_font_size = self.theme.get_font_size("increment_button")
 
-        self.label.configure(font=("Arial", label_font_size))
-        self.value_label.configure(font=("Arial", value_font_size))
+        # Update label in single configure call
+        label_config = {"font": ("Arial", label_font_size), "anchor": "e"}
+        if self.label_width is not None:
+            label_config["width"] = self.label_width
+        self.label.configure(**label_config)
+
+        # Update value label in single configure call
+        self.value_label.configure(
+            font=("Arial", value_font_size),
+            width=self.theme.get_value_width(),
+            anchor="center",
+        )
 
         for btn in [self.minus_btn, self.plus_btn]:
             btn.configure(font=("Arial", btn_font_size))

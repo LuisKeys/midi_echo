@@ -2,6 +2,7 @@
 
 from typing import Tuple
 from src.config import AppConfig
+from .layout_utils import LayoutSpacing
 
 
 class Theme:
@@ -91,6 +92,28 @@ class Theme:
         width_scale = self.current_width / self.config.base_window_width
         height_scale = self.current_height / self.config.base_window_height
         return (width_scale + height_scale) / 2
+
+    def get_label_width(self) -> int:
+        """Get uniform width for all control labels in pixels.
+
+        Returns:
+            Width in pixels (scales with font size)
+        """
+        # Calculate based on 18 characters at current font size
+        # Using ~8 pixels per character as base estimate for 14pt font
+        base_width = 144  # 18 chars × 8 pixels/char at base resolution
+        return int(base_width * self.get_scale())
+
+    def get_value_width(self) -> int:
+        """Get uniform width for value display labels in pixels.
+
+        Returns:
+            Width in pixels (scales with font size) to fit 3 digits comfortably
+        """
+        # Width to fit 3 digits at 16pt font (e.g., "300")
+        # Using ~10 pixels per character for 16pt font
+        base_width = 50  # Approximately 3 digits at base resolution
+        return int(base_width * self.get_scale())
 
     def update_window_size(self, width: int, height: int) -> None:
         """Update current window size for font scaling.

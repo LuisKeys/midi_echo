@@ -4,6 +4,7 @@ from typing import Callable
 import customtkinter as ctk
 from src.midi.arp.state_validator import ArpState
 from .widgets import IncrementDecrementWidget
+from .layout_utils import LayoutSpacing
 from .tabs import (
     _build_pattern_tab,
     _build_timing_tab,
@@ -28,7 +29,12 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
 
     # Main tabview
     tabview = ctk.CTkTabview(parent)
-    tabview.pack(expand=True, fill="both", padx=10, pady=10)
+    tabview.pack(
+        expand=True,
+        fill="both",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=LayoutSpacing.CONTAINER_PADY,
+    )
 
     # Configure tab appearance for touch-friendly interface
     if hasattr(tabview, "_segmented_button"):

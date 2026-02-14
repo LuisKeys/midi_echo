@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 from ..widgets import IncrementDecrementWidget, SquareDropdown
+from ..layout_utils import LayoutSpacing
 
 
 def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -12,10 +13,13 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Mode
     mode_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    mode_frame.pack(fill="x", padx=10, pady=10)
+    mode_frame.pack(
+        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
+    )
 
-    mode_label = ctk.CTkLabel(mode_frame, text="Mode:", font=("Arial", 14))
-    mode_label.pack(side="left", padx=10)
+    mode_label = ctk.CTkLabel(mode_frame, text="Mode:", font=("Arial", 14), anchor="e")
+    mode_label.configure(width=theme.get_label_width())
+    mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     mode_var = ctk.StringVar(value=state.mode)
     mode_menu = SquareDropdown(
@@ -26,7 +30,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
     )
-    mode_menu.pack(side="left", padx=10)
+    mode_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Octave
     oct_widget = IncrementDecrementWidget(
@@ -38,16 +42,28 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         callback=lambda v: setattr(state, "octave", v),
         config=config,
         theme=theme,
+        label_width=theme.get_label_width(),
     )
-    oct_widget.pack(fill="x", padx=10, pady=(0, 10))
+    oct_widget.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
     pm.register_element("content_elements", oct_widget)
 
     # Octave direction
     dir_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    dir_frame.pack(fill="x", padx=10, pady=(0, 10))
+    dir_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
-    dir_label = ctk.CTkLabel(dir_frame, text="Octave Direction:", font=("Arial", 14))
-    dir_label.pack(side="left", padx=10)
+    dir_label = ctk.CTkLabel(
+        dir_frame, text="Octave Direction:", font=("Arial", 14), anchor="e"
+    )
+    dir_label.configure(width=theme.get_label_width())
+    dir_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     dir_var = ctk.StringVar(value=state.octave_dir)
     dir_menu = SquareDropdown(
@@ -58,14 +74,21 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
     )
-    dir_menu.pack(side="left", padx=10)
+    dir_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Reset mode
     reset_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    reset_frame.pack(fill="x", padx=10, pady=(0, 10))
+    reset_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
-    reset_label = ctk.CTkLabel(reset_frame, text="Reset Mode:", font=("Arial", 14))
-    reset_label.pack(side="left", padx=10)
+    reset_label = ctk.CTkLabel(
+        reset_frame, text="Reset Mode:", font=("Arial", 14), anchor="e"
+    )
+    reset_label.configure(width=theme.get_label_width())
+    reset_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     reset_var = ctk.StringVar(value=state.reset_mode)
     reset_menu = SquareDropdown(
@@ -76,17 +99,28 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
     )
-    reset_menu.pack(side="left", padx=10)
+    reset_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     def update_font_sizes():
-        font_size = theme.get_font_size("label_small")
+        try:
+            if not parent.winfo_exists():
+                return
+            font_size = theme.get_font_size("label_small")
 
-        mode_label.configure(font=("Arial", font_size))
-        mode_menu.configure(font=("Arial", font_size))
-        dir_label.configure(font=("Arial", font_size))
-        dir_menu.configure(font=("Arial", font_size))
-        reset_label.configure(font=("Arial", font_size))
-        reset_menu.configure(font=("Arial", font_size))
+            mode_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+            mode_menu.configure(font=("Arial", font_size))
+            dir_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+            dir_menu.configure(font=("Arial", font_size))
+            reset_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+            reset_menu.configure(font=("Arial", font_size))
+        except Exception:
+            pass  # Widget might be destroyed
 
     parent.update_font_sizes = update_font_sizes
     pm.register_element("content_elements", parent)

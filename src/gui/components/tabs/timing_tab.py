@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 from ..widgets import IncrementDecrementWidget, SquareDropdown
+from ..layout_utils import LayoutSpacing
 
 
 def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -21,8 +22,11 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         config=config,
         tap_callback=lambda: context.gui.handlers["AR"].tap_tempo(),
         theme=theme,
+        label_width=theme.get_label_width(),
     )
-    bpm_widget.pack(fill="x", padx=10, pady=10)
+    bpm_widget.pack(
+        fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
+    )
     pm.register_element("content_elements", bpm_widget)
 
     # Store reference in handler for display updates
@@ -31,10 +35,17 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Division
     div_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    div_frame.pack(fill="x", padx=10, pady=(0, 10))
+    div_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
-    div_label = ctk.CTkLabel(div_frame, text="Division:", font=("Arial", 14))
-    div_label.pack(side="left", padx=10)
+    div_label = ctk.CTkLabel(
+        div_frame, text="Division:", font=("Arial", 14), anchor="e"
+    )
+    div_label.configure(width=theme.get_label_width())
+    div_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     div_var = ctk.StringVar(value=state.timing.division)
     div_menu = SquareDropdown(
@@ -45,7 +56,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
     )
-    div_menu.pack(side="left", padx=10)
+    div_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Swing
     swing_widget = IncrementDecrementWidget(
@@ -58,8 +69,13 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         config=config,
         suffix="%",
         theme=theme,
+        label_width=theme.get_label_width(),
     )
-    swing_widget.pack(fill="x", padx=10, pady=(0, 10))
+    swing_widget.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
     pm.register_element("content_elements", swing_widget)
 
     # Gate
@@ -73,13 +89,22 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         config=config,
         suffix="%",
         theme=theme,
+        label_width=theme.get_label_width(),
     )
-    gate_widget.pack(fill="x", padx=10, pady=(0, 10))
+    gate_widget.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
     pm.register_element("content_elements", gate_widget)
 
     # External sync
     sync_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
-    sync_frame.pack(fill="x", padx=10, pady=(0, 10))
+    sync_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, LayoutSpacing.CONTAINER_PADY),
+    )
 
     sync_var = ctk.BooleanVar(value=state.external_sync)
     sync_check = ctk.CTkCheckBox(
@@ -89,14 +114,21 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         command=lambda: setattr(state, "external_sync", sync_var.get()),
         font=("Arial", 14),
     )
-    sync_check.pack(side="left", padx=10)
+    sync_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     def update_font_sizes():
-        font_size = theme.get_font_size("label_small")
+        try:
+            if not parent.winfo_exists():
+                return
+            font_size = theme.get_font_size("label_small")
 
-        div_label.configure(font=("Arial", font_size))
-        div_menu.configure(font=("Arial", font_size))
-        sync_check.configure(font=("Arial", font_size))
+            div_label.configure(
+                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+            )
+            div_menu.configure(font=("Arial", font_size))
+            sync_check.configure(font=("Arial", font_size))
+        except Exception:
+            pass  # Widget might be destroyed
 
     parent.update_font_sizes = update_font_sizes
     pm.register_element("content_elements", parent)
