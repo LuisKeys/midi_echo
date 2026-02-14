@@ -99,9 +99,17 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
                 handler.current_program = preset_num
                 handler.update_ui()
 
-            # Close the popup via popup_manager
-            if context.gui.popup_manager:
-                context.gui.popup_manager._close_current()
+            # Update button colors to highlight current preset
+            for btn, num in zip(buttons, range(preset_range_max + 1)):
+                if num == preset_num:
+                    fg_color = (
+                        theme.get_color_tuple("green")
+                        if hasattr(theme, "colors")
+                        else ("#00FF00", "#00FF00")
+                    )
+                else:
+                    fg_color = ("#3D3D3D", "#3D3D3D")
+                btn.configure(fg_color=fg_color)
 
             logger.info(f"Preset {preset_num} selected (channel {ch})")
 
@@ -127,7 +135,8 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
             grid_frame,
             text=str(preset_num),
             fg_color=fg_color,
-            corner_radius=4,
+            corner_radius=0,
+            height=50,
             command=make_preset_button(preset_num),
         )
         btn.grid(

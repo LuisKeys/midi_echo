@@ -48,8 +48,8 @@ class PopupManager:
         Args:
             title: Popup title
             content_builder: Function to build popup content
-            width: Popup width (defaults to 80% of parent)
-            height: Popup height (defaults to 80% of parent)
+            width: Popup width (defaults to 95% of parent)
+            height: Popup height (defaults to 95% of parent)
 
         Returns:
             PopupMenu instance
@@ -64,9 +64,9 @@ class PopupManager:
         # Calculate dimensions
         self.parent.update_idletasks()
         if width is None:
-            width = int(self.parent.winfo_width() * 0.8)
+            width = int(self.parent.winfo_width() * 0.95)
         if height is None:
-            height = int(self.parent.winfo_height() * 0.8)
+            height = int(self.parent.winfo_height() * 0.95)
 
         # Create popup
         popup = PopupMenu(
@@ -251,7 +251,7 @@ class PopupMenu(ctk.CTkFrame):
             x: X position (deprecated, centered by default)
             y: Y position (deprecated, centered by default)
         """
-        self.place(relx=0.5, rely=0.5, relwidth=0.8, relheight=0.8, anchor="center")
+        self.place(relx=0.5, rely=0.5, relwidth=0.95, relheight=0.95, anchor="center")
         self.lift()
         self.focus()
         # Update fonts after layout is complete
