@@ -1,7 +1,7 @@
 """Modes tab for the ARP control interface."""
 
 import customtkinter as ctk
-from ..widgets import IncrementDecrementWidget, SquareDropdown
+from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 
 
@@ -28,13 +28,20 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     mode_var = ctk.StringVar(value=state.mode)
-    mode_menu = SquareDropdown(
+    mode_menu = ctk.CTkOptionMenu(
         mode_frame,
         values=["UP", "DOWN", "UPDOWN", "RANDOM", "CHORD"],
         variable=mode_var,
         command=lambda v: setattr(state, "mode", v),
         width=150,
         height=50,
+        corner_radius=0,
+        fg_color="#B0BEC5",
+        button_color="#B0BEC5",
+        button_hover_color="#B0BEC5",
+        text_color=theme.get_color("button_text"),
+        font=("Arial", 20),
+        dropdown_font=("Arial", 30),
     )
     mode_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -76,13 +83,20 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     dir_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     dir_var = ctk.StringVar(value=state.octave_dir)
-    dir_menu = SquareDropdown(
+    dir_menu = ctk.CTkOptionMenu(
         dir_frame,
         values=["UP", "DOWN", "BOTH"],
         variable=dir_var,
         command=lambda v: setattr(state, "octave_dir", v),
         width=150,
         height=50,
+        corner_radius=0,
+        fg_color="#B0BEC5",
+        button_color="#B0BEC5",
+        button_hover_color="#B0BEC5",
+        text_color=theme.get_color("button_text"),
+        font=("Arial", 20),
+        dropdown_font=("Arial", 30),
     )
     dir_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -105,13 +119,20 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     reset_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     reset_var = ctk.StringVar(value=state.reset_mode)
-    reset_menu = SquareDropdown(
+    reset_menu = ctk.CTkOptionMenu(
         reset_frame,
         values=["NEW_CHORD", "FIRST_NOTE", "FREE_RUN"],
         variable=reset_var,
         command=lambda v: setattr(state, "reset_mode", v),
         width=150,
         height=50,
+        corner_radius=0,
+        fg_color="#B0BEC5",
+        button_color="#B0BEC5",
+        button_hover_color="#B0BEC5",
+        text_color=theme.get_color("button_text"),
+        font=("Arial", 20),
+        dropdown_font=("Arial", 30),
     )
     reset_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 

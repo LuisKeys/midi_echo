@@ -2,7 +2,6 @@
 
 import customtkinter as ctk
 from src.midi.arp.state_validator import ArpState
-from ..widgets import SquareDropdown
 from ..layout_utils import LayoutSpacing
 
 
@@ -28,13 +27,20 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     latch_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     latch_var = ctk.StringVar(value=state.latch)
-    latch_menu = SquareDropdown(
+    latch_menu = ctk.CTkOptionMenu(
         latch_frame,
         values=["OFF", "ON", "HOLD"],
         variable=latch_var,
         command=lambda v: setattr(state, "latch", v),
         width=150,
         height=50,
+        corner_radius=0,
+        fg_color="#B0BEC5",
+        button_color="#B0BEC5",
+        button_hover_color="#B0BEC5",
+        text_color=theme.get_color("button_text"),
+        font=("Arial", 20),
+        dropdown_font=("Arial", 30),
     )
     latch_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 

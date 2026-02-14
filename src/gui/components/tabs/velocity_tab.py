@@ -1,7 +1,7 @@
 """Velocity tab for the ARP control interface."""
 
 import customtkinter as ctk
-from ..widgets import IncrementDecrementWidget, SquareDropdown
+from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 
 
@@ -28,13 +28,20 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
     mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     vel_mode_var = ctk.StringVar(value=state.velocity.mode)
-    vel_mode_menu = SquareDropdown(
+    vel_mode_menu = ctk.CTkOptionMenu(
         mode_frame,
         values=["ORIGINAL", "FIXED", "RAMP_UP", "RAMP_DOWN", "RANDOM", "ACCENT_FIRST"],
         variable=vel_mode_var,
         command=lambda v: setattr(state.velocity, "mode", v),
         width=150,
         height=50,
+        corner_radius=0,
+        fg_color="#B0BEC5",
+        button_color="#B0BEC5",
+        button_hover_color="#B0BEC5",
+        text_color=theme.get_color("button_text"),
+        font=("Arial", 20),
+        dropdown_font=("Arial", 30),
     )
     vel_mode_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
