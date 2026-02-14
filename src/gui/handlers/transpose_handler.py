@@ -3,6 +3,7 @@
 import logging
 from src.gui.handlers.base_handler import BaseHandler
 from src.gui.context import AppContext
+from src.gui.components.layout_utils import LayoutSpacing
 
 logger = logging.getLogger(__name__)
 
