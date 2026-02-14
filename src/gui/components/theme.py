@@ -9,13 +9,13 @@ class Theme:
     """Manages colors and font sizing for the GUI.
 
     Responsible for:
-    - Color palette definitions
+    - Color palette definitions for light and dark modes
     - Dynamic font size calculation based on window dimensions
     - Theme-aware color tuples for customtkinter consistency
     """
 
-    # Color definitions
-    COLORS = {
+    # Color definitions for light mode
+    COLORS_LIGHT = {
         "cyan": "#B3E5FC",
         "violet": "#F8BBD9",
         "aqua": "#C8E6C9",
@@ -30,7 +30,28 @@ class Theme:
         "button_inactive_light": "#CFD8DC",
         "text_white": "#CCCBCB",
         "text_black": "#454444",
+        "button_text": "#000000",
         "popup_grey": "#A3A3a3",
+    }
+
+    # Color definitions for dark mode
+    COLORS_DARK = {
+        "cyan": "#B3E5FC",
+        "violet": "#F8BBD9",
+        "aqua": "#C8E6C9",
+        "grey": "#F5F5F5",
+        "red": "#FFCDD2",
+        "bg": "#2D2D2D",
+        "overlay": "#1E3A1E",
+        "frame_bg": "#2D2D2D",
+        "selector_bg": "#4D4D4D",
+        "preset_highlight": "#2D2D2D",
+        "button_inactive": "#555555",
+        "button_inactive_light": "#666666",
+        "text_white": "#FFFFFF",
+        "text_black": "#D3D3D3",
+        "button_text": "#000000",
+        "popup_grey": "#2D2D2D",
     }
 
     # Base font sizes at reference window resolution (600x400)
@@ -50,9 +71,10 @@ class Theme:
         """Initialize theme with configuration.
 
         Args:
-            config: AppConfig instance with window dimensions
+            config: AppConfig instance with window dimensions and theme mode
         """
         self.config = config
+        self.mode = config.theme_mode
         self.current_width = config.window_width
         self.current_height = config.window_height
 
@@ -65,7 +87,8 @@ class Theme:
         Returns:
             Hex color string
         """
-        return self.COLORS.get(name, "#000000")
+        colors = self.COLORS_LIGHT if self.mode == "light" else self.COLORS_DARK
+        return colors.get(name, "#000000")
 
     def get_color_tuple(self, name: str) -> Tuple[str, str]:
         """Get a color as a tuple for customtkinter light/dark modes.
@@ -76,8 +99,9 @@ class Theme:
         Returns:
             Tuple of (light_mode_color, dark_mode_color)
         """
-        color = self.get_color(name)
-        return (color, color)
+        light_color = self.COLORS_LIGHT.get(name, "#000000")
+        dark_color = self.COLORS_DARK.get(name, "#000000")
+        return (light_color, dark_color)
 
     def get_font_size(self, element_type: str) -> int:
         """Calculate font size based on current window dimensions.

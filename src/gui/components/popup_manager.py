@@ -230,7 +230,7 @@ class PopupMenu(ctk.CTkFrame):
             text="✕",
             font=("Arial", 8, "bold"),
             fg_color=self.popup_manager.theme.get_color("popup_grey"),
-            text_color=self.popup_manager.theme.get_color("text_black"),
+            text_color=self.popup_manager.theme.get_color("button_text"),
             hover_color=self.popup_manager.theme.get_color("red"),
             width=60,
             height=60,
