@@ -18,6 +18,8 @@ def _make_config():
         window_height=400,
         base_window_width=600,
         base_window_height=400,
+        preset_range_max=127,
+        default_preset=0,
     )
 
 

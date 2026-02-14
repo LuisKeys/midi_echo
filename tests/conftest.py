@@ -21,6 +21,9 @@ def mock_config():
         window_height=400,
         base_window_width=600,
         base_window_height=400,
+        hold_increment_rate=50,
+        preset_range_max=127,
+        default_preset=0,
     )
     return config
 

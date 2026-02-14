@@ -32,6 +32,10 @@ class AppConfig:
     # UI Configuration - Button Hold
     hold_increment_rate: int  # milliseconds between increments when holding button
 
+    # Preset Configuration
+    preset_range_max: int  # Maximum MIDI program number (0-127)
+    default_preset: int  # Default preset on startup (0-127)
+
     @classmethod
     def from_env(cls) -> "AppConfig":
         """Load configuration from environment variables."""
@@ -47,4 +51,6 @@ class AppConfig:
             base_window_width=600,
             base_window_height=400,
             hold_increment_rate=int(os.getenv("HOLD_INCREMENT_RATE", "50")),
+            preset_range_max=int(os.getenv("PRESET_RANGE_MAX", "127")),
+            default_preset=int(os.getenv("DEFAULT_PRESET", "0")),
         )
