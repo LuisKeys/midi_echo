@@ -25,6 +25,7 @@ class AppContext:
         event_loop: asyncio.AbstractEventLoop = None,
         app_config: "AppConfig" = None,
         arp_engine: object = None,
+        harmony_engine: object = None,
     ):
         """Initialize application context.
 
@@ -40,6 +41,7 @@ class AppContext:
         self.processor = processor
         self.event_loop = event_loop
         self.arp_engine = arp_engine
+        self.harmony_engine = harmony_engine
         self.app_config = app_config
 
     def update_engine(self, engine: "MidiEngine") -> None:

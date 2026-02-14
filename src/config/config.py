@@ -39,6 +39,10 @@ class AppConfig:
     # Theme Configuration
     theme_mode: str  # "light" or "dark"
 
+    # Harmonizer Configuration
+    harmonizer_chord_port: str  # MIDI port name for chord input
+    harmonizer_melody_port: str  # MIDI port name for melody input
+
     @classmethod
     def from_env(cls) -> "AppConfig":
         """Load configuration from environment variables."""
@@ -57,4 +61,6 @@ class AppConfig:
             preset_range_max=int(os.getenv("PRESET_RANGE_MAX", "127")),
             default_preset=int(os.getenv("DEFAULT_PRESET", "0")),
             theme_mode=os.getenv("THEME_MODE", "light"),
+            harmonizer_chord_port=os.getenv("HARMONIZER_CHORD_PORT", ""),
+            harmonizer_melody_port=os.getenv("HARMONIZER_MELODY_PORT", ""),
         )

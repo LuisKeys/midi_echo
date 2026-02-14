@@ -32,6 +32,10 @@ class ArpHandler(BaseHandler):
                 self.context.processor.arp_enabled
             )
 
+        # Mutual exclusion: disable harmonizer when enabling arp
+        if self.context.processor.arp_enabled:
+            self.context.processor.harmonizer_enabled = False
+
         # Start/stop the ArpEngine on the engine event loop
         try:
             arp_engine = getattr(self.context, "arp_engine", None)
@@ -44,6 +48,9 @@ class ArpHandler(BaseHandler):
             logger.exception("Failed to start/stop arp engine")
 
         self.update_ui()
+        # Update harmonizer UI as well
+        if hasattr(self.context.gui, "handlers") and "HZ" in self.context.gui.handlers:
+            self.context.gui.handlers["HZ"].update_ui()
         logger.info(f"Arp enabled: {self.context.processor.arp_enabled}")
 
     def on_button_long_press(self) -> None:
@@ -112,6 +119,10 @@ class ArpHandler(BaseHandler):
         enabled = self.context.processor.arp_enabled
         if hasattr(self.context.processor, "arp_state"):
             enabled = self.context.processor.arp_state.enabled
+
+        # If harmonizer is enabled, arp is disabled
+        if getattr(self.context.processor, "harmonizer_enabled", False):
+            enabled = False
 
         logger.debug(f"update_ui: enabled={enabled}")
 

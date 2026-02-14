@@ -4,7 +4,7 @@ from .base_handler import BaseHandler
 from .transpose_handler import TransposeHandler
 from .octave_handler import OctaveHandler
 from .channel_handler import ChannelHandler
-from .fx_handler import FXHandler
+from .harmony_handler import HarmonyHandler
 from .scale_handler import ScaleHandler
 from .arp_handler import ArpHandler
 from .preset_handler import PresetHandler
@@ -15,7 +15,7 @@ __all__ = [
     "TransposeHandler",
     "OctaveHandler",
     "ChannelHandler",
-    "FXHandler",
+    "HarmonyHandler",
     "ScaleHandler",
     "ArpHandler",
     "PresetHandler",

@@ -68,7 +68,7 @@ async def main():
         logger.error("No valid input ports found.")
         return
 
-    processor = MidiProcessor(verbose=config.verbose)
+    processor = MidiProcessor(verbose=config.verbose, config=config)
     engine = MidiEngine(processor)
 
     # Create event loop for MIDI engine
@@ -90,6 +90,18 @@ async def main():
         context.arp_engine = arp_engine
     except Exception:
         arp_engine = None
+
+    # Create HarmonyEngine
+    try:
+        from src.midi.harmony.engine import HarmonyEngine
+        from src.midi.arp.dispatcher import MidiDispatcher
+
+        dispatcher = MidiDispatcher(engine)
+        harmony_engine = HarmonyEngine(dispatcher)
+        context.harmony_engine = harmony_engine
+        processor.harmony_engine = harmony_engine
+    except Exception:
+        harmony_engine = None
 
     # Start MIDI engine in a background thread
     engine_thread = threading.Thread(

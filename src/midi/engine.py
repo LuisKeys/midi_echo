@@ -19,10 +19,10 @@ class MidiEngine:
         self._loop = None
         self._stop_event = None
 
-    def _callback(self, msg):
+    def _callback(self, msg, port_name):
         """Thread-safe callback to push messages into the async queue."""
         if self._loop and self._loop.is_running() and self.queue:
-            wrapped_msg = MidiMessageWrapper(msg, is_arp=False)
+            wrapped_msg = MidiMessageWrapper(msg, is_arp=False, port=port_name)
             self._loop.call_soon_threadsafe(self.queue.put_nowait, wrapped_msg)
 
     async def run(self, input_names: list[str], output_name: str):
@@ -40,7 +40,9 @@ class MidiEngine:
                 try:
                     # mido.open_input with a callback creates a background thread.
                     # This thread will call self._callback(msg) for every incoming message.
-                    inp = mido.open_input(name, callback=self._callback)
+                    inp = mido.open_input(
+                        name, callback=lambda msg, p=name: self._callback(msg, p)
+                    )
                     self.inputs.append(inp)
                     logger.info(f"Listening on input: {name}")
                 except Exception as e:

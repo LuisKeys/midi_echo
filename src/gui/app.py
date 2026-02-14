@@ -10,7 +10,7 @@ from src.gui.handlers import (
     TransposeHandler,
     OctaveHandler,
     ChannelHandler,
-    FXHandler,
+    HarmonyHandler,
     ScaleHandler,
     ArpHandler,
     PresetHandler,
@@ -67,7 +67,7 @@ class MidiGui(ctk.CTk):
             "TR": TransposeHandler(context),
             "OC": OctaveHandler(context),
             "CH": ChannelHandler(context),
-            "FX": FXHandler(context),
+            "HZ": HarmonyHandler(context),
             "SC": ScaleHandler(context),
             "AR": ArpHandler(context),
             "PS": PresetHandler(context),
@@ -99,7 +99,7 @@ class MidiGui(ctk.CTk):
         """Create all buttons for the interface."""
         button_specs = [
             # Row 0
-            ButtonSpec("FX", 0, 0, "violet", self.handlers["FX"].on_button_press),
+            ButtonSpec("HZ", 0, 0, "violet", self.handlers["HZ"].on_button_press),
             ButtonSpec(
                 "TR",
                 0,
