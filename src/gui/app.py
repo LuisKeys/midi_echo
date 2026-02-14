@@ -99,7 +99,14 @@ class MidiGui(ctk.CTk):
         """Create all buttons for the interface."""
         button_specs = [
             # Row 0
-            ButtonSpec("HZ", 0, 0, "violet", self.handlers["HZ"].on_button_press),
+            ButtonSpec(
+                "HZ",
+                0,
+                0,
+                "violet",
+                self.handlers["HZ"].on_button_press,
+                self.handlers["HZ"].on_button_long_press,
+            ),
             ButtonSpec(
                 "TR",
                 0,
