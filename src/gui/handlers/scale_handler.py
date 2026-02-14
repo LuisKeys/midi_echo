@@ -78,7 +78,10 @@ class ScaleHandler(BaseHandler):
             root_frame.pack(
                 fill="x",
                 padx=LayoutSpacing.CONTAINER_PADX,
-                pady=(20, 10),
+                pady=(
+                    theme.get_padding("popup_control"),
+                    theme.get_padding("popup_control_small"),
+                ),
             )
 
             root_label = ctk.CTkLabel(
@@ -116,7 +119,10 @@ class ScaleHandler(BaseHandler):
             type_frame.pack(
                 fill="x",
                 padx=LayoutSpacing.CONTAINER_PADX,
-                pady=(10, 20),
+                pady=(
+                    theme.get_padding("popup_control_small"),
+                    theme.get_padding("popup_control"),
+                ),
             )
 
             type_label = ctk.CTkLabel(

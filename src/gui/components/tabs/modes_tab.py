@@ -13,7 +13,11 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
 
     # Mode
     mode_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
-    mode_frame.pack(fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=20)
+    mode_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=theme.get_padding("popup_control"),
+    )
 
     mode_label = ctk.CTkLabel(
         mode_frame,
@@ -58,7 +62,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     oct_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, 20),
+        pady=(0, theme.get_padding("popup_control")),
     )
     pm.register_element("content_elements", oct_widget)
 
@@ -67,7 +71,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     dir_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, 20),
+        pady=(0, theme.get_padding("popup_control")),
     )
 
     dir_label = ctk.CTkLabel(
@@ -103,7 +107,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     reset_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, 20),
+        pady=(0, theme.get_padding("popup_control")),
     )
 
     reset_label = ctk.CTkLabel(

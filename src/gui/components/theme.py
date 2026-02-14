@@ -67,6 +67,14 @@ class Theme:
         "increment_button": 14,
     }
 
+    # Base padding values at reference window resolution
+    BASE_PADDINGS = {
+        "popup_control": 20,  # Vertical padding between controls in popups
+        "popup_control_small": 10,  # Smaller padding for intermediate spacing
+        "popup_frame": 20,  # Padding for popup frames and containers
+        "tab_container": 20,  # Padding for tabview containers
+    }
+
     def __init__(self, config: AppConfig):
         """Initialize theme with configuration.
 
@@ -114,6 +122,18 @@ class Theme:
         """
         base_size = self.BASE_FONT_SIZES.get(element_type, 12)
         return int(base_size * self.get_scale())
+
+    def get_padding(self, element_type: str) -> int:
+        """Calculate padding based on current window dimensions.
+
+        Args:
+            element_type: Type of element ('popup_control', 'popup_frame', etc.)
+
+        Returns:
+            Calculated padding in pixels
+        """
+        base_padding = self.BASE_PADDINGS.get(element_type, 10)
+        return int(base_padding * self.get_scale())
 
     def get_scale(self) -> float:
         """Get the current scaling factor based on window dimensions.

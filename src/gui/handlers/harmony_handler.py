@@ -82,7 +82,12 @@ class HarmonyHandler(BaseHandler):
                 ),
                 text_color=self.context.gui.theme.get_color("text_black"),
             )
-            title_label.pack(pady=(20, 10))
+            title_label.pack(
+                pady=(
+                    theme.get_padding("popup_control"),
+                    theme.get_padding("popup_control_small"),
+                )
+            )
 
             # Checkboxes for intervals
             current_intervals = self.context.processor.harmony_state.intervals
@@ -103,7 +108,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            major_3rd_cb.pack(pady=10, anchor="w")
+            major_3rd_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
 
             minor_3rd_cb = ctk.CTkCheckBox(
                 frame,
@@ -116,7 +121,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            minor_3rd_cb.pack(pady=10, anchor="w")
+            minor_3rd_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
 
             fifth_cb = ctk.CTkCheckBox(
                 frame,
@@ -129,7 +134,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            fifth_cb.pack(pady=10, anchor="w")
+            fifth_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
 
             octave_cb = ctk.CTkCheckBox(
                 frame,
@@ -142,7 +147,7 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            octave_cb.pack(pady=10, anchor="w")
+            octave_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
 
         if self.context.gui.popup_manager:
             popup = self.context.gui.popup_manager.create_popup(
