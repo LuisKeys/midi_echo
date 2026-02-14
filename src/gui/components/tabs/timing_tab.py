@@ -34,7 +34,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         context.gui.handlers["AR"]._bpm_widget = bpm_widget
 
     # Division
-    div_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    div_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     div_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -99,7 +99,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm.register_element("content_elements", gate_widget)
 
     # External sync
-    sync_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    sync_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     sync_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,

@@ -29,7 +29,7 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
     )
 
     # Main container frame
-    selector_frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
+    selector_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("selector_bg"))
     selector_frame.pack(
         expand=True,
         fill="both",
@@ -38,11 +38,13 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
     )
 
     # Scrollable frame for the preset grid (handles overflow)
-    scroll_frame = ctk.CTkScrollableFrame(selector_frame, fg_color="#1F1F1F")
+    scroll_frame = ctk.CTkScrollableFrame(
+        selector_frame, fg_color=theme.get_color("selector_bg")
+    )
     scroll_frame.pack(expand=True, fill="both")
 
     # Grid frame inside scrollable frame
-    grid_frame = ctk.CTkFrame(scroll_frame, fg_color="#1F1F1F")
+    grid_frame = ctk.CTkFrame(scroll_frame, fg_color=theme.get_color("selector_bg"))
     grid_frame.pack(
         expand=True,
         fill="both",
@@ -102,13 +104,9 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
             # Update button colors to highlight current preset
             for btn, num in zip(buttons, range(preset_range_max + 1)):
                 if num == preset_num:
-                    fg_color = (
-                        theme.get_color_tuple("green")
-                        if hasattr(theme, "colors")
-                        else ("#00FF00", "#00FF00")
-                    )
+                    fg_color = theme.get_color_tuple("preset_highlight")
                 else:
-                    fg_color = ("#3D3D3D", "#3D3D3D")
+                    fg_color = theme.get_color_tuple("button_inactive")
                 btn.configure(fg_color=fg_color)
 
             logger.info(f"Preset {preset_num} selected (channel {ch})")
@@ -123,13 +121,9 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
         # Highlight current preset
         is_current = preset_num == current_program
         if is_current:
-            fg_color = (
-                theme.get_color_tuple("green")
-                if hasattr(theme, "colors")
-                else ("#00FF00", "#00FF00")
-            )
+            fg_color = theme.get_color_tuple("preset_highlight")
         else:
-            fg_color = ("#3D3D3D", "#3D3D3D")
+            fg_color = theme.get_color_tuple("button_inactive")
 
         btn = ctk.CTkButton(
             grid_frame,

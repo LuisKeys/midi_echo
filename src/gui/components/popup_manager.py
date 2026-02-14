@@ -176,7 +176,11 @@ class PopupMenu(ctk.CTkFrame):
             height: Popup height
         """
         super().__init__(
-            parent, fg_color="#2A2A2A", corner_radius=0, width=width, height=height
+            parent,
+            fg_color=popup_manager.theme.get_color("frame_bg"),
+            corner_radius=0,
+            width=width,
+            height=height,
         )
 
         self.parent = parent
@@ -201,7 +205,11 @@ class PopupMenu(ctk.CTkFrame):
     def _create_layout(self) -> None:
         """Create popup layout."""
         # Top bar with title and close button
-        top_frame = ctk.CTkFrame(self, fg_color="#2A2A2A", corner_radius=0)
+        top_frame = ctk.CTkFrame(
+            self,
+            fg_color=self.popup_manager.theme.get_color("frame_bg"),
+            corner_radius=0,
+        )
         top_frame.pack(
             fill="x",
             padx=LayoutSpacing.CONTAINER_PADX,
@@ -212,7 +220,7 @@ class PopupMenu(ctk.CTkFrame):
             top_frame,
             text=self.title_text,
             font=("Arial", 32, "bold"),
-            text_color="#FFFFFF",
+            text_color=self.popup_manager.theme.get_color("text_white"),
         )
         title_label.pack(side="left", fill="x", expand=True)
         self.popup_manager.register_element("title_label", title_label)
@@ -221,9 +229,9 @@ class PopupMenu(ctk.CTkFrame):
             top_frame,
             text="✕",
             font=("Arial", 8, "bold"),
-            fg_color="#555555",
-            text_color="white",
-            hover_color="#FF0000",
+            fg_color=self.popup_manager.theme.get_color("popup_grey"),
+            text_color=self.popup_manager.theme.get_color("text_white"),
+            hover_color=self.popup_manager.theme.get_color("red"),
             width=60,
             height=60,
             corner_radius=0,
@@ -233,7 +241,11 @@ class PopupMenu(ctk.CTkFrame):
         self.popup_manager.register_element("close_btn", close_btn)
 
         # Content frame
-        content_frame = ctk.CTkFrame(self, fg_color="#2A2A2A", corner_radius=0)
+        content_frame = ctk.CTkFrame(
+            self,
+            fg_color=self.popup_manager.theme.get_color("frame_bg"),
+            corner_radius=0,
+        )
         content_frame.pack(
             fill="both",
             expand=True,

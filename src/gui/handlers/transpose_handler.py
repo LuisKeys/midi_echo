@@ -93,13 +93,15 @@ class TransposeHandler(BaseHandler):
                     self.context.gui.theme.get_font_size("popup_value"),
                     "bold",
                 ),
-                text_color="#FFFFFF",
+                text_color=self.context.gui.theme.get_color("text_white"),
             )
             value_label.pack(pady=8)
             self._value_label = value_label
 
             # Buttons row
-            buttons_frame = ctk.CTkFrame(frame, fg_color="#2A2A2A")
+            buttons_frame = ctk.CTkFrame(
+                frame, fg_color=self.context.gui.theme.get_color("frame_bg")
+            )
             buttons_frame.pack(
                 fill="both",
                 expand=True,
@@ -117,7 +119,7 @@ class TransposeHandler(BaseHandler):
                     "bold",
                 ),
                 fg_color=self.context.gui.theme.get_color_tuple("aqua"),
-                text_color="black",
+                text_color=self.context.gui.theme.get_color("text_black"),
                 width=100,
                 height=100,
                 corner_radius=0,
@@ -169,7 +171,7 @@ class TransposeHandler(BaseHandler):
                     "bold",
                 ),
                 fg_color=self.context.gui.theme.get_color_tuple("cyan"),
-                text_color="black",
+                text_color=self.context.gui.theme.get_color("text_black"),
                 width=100,
                 height=100,
                 corner_radius=0,
@@ -193,7 +195,7 @@ class TransposeHandler(BaseHandler):
                     "bold",
                 ),
                 fg_color=self.context.gui.theme.get_color_tuple("aqua"),
-                text_color="black",
+                text_color=self.context.gui.theme.get_color("text_black"),
                 width=100,
                 height=100,
                 corner_radius=0,

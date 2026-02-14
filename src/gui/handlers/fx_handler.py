@@ -37,4 +37,8 @@ class FXHandler(BaseHandler):
                     fg_color=self.context.gui.theme.get_color_tuple(new_color)
                 )
             else:
-                btn.configure(fg_color=("#4A4A4A", "#4A4A4A"))
+                btn.configure(
+                    fg_color=self.context.gui.theme.get_color_tuple(
+                        "button_inactive_light"
+                    )
+                )

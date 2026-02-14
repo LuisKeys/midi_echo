@@ -23,6 +23,14 @@ class Theme:
         "red": "#FF0000",
         "bg": "#1A1A1A",
         "overlay": "#3D1A6D",
+        "frame_bg": "#2A2A2A",
+        "selector_bg": "#1F1F1F",
+        "preset_highlight": "#00FF00",
+        "button_inactive": "#3D3D3D",
+        "button_inactive_light": "#4A4A4A",
+        "text_white": "#FFFFFF",
+        "text_black": "#000000",
+        "popup_grey": "#555555",
     }
 
     # Base font sizes at reference window resolution (600x400)

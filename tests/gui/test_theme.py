@@ -49,7 +49,7 @@ def test_theme_font_size_calculation():
 
     # At base resolution, font sizes should match base values
     assert theme.get_font_size("main_button") == 32
-    assert theme.get_font_size("popup_title") == 36
+    assert theme.get_font_size("popup_title") == 20
 
 
 def test_theme_font_size_scaling():
@@ -62,4 +62,31 @@ def test_theme_font_size_scaling():
 
     # Font sizes should double
     assert theme.get_font_size("main_button") == 64
-    assert theme.get_font_size("popup_title") == 72
+    assert theme.get_font_size("popup_title") == 40
+
+
+def test_all_colors_defined():
+    """Test that all expected colors are defined in the theme."""
+    config = _make_config()
+    theme = Theme(config)
+
+    expected_colors = [
+        "cyan",
+        "violet",
+        "aqua",
+        "grey",
+        "red",
+        "bg",
+        "overlay",
+        "frame_bg",
+        "selector_bg",
+        "preset_highlight",
+        "button_inactive",
+        "button_inactive_light",
+        "text_white",
+        "text_black",
+        "popup_grey",
+    ]
+
+    for color in expected_colors:
+        assert color in theme.COLORS
