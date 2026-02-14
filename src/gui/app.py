@@ -116,7 +116,14 @@ class MidiGui(ctk.CTk):
                 self.handlers["OC"].on_button_press,
                 self.handlers["OC"].on_button_long_press,
             ),
-            ButtonSpec("SC", 0, 3, "aqua", self.handlers["SC"].on_button_press),
+            ButtonSpec(
+                "SC",
+                0,
+                3,
+                "aqua",
+                self.handlers["SC"].on_button_press,
+                self.handlers["SC"].on_button_long_press,
+            ),
             # Row 1
             ButtonSpec(
                 "AR",

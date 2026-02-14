@@ -3,6 +3,7 @@ import logging
 import time
 from src.midi.arp.state_validator import ArpState
 from src.midi.message_wrapper import MidiMessageWrapper
+from src.midi.scales import ScaleType, snap_note_to_scale
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,8 @@ class MidiProcessor:
         self.octave = 0
         self.fx_enabled = False
         self.scale_enabled = False
+        self.scale_root = 0  # 0-11, default C
+        self.scale_type = ScaleType.MAJOR
         # Backwards-compatible boolean flag
         self.arp_enabled = False
         # Full arpeggiator state container
@@ -53,6 +56,16 @@ class MidiProcessor:
             return original_msg
 
         new_msg = original_msg.copy()
+
+        # Apply scale snapping for input notes before arp processing
+        if (
+            self.scale_enabled
+            and new_msg.type in ["note_on", "note_off", "aftertouch", "polytouch"]
+            and not is_arp
+        ):
+            new_msg.note = snap_note_to_scale(
+                new_msg.note, self.scale_root, self.scale_type
+            )
 
         # Handle arpeggiator input notes (only real input, not arp-generated)
         if self.arp_enabled and new_msg.type in ["note_on", "note_off"] and not is_arp:
