@@ -72,6 +72,7 @@ class ButtonPanel:
             fg_color=color,
             text_color=self.theme.get_color("button_text"),
             hover_color=color,
+            hover=False,
             corner_radius=0,
             command=cmd,
         )
