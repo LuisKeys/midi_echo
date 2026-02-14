@@ -220,7 +220,7 @@ class PopupMenu(ctk.CTkFrame):
             top_frame,
             text=self.title_text,
             font=("Arial", 32, "bold"),
-            text_color=self.popup_manager.theme.get_color("text_white"),
+            text_color=self.popup_manager.theme.get_color("text_black"),
         )
         title_label.pack(side="left", fill="x", expand=True)
         self.popup_manager.register_element("title_label", title_label)
@@ -230,7 +230,7 @@ class PopupMenu(ctk.CTkFrame):
             text="✕",
             font=("Arial", 8, "bold"),
             fg_color=self.popup_manager.theme.get_color("popup_grey"),
-            text_color=self.popup_manager.theme.get_color("text_white"),
+            text_color=self.popup_manager.theme.get_color("text_black"),
             hover_color=self.popup_manager.theme.get_color("red"),
             width=60,
             height=60,

@@ -93,7 +93,7 @@ class TransposeHandler(BaseHandler):
                     self.context.gui.theme.get_font_size("popup_value"),
                     "bold",
                 ),
-                text_color=self.context.gui.theme.get_color("text_white"),
+                text_color=self.context.gui.theme.get_color("text_black"),
             )
             value_label.pack(pady=8)
             self._value_label = value_label

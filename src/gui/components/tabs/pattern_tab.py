@@ -20,7 +20,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
         state.pattern.accents = [False] * 12
 
     # Pattern grid
-    grid_frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
+    grid_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("selector_bg"))
     grid_frame.pack(
         expand=True,
         fill="both",
@@ -44,7 +44,10 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 btn.configure(font=("Arial", font_size))
 
             held_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
         except Exception:
             pass  # Widget might be destroyed
@@ -57,13 +60,24 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
         """Refresh UI elements to match current state."""
         for i, btn in enumerate(buttons):
             btn.configure(
-                fg_color="#00FF00" if state.pattern.mask[i] else ("#333333", "#333333")
+                fg_color=(
+                    theme.get_color("preset_highlight")
+                    if state.pattern.mask[i]
+                    else (
+                        theme.get_color("button_inactive"),
+                        theme.get_color("button_inactive"),
+                    )
+                ),
+                text_color=theme.get_color("text_black"),
             )
         for i, btn in enumerate(accent_buttons):
             btn.configure(
                 fg_color=(
-                    "#FFFF00" if state.pattern.accents[i] else ("#555555", "#555555")
-                )
+                    theme.get_color("preset_highlight")
+                    if state.pattern.accents[i]
+                    else (theme.get_color("popup_grey"), theme.get_color("popup_grey"))
+                ),
+                text_color=theme.get_color("text_black"),
             )
         # Update held notes
         held_text = (
@@ -72,7 +86,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             else "None"
         )
         held_label.configure(
-            text=f"Held Notes: {held_text}", width=theme.get_label_width(), anchor="e"
+            text=f"Held Notes: {held_text}", width=theme.get_label_width(), anchor="e", text_color=theme.get_color("text_black")
         )
 
     def make_toggle(i: int):
@@ -103,11 +117,19 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
         for c in range(4):
             idx = r * 4 + c
             text = str(idx + 1)
-            fg = "#00FF00" if state.pattern.mask[idx] else ("#333333", "#333333")
+            fg = (
+                theme.get_color("preset_highlight")
+                if state.pattern.mask[idx]
+                else (
+                    theme.get_color("button_inactive"),
+                    theme.get_color("button_inactive"),
+                )
+            )
             btn = ctk.CTkButton(
                 grid_frame,
                 text=text,
                 fg_color=fg,
+                text_color=theme.get_color("text_black"),
                 corner_radius=0,
                 command=make_toggle(idx),
             )
@@ -124,11 +146,16 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     for r in range(3):
         for c in range(4):
             idx = r * 4 + c
-            fg = "#FFFF00" if state.pattern.accents[idx] else ("#555555", "#555555")
+            fg = (
+                theme.get_color("preset_highlight")
+                if state.pattern.accents[idx]
+                else (theme.get_color("popup_grey"), theme.get_color("popup_grey"))
+            )
             btn = ctk.CTkButton(
                 grid_frame,
                 text="A",
                 fg_color=fg,
+                text_color=theme.get_color("text_black"),
                 corner_radius=0,
                 command=make_accent_toggle(idx),
             )
@@ -142,7 +169,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             accent_buttons.append(btn)
 
     # Held notes display
-    held_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    held_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     held_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -155,7 +182,11 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
         else "None"
     )
     held_label = ctk.CTkLabel(
-        held_frame, text=f"Held Notes: {held_text}", font=("Arial", 14), anchor="e"
+        held_frame,
+        text=f"Held Notes: {held_text}",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
     )
     held_label.configure(width=theme.get_label_width())
     held_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)

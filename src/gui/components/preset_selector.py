@@ -107,7 +107,9 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
                     fg_color = theme.get_color_tuple("preset_highlight")
                 else:
                     fg_color = theme.get_color_tuple("button_inactive")
-                btn.configure(fg_color=fg_color)
+                btn.configure(
+                    fg_color=fg_color, text_color=theme.get_color("text_black")
+                )
 
             logger.info(f"Preset {preset_num} selected (channel {ch})")
 
@@ -129,6 +131,7 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
             grid_frame,
             text=str(preset_num),
             fg_color=fg_color,
+            text_color=theme.get_color("text_black"),
             corner_radius=0,
             height=50,
             command=make_preset_button(preset_num),

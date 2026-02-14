@@ -28,9 +28,9 @@ def test_theme_color_retrieval():
     config = _make_config()
     theme = Theme(config)
 
-    assert theme.get_color("cyan") == "#00FFFF"
-    assert theme.get_color("violet") == "#8A2BE2"
-    assert theme.get_color("red") == "#FF0000"
+    assert theme.get_color("cyan") == "#B3E5FC"
+    assert theme.get_color("violet") == "#F8BBD9"
+    assert theme.get_color("red") == "#FFCDD2"
 
 
 def test_theme_color_tuple():
@@ -39,7 +39,7 @@ def test_theme_color_tuple():
     theme = Theme(config)
 
     color_tuple = theme.get_color_tuple("cyan")
-    assert color_tuple == ("#00FFFF", "#00FFFF")
+    assert color_tuple == ("#B3E5FC", "#B3E5FC")
 
 
 def test_theme_font_size_calculation():

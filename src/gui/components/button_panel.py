@@ -70,7 +70,7 @@ class ButtonPanel:
             text=spec.text,
             font=("Arial", self.theme.get_font_size("main_button"), "bold"),
             fg_color=color,
-            text_color="black",
+            text_color=self.theme.get_color("text_black"),
             hover_color=color,
             corner_radius=0,
             command=cmd,

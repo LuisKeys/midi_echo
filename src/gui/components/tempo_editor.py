@@ -15,11 +15,15 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
     pm = context.gui.popup_manager
     state = getattr(context.processor, "arp_state", None)
     if state is None:
-        lbl = ctk.CTkLabel(parent, text="No arpeggiator state found.")
+        lbl = ctk.CTkLabel(
+            parent,
+            text="No arpeggiator state found.",
+            text_color=theme.get_color("text_black"),
+        )
         lbl.pack()
         return
 
-    frame = ctk.CTkFrame(parent, fg_color="#1F1F1F")
+    frame = ctk.CTkFrame(parent, fg_color=theme.get_color("selector_bg"))
     frame.pack(
         expand=True,
         fill="both",
@@ -27,7 +31,12 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         pady=LayoutSpacing.CONTAINER_PADY,
     )
 
-    label = ctk.CTkLabel(frame, text=f"BPM: {state.timing.bpm}", font=("Arial", 20))
+    label = ctk.CTkLabel(
+        frame,
+        text=f"BPM: {state.timing.bpm}",
+        font=("Arial", 20),
+        text_color=theme.get_color("text_black"),
+    )
     label.pack(pady=(8, 12))
 
     def on_change(val):
@@ -56,7 +65,9 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
     def update_font_sizes():
         font_size = theme.get_font_size("label_medium")
 
-        label.configure(font=("Arial", font_size))
+        label.configure(
+            font=("Arial", font_size), text_color=theme.get_color("text_black")
+        )
         btn.configure(font=("Arial", theme.get_font_size("label_small")))
 
     frame.update_font_sizes = update_font_sizes

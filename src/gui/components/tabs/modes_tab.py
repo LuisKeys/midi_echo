@@ -12,12 +12,18 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm = context.gui.popup_manager
 
     # Mode
-    mode_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    mode_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     mode_frame.pack(
         fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
     )
 
-    mode_label = ctk.CTkLabel(mode_frame, text="Mode:", font=("Arial", 14), anchor="e")
+    mode_label = ctk.CTkLabel(
+        mode_frame,
+        text="Mode:",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
+    )
     mode_label.configure(width=theme.get_label_width())
     mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -52,7 +58,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm.register_element("content_elements", oct_widget)
 
     # Octave direction
-    dir_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    dir_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     dir_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -60,7 +66,11 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     )
 
     dir_label = ctk.CTkLabel(
-        dir_frame, text="Octave Direction:", font=("Arial", 14), anchor="e"
+        dir_frame,
+        text="Octave Direction:",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
     )
     dir_label.configure(width=theme.get_label_width())
     dir_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -77,7 +87,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     dir_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Reset mode
-    reset_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    reset_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     reset_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -85,7 +95,11 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     )
 
     reset_label = ctk.CTkLabel(
-        reset_frame, text="Reset Mode:", font=("Arial", 14), anchor="e"
+        reset_frame,
+        text="Reset Mode:",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
     )
     reset_label.configure(width=theme.get_label_width())
     reset_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -108,15 +122,24 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             mode_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
             mode_menu.configure(font=("Arial", font_size))
             dir_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
             dir_menu.configure(font=("Arial", font_size))
             reset_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
             reset_menu.configure(font=("Arial", font_size))
         except Exception:

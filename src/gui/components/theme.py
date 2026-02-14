@@ -16,21 +16,21 @@ class Theme:
 
     # Color definitions
     COLORS = {
-        "cyan": "#00FFFF",
-        "violet": "#8A2BE2",
-        "aqua": "#7FFFD4",
-        "grey": "#E8E8E8",
-        "red": "#FF0000",
-        "bg": "#1A1A1A",
-        "overlay": "#3D1A6D",
-        "frame_bg": "#2A2A2A",
-        "selector_bg": "#1F1F1F",
-        "preset_highlight": "#00FF00",
-        "button_inactive": "#3D3D3D",
-        "button_inactive_light": "#4A4A4A",
+        "cyan": "#B3E5FC",
+        "violet": "#F8BBD9",
+        "aqua": "#C8E6C9",
+        "grey": "#F5F5F5",
+        "red": "#FFCDD2",
+        "bg": "#A3A3a3",
+        "overlay": "#E8F5E8",
+        "frame_bg": "#A3A3a3",
+        "selector_bg": "#E0F2F1",
+        "preset_highlight": "#A3A3a3",
+        "button_inactive": "#B0BEC5",
+        "button_inactive_light": "#CFD8DC",
         "text_white": "#FFFFFF",
-        "text_black": "#000000",
-        "popup_grey": "#555555",
+        "text_black": "#424242",
+        "popup_grey": "#B0BEC5",
     }
 
     # Base font sizes at reference window resolution (600x400)

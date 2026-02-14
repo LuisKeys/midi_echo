@@ -126,7 +126,10 @@ class ArpHandler(BaseHandler):
             btn.configure(fg_color=color_tuple, hover_color=color_tuple)
         else:
             logger.debug("update_ui: setting disabled color")
-            disabled_color = ("#4A4A4A", "#4A4A4A")
+            disabled_color = (
+                self.context.gui.theme.get_color("button_inactive_light"),
+                self.context.gui.theme.get_color("button_inactive_light"),
+            )
             btn.configure(fg_color=disabled_color, hover_color=disabled_color)
 
         # Force UI update

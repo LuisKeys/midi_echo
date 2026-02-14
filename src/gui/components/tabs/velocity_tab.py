@@ -12,13 +12,17 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm = context.gui.popup_manager
 
     # Mode
-    mode_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    mode_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     mode_frame.pack(
         fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
     )
 
     mode_label = ctk.CTkLabel(
-        mode_frame, text="Velocity Mode:", font=("Arial", 14), anchor="e"
+        mode_frame,
+        text="Velocity Mode:",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
     )
     mode_label.configure(width=theme.get_label_width())
     mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -60,7 +64,10 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             mode_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
             vel_mode_menu.configure(font=("Arial", font_size))
         except Exception:

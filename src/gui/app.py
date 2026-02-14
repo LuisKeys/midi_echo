@@ -30,7 +30,7 @@ class MidiGui(ctk.CTk):
             context: AppContext for dependency injection
             config: AppConfig with configuration
         """
-        ctk.set_appearance_mode("dark")
+        ctk.set_appearance_mode("light")
         super().__init__()
 
         self.context = context

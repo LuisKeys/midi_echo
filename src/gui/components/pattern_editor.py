@@ -21,7 +21,11 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
     """
     state = getattr(context.processor, "arp_state", None)
     if state is None:
-        lbl = ctk.CTkLabel(parent, text="No arpeggiator state found.")
+        lbl = ctk.CTkLabel(
+            parent,
+            text="No arpeggiator state found.",
+            text_color=theme.get_color("text_black"),
+        )
         lbl.pack()
         return
 
@@ -40,7 +44,9 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
     if hasattr(tabview, "_segmented_button"):
         # Increase font size for tabs
         tab_font_size = theme.get_font_size("tab_text")
-        tabview._segmented_button.configure(font=("Arial", tab_font_size))
+        tabview._segmented_button.configure(
+            font=("Arial", tab_font_size), text_color=theme.get_color("text_black")
+        )
 
     # Register tabview for font scaling
     if hasattr(parent.master, "popup_manager"):

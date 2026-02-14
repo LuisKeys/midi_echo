@@ -22,7 +22,9 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         theme=None,
         label_width=None,
     ):
-        super().__init__(parent, fg_color="#2A2A2A")
+        super().__init__(
+            parent, fg_color=theme.get_color("frame_bg") if theme else "#F5F5F5"
+        )
         self.min_val = min_val
         self.max_val = max_val
         self.step = step
@@ -32,7 +34,13 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.current_val = initial_val
 
         # Label
-        self.label = ctk.CTkLabel(self, text=label_text, font=("Arial", 14), anchor="e")
+        self.label = ctk.CTkLabel(
+            self,
+            text=label_text,
+            font=("Arial", 14),
+            anchor="e",
+            text_color=theme.get_color("text_black") if theme else None,
+        )
         if self.label_width is not None:
             self.label.configure(width=self.label_width)
         self.label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -50,7 +58,11 @@ class IncrementDecrementWidget(ctk.CTkFrame):
 
         # Value display
         self.value_label = ctk.CTkLabel(
-            self, text=str(self.current_val), font=("Arial", 16), anchor="center"
+            self,
+            text=str(self.current_val),
+            font=("Arial", 16),
+            anchor="center",
+            text_color=theme.get_color("text_black") if theme else None,
         )
         if self.theme:
             self.value_label.configure(width=self.theme.get_value_width())
@@ -69,7 +81,12 @@ class IncrementDecrementWidget(ctk.CTkFrame):
 
         # Suffix label
         if suffix:
-            self.suffix_label = ctk.CTkLabel(self, text=suffix, font=("Arial", 14))
+            self.suffix_label = ctk.CTkLabel(
+                self,
+                text=suffix,
+                font=("Arial", 14),
+                text_color=theme.get_color("text_black") if theme else None,
+            )
             self.suffix_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
         # Tap button
@@ -105,7 +122,11 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         btn_font_size = self.theme.get_font_size("increment_button")
 
         # Update label in single configure call
-        label_config = {"font": ("Arial", label_font_size), "anchor": "e"}
+        label_config = {
+            "font": ("Arial", label_font_size),
+            "anchor": "e",
+            "text_color": self.theme.get_color("text_black"),
+        }
         if self.label_width is not None:
             label_config["width"] = self.label_width
         self.label.configure(**label_config)
@@ -115,13 +136,17 @@ class IncrementDecrementWidget(ctk.CTkFrame):
             font=("Arial", value_font_size),
             width=self.theme.get_value_width(),
             anchor="center",
+            text_color=self.theme.get_color("text_black"),
         )
 
         for btn in [self.minus_btn, self.plus_btn]:
             btn.configure(font=("Arial", btn_font_size))
 
         if hasattr(self, "suffix_label"):
-            self.suffix_label.configure(font=("Arial", label_font_size))
+            self.suffix_label.configure(
+                font=("Arial", label_font_size),
+                text_color=self.theme.get_color("text_black"),
+            )
 
         if hasattr(self, "tap_btn"):
             self.tap_btn.configure(font=("Arial", label_font_size))
@@ -219,7 +244,7 @@ class SquareDropdown(ctk.CTkFrame):
             height: Height of the dropdown
             **kwargs: Additional arguments to pass to CTkFrame
         """
-        super().__init__(parent, fg_color="#555555", corner_radius=0, **kwargs)
+        super().__init__(parent, fg_color="#B0BEC5", corner_radius=0, **kwargs)
 
         self.values = values
         self.variable = variable
@@ -272,7 +297,7 @@ class SquareDropdown(ctk.CTkFrame):
         self._dropdown_window.attributes("-topmost", True)
 
         # Create frame for items
-        frame = ctk.CTkFrame(self._dropdown_window, fg_color="#2A2A2A", corner_radius=0)
+        frame = ctk.CTkFrame(self._dropdown_window, fg_color="#F5F5F5", corner_radius=0)
         frame.pack(fill="both", expand=True)
 
         # Add buttons for each value

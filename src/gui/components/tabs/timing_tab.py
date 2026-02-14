@@ -42,7 +42,11 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     )
 
     div_label = ctk.CTkLabel(
-        div_frame, text="Division:", font=("Arial", 14), anchor="e"
+        div_frame,
+        text="Division:",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
     )
     div_label.configure(width=theme.get_label_width())
     div_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -113,6 +117,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         variable=sync_var,
         command=lambda: setattr(state, "external_sync", sync_var.get()),
         font=("Arial", 14),
+        text_color=theme.get_color("text_black"),
     )
     sync_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -123,10 +128,15 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             div_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
             div_menu.configure(font=("Arial", font_size))
-            sync_check.configure(font=("Arial", font_size))
+            sync_check.configure(
+                font=("Arial", font_size), text_color=theme.get_color("text_black")
+            )
         except Exception:
             pass  # Widget might be destroyed
 

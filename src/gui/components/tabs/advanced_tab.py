@@ -12,13 +12,17 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm = context.gui.popup_manager
 
     # Latch
-    latch_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    latch_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     latch_frame.pack(
         fill="x", padx=LayoutSpacing.CONTAINER_PADX, pady=LayoutSpacing.CONTAINER_PADY
     )
 
     latch_label = ctk.CTkLabel(
-        latch_frame, text="Latch:", font=("Arial", 14), anchor="e"
+        latch_frame,
+        text="Latch:",
+        font=("Arial", 14),
+        anchor="e",
+        text_color=theme.get_color("text_black"),
     )
     latch_label.configure(width=theme.get_label_width())
     latch_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -35,7 +39,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     latch_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Enable toggle
-    enable_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    enable_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     enable_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -49,11 +53,12 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         variable=enable_var,
         command=lambda: setattr(state, "enabled", enable_var.get()),
         font=("Arial", 14),
+        text_color=theme.get_color("text_black"),
     )
     enable_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Save/Load
-    preset_frame = ctk.CTkFrame(parent, fg_color="#2A2A2A")
+    preset_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     preset_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -87,10 +92,15 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             latch_label.configure(
-                font=("Arial", font_size), width=theme.get_label_width(), anchor="e"
+                font=("Arial", font_size),
+                width=theme.get_label_width(),
+                anchor="e",
+                text_color=theme.get_color("text_black"),
             )
             latch_menu.configure(font=("Arial", font_size))
-            enable_check.configure(font=("Arial", font_size))
+            enable_check.configure(
+                font=("Arial", font_size), text_color=theme.get_color("text_black")
+            )
             save_btn.configure(font=("Arial", font_size))
             load_btn.configure(font=("Arial", font_size))
         except Exception:
