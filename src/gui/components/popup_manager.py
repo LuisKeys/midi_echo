@@ -81,7 +81,7 @@ class PopupManager:
         self.active_popup = popup
 
         # Clear transitioning flag after a short delay
-        self.parent.after(150, lambda: setattr(self, "_transitioning", False))
+        self.parent.after(200, lambda: setattr(self, "_transitioning", False))
 
         return popup
 
@@ -205,7 +205,7 @@ class PopupManager:
         monitor_frame.lift()
 
         # Clear transitioning flag after a short delay
-        self.parent.after(150, lambda: setattr(self, "_transitioning", False))
+        self.parent.after(200, lambda: setattr(self, "_transitioning", False))
 
     def _close_current(self) -> None:
         """Close the currently active popup."""
@@ -316,9 +316,11 @@ class PopupMenu(ctk.CTkFrame):
             width=60,
             height=60,
             corner_radius=0,
-            command=self.close,
+            command=lambda: None,  # Disabled, we use binding instead
         )
         close_btn.pack(side="right")
+        # Bind to ButtonRelease to prevent propagation to elements below
+        close_btn.bind("<ButtonRelease-1>", self._on_close_click, add="+")
         self.popup_manager.register_element("close_btn", close_btn)
 
         # Content frame
@@ -383,6 +385,21 @@ class PopupMenu(ctk.CTkFrame):
                         pass  # Element might have been destroyed
         except Exception:
             pass  # Popup might be in invalid state
+
+    def _on_close_click(self, event) -> str:
+        """Handle close button click and prevent propagation."""
+        self._close_with_propagation_stop()
+        return "break"  # Stop event propagation
+
+    def _close_with_propagation_stop(self) -> None:
+        """Close popup and prevent event propagation to underlying elements."""
+        # Set transitioning flag to block any button clicks
+        self.popup_manager._transitioning = True
+        self.close()
+        # Keep blocking for longer to ensure event is fully consumed
+        self.popup_manager.parent.after(
+            300, lambda: setattr(self.popup_manager, "_transitioning", False)
+        )
 
     def close(self) -> None:
         """Close the popup."""

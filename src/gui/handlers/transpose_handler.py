@@ -25,10 +25,23 @@ class TransposeHandler(BaseHandler):
     def on_button_press(self) -> None:
         """Show transpose popup."""
         if self.context.gui:
+            # Don't open new popup if one is transitioning
+            if (
+                self.context.gui.popup_manager
+                and self.context.gui.popup_manager._transitioning
+            ):
+                return
             self._show_transpose_popup()
 
     def on_button_long_press(self) -> None:
         """Reset transpose to 0 on long press."""
+        # Don't handle long press if popup is transitioning
+        if (
+            self.context.gui
+            and self.context.gui.popup_manager
+            and self.context.gui.popup_manager._transitioning
+        ):
+            return
         if self.context.processor:
             self.context.processor.transpose = 0
             self.update_ui()
