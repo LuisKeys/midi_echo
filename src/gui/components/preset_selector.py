@@ -53,7 +53,7 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
     )
 
     buttons = []
-    num_cols = 8  # 8 columns for preset buttons
+    num_cols = 10  # 10 columns for preset buttons
     num_rows = (
         preset_range_max + 1 + num_cols - 1
     ) // num_cols  # Calculate needed rows
@@ -69,7 +69,7 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
         try:
             if not selector_frame.winfo_exists():
                 return
-            font_size = theme.get_font_size("label_small")
+            font_size = theme.get_font_size("label_medium")
 
             for btn in buttons:
                 btn.configure(font=("Arial", font_size))
@@ -129,9 +129,10 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
 
         btn = ctk.CTkButton(
             grid_frame,
-            text=str(preset_num),
+            text=str(preset_num + 1),
             fg_color=fg_color,
             text_color=theme.get_color("text_black"),
+            font=("Arial", theme.get_font_size("label_medium")),
             corner_radius=0,
             height=50,
             command=make_preset_button(preset_num),
