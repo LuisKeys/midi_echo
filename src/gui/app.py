@@ -54,7 +54,7 @@ class MidiGui(ctk.CTk):
         screen_height = self.winfo_screenheight()
         self.geometry(f"{screen_width}x{screen_height}+0+0")
         self.lift()
-        self.attributes("-topmost", True)
+        # self.attributes("-topmost", True)
         self.focus()
 
         # Setup components
@@ -98,11 +98,27 @@ class MidiGui(ctk.CTk):
     def _create_buttons(self) -> None:
         """Create all buttons for the interface."""
         button_specs = [
-            # Row 0
+            # Row 0 - Main buttons
+            ButtonSpec(
+                "SC",
+                0,
+                0,
+                "aqua",
+                self.handlers["SC"].on_button_press,
+                self.handlers["SC"].on_button_long_press,
+            ),
+            ButtonSpec(
+                "AR",
+                0,
+                1,
+                "aqua",
+                self.handlers["AR"].on_button_press,
+                self.handlers["AR"].on_button_long_press,
+            ),
             ButtonSpec(
                 "HZ",
                 0,
-                0,
+                2,
                 "violet",
                 self.handlers["HZ"].on_button_press,
                 self.handlers["HZ"].on_button_long_press,
@@ -110,35 +126,19 @@ class MidiGui(ctk.CTk):
             ButtonSpec(
                 "TR",
                 0,
-                1,
+                3,
                 "aqua",
                 self.handlers["TR"].on_button_press,
                 self.handlers["TR"].on_button_long_press,
             ),
+            # Row 1 - Supporting buttons
             ButtonSpec(
                 "OC",
-                0,
-                2,
-                "aqua",
-                self.handlers["OC"].on_button_press,
-                self.handlers["OC"].on_button_long_press,
-            ),
-            ButtonSpec(
-                "SC",
-                0,
-                3,
-                "aqua",
-                self.handlers["SC"].on_button_press,
-                self.handlers["SC"].on_button_long_press,
-            ),
-            # Row 1
-            ButtonSpec(
-                "AR",
                 1,
                 0,
                 "aqua",
-                self.handlers["AR"].on_button_press,
-                self.handlers["AR"].on_button_long_press,
+                self.handlers["OC"].on_button_press,
+                self.handlers["OC"].on_button_long_press,
             ),
             ButtonSpec(
                 "CH",
