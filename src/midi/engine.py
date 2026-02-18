@@ -10,8 +10,9 @@ logger = logging.getLogger(__name__)
 class MidiEngine:
     """Core engine to handle async MIDI message routing."""
 
-    def __init__(self, processor: MidiProcessor):
+    def __init__(self, processor: MidiProcessor, event_log=None):
         self.processor = processor
+        self.event_log = event_log
         self.queue = None
         self.inputs = []
         self.output = None
@@ -22,6 +23,13 @@ class MidiEngine:
     def _callback(self, msg, port_name):
         """Thread-safe callback to push messages into the async queue."""
         if self._loop and self._loop.is_running() and self.queue:
+            # Log incoming event
+            if self.event_log:
+                channel = getattr(msg, "channel", 0)
+                self._loop.call_soon_threadsafe(
+                    self.event_log.add_event, "in", msg, channel
+                )
+
             wrapped_msg = MidiMessageWrapper(msg, is_arp=False, port=port_name)
             self._loop.call_soon_threadsafe(self.queue.put_nowait, wrapped_msg)
 

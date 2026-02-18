@@ -45,8 +45,12 @@ class PanicHandler(BaseHandler):
             )
 
     def on_button_long_press(self) -> None:
-        """No special action on long press."""
-        pass
+        """Open the event monitor on long press."""
+        if not self.context.gui or not self.context.event_log:
+            return
+
+        logger.info("ST long pressed - opening event monitor")
+        self.context.gui.popup_manager.show_event_monitor(self.context.event_log)
 
     def update_ui(self) -> None:
         """No persistent UI update needed."""

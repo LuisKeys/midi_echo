@@ -9,6 +9,7 @@ from src.gui.context import AppContext
 from src.midi.ports import PortManager
 from src.midi.processor import MidiProcessor
 from src.midi.engine import MidiEngine
+from src.midi.event_log import EventLog
 from src.gui.app import MidiGui
 
 # Load environment variables
@@ -68,8 +69,13 @@ async def main():
         logger.error("No valid input ports found.")
         return
 
-    processor = MidiProcessor(verbose=config.verbose, config=config)
-    engine = MidiEngine(processor)
+    # Create event log for monitoring
+    event_log = EventLog(max_events=50)
+
+    processor = MidiProcessor(
+        verbose=config.verbose, config=config, event_log=event_log
+    )
+    engine = MidiEngine(processor, event_log=event_log)
 
     # Create event loop for MIDI engine
     event_loop = asyncio.new_event_loop()
@@ -80,6 +86,7 @@ async def main():
         engine=engine,
         processor=processor,
         event_loop=event_loop,
+        event_log=event_log,
     )
 
     # Create ArpEngine and attach to context (engine runs in event_loop)

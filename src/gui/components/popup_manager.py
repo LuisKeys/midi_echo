@@ -152,6 +152,87 @@ class PopupManager:
         """Check if a popup is currently open."""
         return self.active_popup is not None
 
+    def show_event_monitor(self, event_log) -> None:
+        """Show the event monitor in a modal window.
+
+        Args:
+            event_log: EventLog instance to display
+        """
+        from .event_monitor import EventMonitor
+
+        # Set transitioning flag
+        self._transitioning = True
+
+        # Close any existing popup
+        if self.active_popup:
+            self._close_current()
+
+        # Calculate dimensions
+        self.parent.update_idletasks()
+        width = int(self.parent.winfo_width() * 0.9)
+        height = int(self.parent.winfo_height() * 0.85)
+
+        # Create frame for the monitor
+        monitor_frame = ctk.CTkFrame(
+            self.parent,
+            fg_color=self.theme.get_color("frame_bg"),
+            corner_radius=10,
+            width=width,
+            height=height,
+        )
+        monitor_frame.pack_propagate(False)
+
+        # Add the event monitor widget
+        event_monitor = EventMonitor(monitor_frame, event_log, self.theme)
+        event_monitor.pack(fill="both", expand=True)
+
+        # Store reference for cleanup
+        self.active_popup = monitor_frame
+        self._monitor_widget = event_monitor
+
+        # Add update_font_sizes method to monitor_frame so popup_manager can call it
+        def monitor_update_fonts():
+            if event_monitor.winfo_exists():
+                event_monitor.update_font_sizes()
+
+        monitor_frame.update_font_sizes = monitor_update_fonts
+
+        # Create overlay
+        self._create_overlay()
+
+        # Position the frame
+        monitor_frame.place(relx=0.5, rely=0.5, anchor="center")
+        monitor_frame.lift()
+
+        # Clear transitioning flag after a short delay
+        self.parent.after(150, lambda: setattr(self, "_transitioning", False))
+
+    def _close_current(self) -> None:
+        """Close the currently active popup."""
+        if self.active_popup:
+            self._transitioning = True
+            try:
+                # Clean up event monitor if it exists
+                if hasattr(self, "_monitor_widget") and self._monitor_widget:
+                    self._monitor_widget.cleanup()
+                    self._monitor_widget = None
+
+                if self.overlay:
+                    self.overlay.hide()
+
+                self.active_popup.place_forget()
+                self.active_popup.destroy()
+            except Exception:
+                pass
+
+            self.active_popup = None
+            self.popup_elements = {
+                "title_label": None,
+                "close_btn": None,
+                "content_elements": [],
+            }
+            self._transitioning = False
+
 
 class PopupMenu(ctk.CTkFrame):
     """A modal popup menu overlay."""
@@ -161,7 +242,7 @@ class PopupMenu(ctk.CTkFrame):
         parent: ctk.CTk,
         title: str,
         content_builder: Callable,
-        popup_manager: PopupManager,
+        popup_manager: "PopupManager",
         width: int,
         height: int,
     ):

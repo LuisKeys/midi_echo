@@ -149,7 +149,14 @@ class MidiGui(ctk.CTk):
                 self.handlers["CH"].on_button_long_press,
             ),
             ButtonSpec("PS", 1, 2, "cyan", self.handlers["PS"].on_button_press),
-            ButtonSpec("ST", 1, 3, "grey", self.handlers["ST"].on_button_press),
+            ButtonSpec(
+                "ST",
+                1,
+                3,
+                "grey",
+                self.handlers["ST"].on_button_press,
+                self.handlers["ST"].on_button_long_press,
+            ),
         ]
 
         for spec in button_specs:

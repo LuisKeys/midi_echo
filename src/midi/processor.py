@@ -12,9 +12,10 @@ logger = logging.getLogger(__name__)
 class MidiProcessor:
     """Handles MIDI message transformation and routing logic."""
 
-    def __init__(self, verbose: bool = False, config: object = None):
+    def __init__(self, verbose: bool = False, config: object = None, event_log=None):
         self.verbose = verbose
         self.config = config
+        self.event_log = event_log
         # State for live performance
         self.output_channel = None  # None means keep original
         self.transpose = 0
@@ -102,6 +103,11 @@ class MidiProcessor:
         # Apply channel mapping
         if self.output_channel is not None and hasattr(new_msg, "channel"):
             new_msg.channel = self.output_channel
+
+        # Log outgoing event
+        if new_msg and self.event_log:
+            channel = getattr(new_msg, "channel", 0)
+            self.event_log.add_event("out", new_msg, channel)
 
         return new_msg
 

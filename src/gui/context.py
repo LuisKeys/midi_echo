@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from src.gui.app import MidiGui
     from src.midi.engine import MidiEngine
     from src.midi.processor import MidiProcessor
+    from src.midi.event_log import EventLog
     from src.config import AppConfig
 
 
@@ -26,6 +27,7 @@ class AppContext:
         app_config: "AppConfig" = None,
         arp_engine: object = None,
         harmony_engine: object = None,
+        event_log: "EventLog" = None,
     ):
         """Initialize application context.
 
@@ -35,6 +37,7 @@ class AppContext:
             processor: The MIDI message processor
             event_loop: The asyncio event loop for async operations
             app_config: The application configuration
+            event_log: The event log for monitoring MIDI messages
         """
         self.gui = gui
         self.engine = engine
@@ -43,6 +46,7 @@ class AppContext:
         self.arp_engine = arp_engine
         self.harmony_engine = harmony_engine
         self.app_config = app_config
+        self.event_log = event_log
 
     def update_engine(self, engine: "MidiEngine") -> None:
         """Update the engine reference after initialization."""
