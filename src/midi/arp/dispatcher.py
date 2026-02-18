@@ -41,9 +41,13 @@ class MidiDispatcher:
                 "note_on", note=note, velocity=velocity, channel=channel
             )
             wrapped_message = MidiMessageWrapper(message, is_arp=True)
-            return self._enqueue_message(wrapped_message)
+            result = self._enqueue_message(wrapped_message)
+            logger.info(
+                f"AR dispatcher sending note_on: note={note} velocity={velocity} enqueued={result}"
+            )
+            return result
         except Exception as e:
-            logger.debug(f"Error creating note_on message: {e}")
+            logger.error(f"Error creating note_on message: {e}")
             return False
 
     def send_note_off(self, note: int, velocity: int = 0, channel: int = 0) -> bool:
@@ -77,22 +81,33 @@ class MidiDispatcher:
             True if successfully enqueued, False on error.
         """
         try:
+            # Check if queue exists first
+            queue = getattr(self.midi_engine, "queue", None)
+            if not queue:
+                logger.error(f"MIDI engine queue not initialized yet")
+                return False
+
             # Try to use event loop for thread-safe enqueueing
             event_loop = getattr(self.midi_engine, "_loop", None)
             if event_loop:
                 try:
-                    event_loop.call_soon_threadsafe(
-                        self.midi_engine.queue.put_nowait, message
+                    event_loop.call_soon_threadsafe(queue.put_nowait, message)
+                    logger.debug(
+                        f"AR message enqueued via event_loop.call_soon_threadsafe"
                     )
-                except RuntimeError:
+                except RuntimeError as e:
                     # Event loop may be closed or on wrong thread; fall back
-                    self.midi_engine.queue.put_nowait(message)
+                    logger.warning(
+                        f"Event loop call_soon_threadsafe failed, falling back to direct enqueue: {e}"
+                    )
+                    queue.put_nowait(message)
             else:
                 # No event loop; enqueue directly
-                self.midi_engine.queue.put_nowait(message)
+                logger.debug(f"No event loop found on midi_engine, enqueueing directly")
+                queue.put_nowait(message)
             return True
         except Exception as e:
-            logger.debug(f"Failed to enqueue MIDI message: {e}")
+            logger.error(f"Failed to enqueue MIDI message: {e}")
             return False
 
     def has_queue(self) -> bool:

@@ -66,6 +66,9 @@ class ArpEngine:
         self._running = True
         self._step = 0
         self._position = 0
+        logger.info(
+            f"ArpEngine starting: state.enabled={self.state.enabled}, held_notes={sorted(self.state.held_notes) if self.state else []}"
+        )
         self._task = self._loop.create_task(self._timing_loop())
 
     def stop(self) -> None:
@@ -77,6 +80,7 @@ class ArpEngine:
         self._running = False
         if self._task and not self._task.done():
             self._task.cancel()
+        logger.info("ArpEngine stopped")
 
     async def _timing_loop(self) -> None:
         """Main timing loop that drives step generation.
@@ -89,6 +93,7 @@ class ArpEngine:
 
         Runs until stop() is called or state.enabled becomes False.
         """
+        logger.info(f"ArpEngine timing loop started")
         try:
             while self._running and self.state and self.state.enabled:
                 try:
@@ -175,8 +180,13 @@ class ArpEngine:
         """
         # Build expanded notes across octave range
         expanded_notes = self._build_expanded_notes()
+        pattern_notes = list(self.state.pattern.notes) if self.state.pattern else []
 
         if not expanded_notes:
+            if self._step % 8 == 0:  # Log every 8 steps to avoid spam
+                logger.debug(
+                    f"ArpEngine step {self._step}: no expanded_notes (pattern.notes={pattern_notes})"
+                )
             return
 
         # Get the mode strategy for current mode

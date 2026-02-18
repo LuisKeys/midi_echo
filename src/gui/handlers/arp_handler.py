@@ -32,6 +32,10 @@ class ArpHandler(BaseHandler):
                 self.context.processor.arp_enabled
             )
 
+        # Clear AR cache when toggling to prevent stale notes
+        if hasattr(self.context.processor, "clear_arp_cache"):
+            self.context.processor.clear_arp_cache()
+
         # Mutual exclusion: disable harmonizer when enabling arp
         if self.context.processor.arp_enabled:
             self.context.processor.harmonizer_enabled = False
