@@ -12,24 +12,27 @@ class HarmonyHandler(BaseHandler):
 
     def on_button_press(self) -> None:
         """Toggle harmonizer enabled state."""
-        if not self.context.processor or not self.context.app_config:
-            return
-
-        # Check if harmonizer ports are configured
-        chord_port = getattr(self.context.app_config, "harmonizer_chord_port", "")
-        melody_port = getattr(self.context.app_config, "harmonizer_melody_port", "")
-        if not chord_port or not melody_port:
-            logger.warning(
-                "Harmonizer ports not configured. Set HARMONIZER_CHORD_PORT and HARMONIZER_MELODY_PORT in .env"
-            )
+        if not self.context.processor:
             return
 
         self.context.processor.harmonizer_enabled = (
             not self.context.processor.harmonizer_enabled
         )
+        # Also sync the harmony_state.enabled
+        self.context.processor.harmony_state.enabled = (
+            self.context.processor.harmonizer_enabled
+        )
 
-        # Mutual exclusion: disable arp when enabling harmonizer
+        # Update the harmony engine's state as well
+        if hasattr(self.context, "harmony_engine") and self.context.harmony_engine:
+            self.context.harmony_engine.update_state(
+                self.context.processor.harmony_state
+            )
+
+        # When enabling harmonizer, auto-enable scale to constrain harmony to scale tones
         if self.context.processor.harmonizer_enabled:
+            self.context.processor.scale_enabled = True
+            # Mutual exclusion: disable arp when enabling harmonizer
             self.context.processor.arp_enabled = False
             if hasattr(self.context.processor, "arp_state"):
                 self.context.processor.arp_state.enabled = False
@@ -38,38 +41,43 @@ class HarmonyHandler(BaseHandler):
         # Update arp UI as well
         if hasattr(self.context.gui, "handlers") and "AR" in self.context.gui.handlers:
             self.context.gui.handlers["AR"].update_ui()
+        # Update scale UI as well to reflect auto-enable
+        if hasattr(self.context.gui, "handlers") and "SC" in self.context.gui.handlers:
+            self.context.gui.handlers["SC"].update_ui()
         logger.info(f"Harmonizer enabled: {self.context.processor.harmonizer_enabled}")
+        if self.context.processor.harmonizer_enabled:
+            logger.info("Scale auto-enabled with harmonizer")
 
     def _show_harmony_popup(self) -> None:
         """Create and show harmony type selection popup."""
 
-        def apply_selection():
-            selected_intervals = []
-            if major_3rd_var.get():
-                selected_intervals.append(4)
-            if minor_3rd_var.get():
-                selected_intervals.append(3)
-            if fifth_var.get():
-                selected_intervals.append(7)
-            if octave_var.get():
-                selected_intervals.append(12)
-
-            if selected_intervals:
-                self.context.processor.harmony_state.intervals = selected_intervals
-                # Update harmony generator
-                if (
-                    hasattr(self.context, "harmony_engine")
-                    and self.context.harmony_engine
-                ):
-                    self.context.harmony_engine.harmony_generator.set_intervals(
-                        selected_intervals
-                    )
-                logger.info(f"Harmony intervals set to: {selected_intervals}")
-            else:
-                logger.warning("No harmony intervals selected")
-
         def build_harmony_content(frame):
             import customtkinter as ctk
+
+            def apply_selection():
+                selected_intervals = []
+                if major_3rd_var.get():
+                    selected_intervals.append(4)
+                if minor_3rd_var.get():
+                    selected_intervals.append(3)
+                if fifth_var.get():
+                    selected_intervals.append(7)
+                if octave_var.get():
+                    selected_intervals.append(12)
+
+                if selected_intervals:
+                    self.context.processor.harmony_state.intervals = selected_intervals
+                    # Update harmony engine state
+                    if (
+                        hasattr(self.context, "harmony_engine")
+                        and self.context.harmony_engine
+                    ):
+                        self.context.harmony_engine.update_state(
+                            self.context.processor.harmony_state
+                        )
+                    logger.info(f"Harmony intervals set to: {selected_intervals}")
+                else:
+                    logger.warning("No harmony intervals selected")
 
             # Title
             title_label = ctk.CTkLabel(
@@ -84,8 +92,8 @@ class HarmonyHandler(BaseHandler):
             )
             title_label.pack(
                 pady=(
-                    theme.get_padding("popup_control"),
-                    theme.get_padding("popup_control_small"),
+                    self.context.gui.theme.get_padding("popup_control"),
+                    self.context.gui.theme.get_padding("popup_control_small"),
                 )
             )
 
@@ -108,7 +116,10 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            major_3rd_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
+            major_3rd_cb.pack(
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
+                anchor="w",
+            )
 
             minor_3rd_cb = ctk.CTkCheckBox(
                 frame,
@@ -121,7 +132,10 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            minor_3rd_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
+            minor_3rd_cb.pack(
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
+                anchor="w",
+            )
 
             fifth_cb = ctk.CTkCheckBox(
                 frame,
@@ -134,7 +148,10 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            fifth_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
+            fifth_cb.pack(
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
+                anchor="w",
+            )
 
             octave_cb = ctk.CTkCheckBox(
                 frame,
@@ -147,7 +164,10 @@ class HarmonyHandler(BaseHandler):
                 text_color=self.context.gui.theme.get_color("text_black"),
                 command=apply_selection,
             )
-            octave_cb.pack(pady=theme.get_padding("popup_control_small"), anchor="w")
+            octave_cb.pack(
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
+                anchor="w",
+            )
 
         if self.context.gui.popup_manager:
             popup = self.context.gui.popup_manager.create_popup(
@@ -164,23 +184,26 @@ class HarmonyHandler(BaseHandler):
 
     def update_ui(self) -> None:
         """Update button color based on harmonizer state."""
-        if (
-            not self.context.gui
-            or not self.context.processor
-            or not self.context.app_config
-        ):
+        if not self.context.gui or not self.context.processor:
             return
 
-        chord_port = getattr(self.context.app_config, "harmonizer_chord_port", "")
-        melody_port = getattr(self.context.app_config, "harmonizer_melody_port", "")
-        ports_configured = bool(chord_port and melody_port)
         # If arp is enabled, harmonizer cannot be enabled
         if self.context.processor.arp_enabled:
             self.context.processor.harmonizer_enabled = False
-        if not ports_configured:
-            # Ports not configured - show disabled state
-            color_name = "button_inactive"
-        elif self.context.processor.harmonizer_enabled:
+            self.context.processor.harmony_state.enabled = False
+
+        # Sync harmony_state.enabled with processor.harmonizer_enabled
+        self.context.processor.harmony_state.enabled = (
+            self.context.processor.harmonizer_enabled
+        )
+
+        # Update the harmony engine's state to stay in sync
+        if hasattr(self.context, "harmony_engine") and self.context.harmony_engine:
+            self.context.harmony_engine.update_state(
+                self.context.processor.harmony_state
+            )
+
+        if self.context.processor.harmonizer_enabled:
             color_name = "violet"
         else:
             color_name = "button_inactive_light"

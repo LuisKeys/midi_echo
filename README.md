@@ -7,13 +7,13 @@ A comprehensive MIDI arpeggiator and harmony processor with a modern GUI, design
 ### Core Functionality
 - **Real-time MIDI Processing**: Processes MIDI messages from input devices and routes them to output devices with transformations
 - **Arpeggiator Engine**: Generates rhythmic patterns from held notes with customizable timing, velocity, and modes
-- **Harmony Engine**: Creates chord progressions and harmonic accompaniments based on input melodies
+- **Harmony Engine**: Creates harmonic accompaniment by generating scale-snapped intervals from input melodies
 - **Multi-channel Support**: Handles multiple MIDI channels for complex setups
 
 ### Main Menu Features
 The main interface consists of 8 primary control buttons arranged in a 2x4 grid:
 
-- **HZ (Harmony)**: Toggle harmony generation mode for automatic chord accompaniment
+- **HZ (Harmony)**: Toggle harmony generation based on the current scale. Automatically enables the scale when activated and adds harmonic intervals to performed notes
 - **TR (Transpose)**: Adjust pitch transposition in semitones (-12 to +12 range)
 - **OC (Octave)**: Shift notes by octaves for different registers
 - **SC (Scale)**: Select musical scale for note filtering and quantization
@@ -68,8 +68,9 @@ The application follows a modular architecture designed for maintainability and 
     - `timing.py`: Rhythm and tempo handling
     - `note_producer.py`: Note generation algorithms
   - `harmony/`: Harmony generation subsystem
-    - `engine.py`: Harmonic accompaniment logic
-    - `chord_analyzer.py`: Chord detection and analysis
+    - `engine.py`: Scale-based harmonic accompaniment logic
+    - `harmony_generator.py`: Generates harmony notes snapped to scale
+    - `voice_manager.py`: Manages polyphonic harmony voices
 
 ### Key Design Patterns
 - **Dependency Injection**: AppContext provides shared dependencies
@@ -139,10 +140,6 @@ HOLD_INCREMENT_RATE=50
 # Preset configuration
 DEFAULT_PRESET=0
 PRESET_RANGE_MAX=127
-
-# Harmony configuration (optional)
-HARMONIZER_CHORD_PORT=chord_input
-HARMONIZER_MELODY_PORT=melody_input
 ```
 
 ### Finding MIDI Ports

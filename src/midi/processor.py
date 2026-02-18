@@ -77,11 +77,7 @@ class MidiProcessor:
 
         # Handle harmonizer
         if self.harmonizer_enabled and self.harmony_engine and not is_arp:
-            if port == getattr(self.config, "harmonizer_chord_port", ""):
-                # Chord input
-                self._update_chord_notes(new_msg)
-            else:
-                # Melody input
+            if new_msg.type in ["note_on", "note_off"]:
                 self._process_melody_note(new_msg)
 
         # Handle arpeggiator input notes (only real input, not arp-generated)
@@ -146,18 +142,11 @@ class MidiProcessor:
                 self.arp_state.timing.bpm = int(max(20, min(300, bpm)))
         self.last_clock_time = current_time
 
-    def _update_chord_notes(self, msg: mido.Message) -> None:
-        """Update held notes for chord analyzer."""
-        if msg.type == "note_on" and msg.velocity > 0:
-            self.harmony_engine.chord_analyzer.held_notes.add(msg.note)
-        elif msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
-            self.harmony_engine.chord_analyzer.held_notes.discard(msg.note)
-
     def _process_melody_note(self, msg: mido.Message) -> None:
         """Process melody note for harmonizer."""
         if msg.type == "note_on" and msg.velocity > 0:
             self.harmony_engine.process_melody_note_on(
-                msg.note, msg.velocity, msg.channel
+                msg.note, msg.velocity, msg.channel, self.scale_root, self.scale_type
             )
         elif msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
             self.harmony_engine.process_melody_note_off(msg.note, msg.channel)

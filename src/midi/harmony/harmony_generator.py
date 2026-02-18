@@ -1,10 +1,11 @@
-"""Harmony generator for creating harmony notes based on melody and chord context."""
+"""Harmony generator for creating harmony notes based on melody and scale context."""
 
-from typing import List, Optional, Tuple
+from typing import List
+from ..scales import ScaleType, snap_note_to_scale
 
 
 class HarmonyGenerator:
-    """Generates harmony notes for a given melody note using chord context."""
+    """Generates harmony notes for a given melody note using scale context."""
 
     def __init__(self, intervals: List[int]):
         self.intervals = intervals
@@ -14,30 +15,26 @@ class HarmonyGenerator:
         self.intervals = [max(1, min(24, i)) for i in intervals]
 
     def generate_harmony(
-        self, melody_note: int, chord_root: Optional[int], chord_quality: str
+        self, melody_note: int, scale_root: int, scale_type: ScaleType
     ) -> List[int]:
-        """Generate harmony notes for the melody note.
+        """Generate harmony notes for the melody note, snapped to scale.
 
         Args:
             melody_note: The input melody note (0-127)
-            chord_root: Root note of the chord (0-127) or None
-            chord_quality: "major", "minor", or "unknown"
+            scale_root: Root of the scale (0-11)
+            scale_type: ScaleType enum
 
         Returns:
-            List of harmony note pitches (0-127), clamped to valid range.
+            List of harmony note pitches (0-127), snapped to scale tones.
         """
-        if chord_root is None:
-            return []
-
         harmony_notes = []
         for interval in self.intervals:
-            # Adjust interval based on chord quality if needed
-            adjusted_interval = interval
-            if chord_quality == "minor" and interval == 4:  # major 3rd in minor chord
-                adjusted_interval = 3  # minor 3rd
+            # Generate harmony note at the interval
+            harmony_note = melody_note + interval
 
-            harmony_note = melody_note + adjusted_interval
+            # Snap to scale
             if 0 <= harmony_note <= 127:
-                harmony_notes.append(harmony_note)
+                snapped_note = snap_note_to_scale(harmony_note, scale_root, scale_type)
+                harmony_notes.append(snapped_note)
 
         return harmony_notes

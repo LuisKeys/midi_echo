@@ -1,19 +1,17 @@
-"""Harmony engine coordinating chord analysis, harmony generation, and voice management."""
+"""Harmony engine coordinating harmony generation and voice management."""
 
-from .chord_analyzer import ChordAnalyzer
 from .harmony_generator import HarmonyGenerator
 from .voice_manager import VoiceManager
 from .state import HarmonyState
 from ..arp.dispatcher import MidiDispatcher
-from typing import Optional
+from ..scales import ScaleType
 
 
 class HarmonyEngine:
-    """Main harmony engine coordinating all components."""
+    """Main harmony engine coordinating harmony generation and voice management."""
 
     def __init__(self, dispatcher: MidiDispatcher):
         self.state = HarmonyState()
-        self.chord_analyzer = ChordAnalyzer()
         self.harmony_generator = HarmonyGenerator(self.state.intervals)
         self.voice_manager = VoiceManager(self.state.voice_limit)
         self.dispatcher = dispatcher
@@ -24,18 +22,28 @@ class HarmonyEngine:
         self.harmony_generator.set_intervals(state.intervals)
         self.voice_manager.set_max_voices(state.voice_limit)
 
-    def update_chord_context(self, held_notes: set[int]) -> None:
-        """Update the chord analyzer with current held notes."""
-        self.chord_analyzer.update_held_notes(held_notes)
+    def process_melody_note_on(
+        self,
+        note: int,
+        velocity: int,
+        channel: int,
+        scale_root: int,
+        scale_type: ScaleType,
+    ) -> None:
+        """Process a melody note-on, generate and send harmony notes.
 
-    def process_melody_note_on(self, note: int, velocity: int, channel: int) -> None:
-        """Process a melody note-on, generate and send harmony notes."""
+        Args:
+            note: The melody note (0-127)
+            velocity: MIDI velocity
+            channel: MIDI channel
+            scale_root: Root of the scale (0-11)
+            scale_type: ScaleType enum
+        """
         if not self.state.enabled:
             return
 
-        chord_root, chord_quality = self.chord_analyzer.get_chord_context()
         harmony_notes = self.harmony_generator.generate_harmony(
-            note, chord_root, chord_quality
+            note, scale_root, scale_type
         )
         allocated_harmonies = self.voice_manager.allocate_voices(note, harmony_notes)
 
@@ -52,4 +60,4 @@ class HarmonyEngine:
 
         # Send harmony note-offs
         for h_note in harmony_notes:
-            self.dispatcher.send_note_off(h_note, channel)
+            self.dispatcher.send_note_off(h_note, 0, channel)
