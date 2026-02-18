@@ -7,12 +7,17 @@ from ..scales import ScaleType, snap_note_to_scale
 class HarmonyGenerator:
     """Generates harmony notes for a given melody note using scale context."""
 
-    def __init__(self, intervals: List[int]):
-        self.intervals = intervals
+    def __init__(self, intervals_above: List[int], intervals_below: List[int] = None):
+        self.intervals_above = intervals_above
+        self.intervals_below = intervals_below or []
 
-    def set_intervals(self, intervals: List[int]) -> None:
-        """Update the harmony intervals."""
-        self.intervals = [max(1, min(24, i)) for i in intervals]
+    def set_intervals_above(self, intervals: List[int]) -> None:
+        """Update the upward harmony intervals."""
+        self.intervals_above = [max(1, min(24, i)) for i in intervals]
+
+    def set_intervals_below(self, intervals: List[int]) -> None:
+        """Update the downward harmony intervals."""
+        self.intervals_below = [max(1, min(24, i)) for i in intervals]
 
     def generate_harmony(
         self, melody_note: int, scale_root: int, scale_type: ScaleType
@@ -28,11 +33,17 @@ class HarmonyGenerator:
             List of harmony note pitches (0-127), snapped to scale tones.
         """
         harmony_notes = []
-        for interval in self.intervals:
-            # Generate harmony note at the interval
-            harmony_note = melody_note + interval
 
-            # Snap to scale
+        # Generate upward harmonies
+        for interval in self.intervals_above:
+            harmony_note = melody_note + interval
+            if 0 <= harmony_note <= 127:
+                snapped_note = snap_note_to_scale(harmony_note, scale_root, scale_type)
+                harmony_notes.append(snapped_note)
+
+        # Generate downward harmonies
+        for interval in self.intervals_below:
+            harmony_note = melody_note - interval
             if 0 <= harmony_note <= 127:
                 snapped_note = snap_note_to_scale(harmony_note, scale_root, scale_type)
                 harmony_notes.append(snapped_note)

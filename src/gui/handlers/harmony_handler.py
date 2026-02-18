@@ -49,129 +49,229 @@ class HarmonyHandler(BaseHandler):
             logger.info("Scale auto-enabled with harmonizer")
 
     def _show_harmony_popup(self) -> None:
-        """Create and show harmony type selection popup."""
+        """Create and show harmony type selection popup with 2-column layout."""
 
         def build_harmony_content(frame):
             import customtkinter as ctk
 
             def apply_selection():
-                selected_intervals = []
-                if major_3rd_var.get():
-                    selected_intervals.append(4)
-                if minor_3rd_var.get():
-                    selected_intervals.append(3)
-                if fifth_var.get():
-                    selected_intervals.append(7)
-                if octave_var.get():
-                    selected_intervals.append(12)
+                selected_intervals_above = []
+                if major_3rd_above_var.get():
+                    selected_intervals_above.append(4)
+                if minor_3rd_above_var.get():
+                    selected_intervals_above.append(3)
+                if fifth_above_var.get():
+                    selected_intervals_above.append(7)
+                if octave_above_var.get():
+                    selected_intervals_above.append(12)
 
-                if selected_intervals:
-                    self.context.processor.harmony_state.intervals = selected_intervals
-                    # Update harmony engine state
-                    if (
-                        hasattr(self.context, "harmony_engine")
-                        and self.context.harmony_engine
-                    ):
-                        self.context.harmony_engine.update_state(
-                            self.context.processor.harmony_state
-                        )
-                    logger.info(f"Harmony intervals set to: {selected_intervals}")
-                else:
-                    logger.warning("No harmony intervals selected")
+                selected_intervals_below = []
+                if major_3rd_below_var.get():
+                    selected_intervals_below.append(4)
+                if minor_3rd_below_var.get():
+                    selected_intervals_below.append(3)
+                if fifth_below_var.get():
+                    selected_intervals_below.append(7)
+                if octave_below_var.get():
+                    selected_intervals_below.append(12)
 
-            # Title
-            title_label = ctk.CTkLabel(
-                frame,
-                text="Select Harmony Intervals:",
-                font=(
-                    "Arial",
-                    self.context.gui.theme.get_font_size("popup_label"),
-                    "bold",
-                ),
-                text_color=self.context.gui.theme.get_color("text_black"),
-            )
-            title_label.pack(
-                pady=(
-                    self.context.gui.theme.get_padding("popup_control"),
-                    self.context.gui.theme.get_padding("popup_control_small"),
+                # Update state
+                self.context.processor.harmony_state.intervals_above = (
+                    selected_intervals_above
                 )
+                self.context.processor.harmony_state.intervals_below = (
+                    selected_intervals_below
+                )
+                self.context.processor.harmony_state.velocity_percentage = int(
+                    velocity_slider.get()
+                )
+
+                # Update harmony engine state
+                if (
+                    hasattr(self.context, "harmony_engine")
+                    and self.context.harmony_engine
+                ):
+                    self.context.harmony_engine.update_state(
+                        self.context.processor.harmony_state
+                    )
+                logger.info(
+                    f"Harmony intervals above: {selected_intervals_above}, "
+                    f"below: {selected_intervals_below}, "
+                    f"velocity: {self.context.processor.harmony_state.velocity_percentage}%"
+                )
+
+            # Get current state
+            current_intervals_above = (
+                self.context.processor.harmony_state.intervals_above
             )
+            current_intervals_below = (
+                self.context.processor.harmony_state.intervals_below
+            )
+            current_velocity = self.context.processor.harmony_state.velocity_percentage
 
-            # Checkboxes for intervals
-            current_intervals = self.context.processor.harmony_state.intervals
+            # Get theme font sizes
+            theme = self.context.gui.theme
+            section_font_size = theme.get_font_size("label_small")
+            checkbox_font_size = theme.get_font_size("label_small")
 
-            major_3rd_var = ctk.BooleanVar(value=4 in current_intervals)
-            minor_3rd_var = ctk.BooleanVar(value=3 in current_intervals)
-            fifth_var = ctk.BooleanVar(value=7 in current_intervals)
-            octave_var = ctk.BooleanVar(value=12 in current_intervals)
+            # Create a columns frame for above/below side by side
+            columns_frame = ctk.CTkFrame(frame, fg_color="transparent")
+            columns_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
-            major_3rd_cb = ctk.CTkCheckBox(
-                frame,
-                text="Major 3rd (+4 semitones)",
-                variable=major_3rd_var,
-                font=(
-                    "Arial",
-                    self.context.gui.theme.get_font_size("popup_button"),
-                ),
-                text_color=self.context.gui.theme.get_color("text_black"),
+            # --- LEFT COLUMN: ABOVE ROOT ---
+            above_frame = ctk.CTkFrame(columns_frame, fg_color="transparent")
+            above_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
+
+            above_label = ctk.CTkLabel(
+                above_frame,
+                text="Above Root:",
+                font=("Arial", section_font_size, "bold"),
+                text_color=theme.get_color("text_black"),
+            )
+            above_label.pack(pady=(0, 5), anchor="w")
+
+            major_3rd_above_var = ctk.BooleanVar(value=4 in current_intervals_above)
+            minor_3rd_above_var = ctk.BooleanVar(value=3 in current_intervals_above)
+            fifth_above_var = ctk.BooleanVar(value=7 in current_intervals_above)
+            octave_above_var = ctk.BooleanVar(value=12 in current_intervals_above)
+
+            major_3rd_above_cb = ctk.CTkCheckBox(
+                above_frame,
+                text="Major 3rd (+4)",
+                variable=major_3rd_above_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
-            major_3rd_cb.pack(
-                pady=self.context.gui.theme.get_padding("popup_control_small"),
-                anchor="w",
-            )
+            major_3rd_above_cb.pack(pady=2, anchor="w")
 
-            minor_3rd_cb = ctk.CTkCheckBox(
-                frame,
-                text="Minor 3rd (+3 semitones)",
-                variable=minor_3rd_var,
-                font=(
-                    "Arial",
-                    self.context.gui.theme.get_font_size("popup_button"),
-                ),
-                text_color=self.context.gui.theme.get_color("text_black"),
+            minor_3rd_above_cb = ctk.CTkCheckBox(
+                above_frame,
+                text="Minor 3rd (+3)",
+                variable=minor_3rd_above_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
-            minor_3rd_cb.pack(
-                pady=self.context.gui.theme.get_padding("popup_control_small"),
-                anchor="w",
-            )
+            minor_3rd_above_cb.pack(pady=2, anchor="w")
 
-            fifth_cb = ctk.CTkCheckBox(
-                frame,
-                text="5th (+7 semitones)",
-                variable=fifth_var,
-                font=(
-                    "Arial",
-                    self.context.gui.theme.get_font_size("popup_button"),
-                ),
-                text_color=self.context.gui.theme.get_color("text_black"),
+            fifth_above_cb = ctk.CTkCheckBox(
+                above_frame,
+                text="5th (+7)",
+                variable=fifth_above_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
-            fifth_cb.pack(
-                pady=self.context.gui.theme.get_padding("popup_control_small"),
-                anchor="w",
-            )
+            fifth_above_cb.pack(pady=2, anchor="w")
 
-            octave_cb = ctk.CTkCheckBox(
-                frame,
-                text="Octave (+12 semitones)",
-                variable=octave_var,
-                font=(
-                    "Arial",
-                    self.context.gui.theme.get_font_size("popup_button"),
-                ),
-                text_color=self.context.gui.theme.get_color("text_black"),
+            octave_above_cb = ctk.CTkCheckBox(
+                above_frame,
+                text="Octave (+12)",
+                variable=octave_above_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
-            octave_cb.pack(
-                pady=self.context.gui.theme.get_padding("popup_control_small"),
-                anchor="w",
+            octave_above_cb.pack(pady=2, anchor="w")
+
+            # --- RIGHT COLUMN: BELOW ROOT ---
+            below_frame = ctk.CTkFrame(columns_frame, fg_color="transparent")
+            below_frame.pack(side="right", fill="both", expand=True, padx=(5, 0))
+
+            below_label = ctk.CTkLabel(
+                below_frame,
+                text="Below Root:",
+                font=("Arial", section_font_size, "bold"),
+                text_color=theme.get_color("text_black"),
             )
+            below_label.pack(pady=(0, 5), anchor="w")
+
+            major_3rd_below_var = ctk.BooleanVar(value=4 in current_intervals_below)
+            minor_3rd_below_var = ctk.BooleanVar(value=3 in current_intervals_below)
+            fifth_below_var = ctk.BooleanVar(value=7 in current_intervals_below)
+            octave_below_var = ctk.BooleanVar(value=12 in current_intervals_below)
+
+            major_3rd_below_cb = ctk.CTkCheckBox(
+                below_frame,
+                text="Major 3rd (-4)",
+                variable=major_3rd_below_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
+                command=apply_selection,
+            )
+            major_3rd_below_cb.pack(pady=2, anchor="w")
+
+            minor_3rd_below_cb = ctk.CTkCheckBox(
+                below_frame,
+                text="Minor 3rd (-3)",
+                variable=minor_3rd_below_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
+                command=apply_selection,
+            )
+            minor_3rd_below_cb.pack(pady=2, anchor="w")
+
+            fifth_below_cb = ctk.CTkCheckBox(
+                below_frame,
+                text="5th (-7)",
+                variable=fifth_below_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
+                command=apply_selection,
+            )
+            fifth_below_cb.pack(pady=2, anchor="w")
+
+            octave_below_cb = ctk.CTkCheckBox(
+                below_frame,
+                text="Octave (-12)",
+                variable=octave_below_var,
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
+                command=apply_selection,
+            )
+            octave_below_cb.pack(pady=2, anchor="w")
+
+            # --- VELOCITY SECTION AT BOTTOM ---
+            separator = ctk.CTkFrame(frame, height=1, fg_color="gray50")
+            separator.pack(fill="x", padx=10, pady=(5, 8))
+
+            velocity_label = ctk.CTkLabel(
+                frame,
+                text="Velocity:",
+                font=("Arial", section_font_size, "bold"),
+                text_color=theme.get_color("text_black"),
+            )
+            velocity_label.pack(pady=(0, 5), anchor="w", padx=10)
+
+            velocity_frame = ctk.CTkFrame(frame, fg_color="transparent")
+            velocity_frame.pack(pady=(0, 10), padx=10, fill="x")
+
+            velocity_slider = ctk.CTkSlider(
+                velocity_frame,
+                from_=0,
+                to=200,
+                number_of_steps=41,
+                command=lambda v: (
+                    apply_selection(),
+                    velocity_value_label.configure(text=f"{int(float(v))}%"),
+                ),
+            )
+            velocity_slider.set(current_velocity)
+            velocity_slider.pack(side="left", fill="x", expand=True)
+
+            velocity_value_label = ctk.CTkLabel(
+                velocity_frame,
+                text=f"{current_velocity}%",
+                font=("Arial", checkbox_font_size),
+                text_color=theme.get_color("text_black"),
+                width=40,
+            )
+            velocity_value_label.pack(side="right", padx=(10, 0))
 
         if self.context.gui.popup_manager:
             popup = self.context.gui.popup_manager.create_popup(
-                "Harmony Selection", build_harmony_content, width=300, height=250
+                "Harmony Selection", build_harmony_content, width=380, height=300
             )
             popup.show()
 

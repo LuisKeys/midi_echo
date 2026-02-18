@@ -12,14 +12,17 @@ class HarmonyEngine:
 
     def __init__(self, dispatcher: MidiDispatcher):
         self.state = HarmonyState()
-        self.harmony_generator = HarmonyGenerator(self.state.intervals)
+        self.harmony_generator = HarmonyGenerator(
+            self.state.intervals_above, self.state.intervals_below
+        )
         self.voice_manager = VoiceManager(self.state.voice_limit)
         self.dispatcher = dispatcher
 
     def update_state(self, state: HarmonyState) -> None:
         """Update the harmony state and propagate to components."""
         self.state = state
-        self.harmony_generator.set_intervals(state.intervals)
+        self.harmony_generator.set_intervals_above(state.intervals_above)
+        self.harmony_generator.set_intervals_below(state.intervals_below)
         self.voice_manager.set_max_voices(state.voice_limit)
 
     def process_melody_note_on(
@@ -47,9 +50,15 @@ class HarmonyEngine:
         )
         allocated_harmonies = self.voice_manager.allocate_voices(note, harmony_notes)
 
+        # Scale harmony velocity based on percentage
+        harmony_velocity = int((velocity * self.state.velocity_percentage) / 100)
+        harmony_velocity = max(
+            0, min(127, harmony_velocity)
+        )  # Clamp to valid MIDI range
+
         # Send harmony note-ons
         for h_note in allocated_harmonies:
-            self.dispatcher.send_note_on(h_note, velocity, channel)
+            self.dispatcher.send_note_on(h_note, harmony_velocity, channel)
 
     def process_melody_note_off(self, note: int, channel: int) -> None:
         """Process a melody note-off, send harmony note-offs."""
