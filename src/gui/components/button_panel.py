@@ -17,6 +17,7 @@ class ButtonSpec:
     color_name: str
     command: Callable
     long_press_handler: Optional[Callable] = None
+    function_name: Optional[str] = None
 
 
 class ButtonPanel:
@@ -38,6 +39,7 @@ class ButtonPanel:
         self.parent = parent
         self.theme = theme
         self.buttons: Dict[str, ctk.CTkButton] = {}
+        self.button_frames: Dict[str, ctk.CTkFrame] = {}
 
         # Configure grid layout
         self.parent.grid_columnconfigure((0, 1, 2, 3), weight=1, uniform="equal")
@@ -65,8 +67,29 @@ class ButtonPanel:
         # so clicks don't also trigger the primary spec.command
         cmd = (lambda: None) if (on_press and on_release) else spec.command
 
-        btn = ctk.CTkButton(
+        # Create wrapper frame
+        wrapper_frame = ctk.CTkFrame(
             self.parent,
+            fg_color="transparent",
+            bg_color=self.theme.get_color("bg"),
+        )
+        wrapper_frame.grid(
+            row=spec.row,
+            column=spec.col,
+            padx=LayoutSpacing.MAIN_BUTTON_PADX,
+            pady=LayoutSpacing.MAIN_BUTTON_PADY,
+            sticky="nsew",
+        )
+        wrapper_frame.grid_propagate(False)
+
+        # Configure frame to have internal layout
+        wrapper_frame.grid_rowconfigure(0, weight=1)
+        wrapper_frame.grid_rowconfigure(0, weight=1)
+        wrapper_frame.grid_columnconfigure(0, weight=1)
+
+        # Create button
+        btn = ctk.CTkButton(
+            wrapper_frame,
             text=spec.text,
             font=("Arial", self.theme.get_font_size("main_button"), "bold"),
             fg_color=color,
@@ -76,18 +99,34 @@ class ButtonPanel:
             corner_radius=0,
             command=cmd,
         )
-
-        # Place button in grid
         btn.grid(
-            row=spec.row,
-            column=spec.col,
-            padx=LayoutSpacing.MAIN_BUTTON_PADX,
-            pady=LayoutSpacing.MAIN_BUTTON_PADY,
+            row=0,
+            column=0,
             sticky="nsew",
+            padx=0,
+            pady=0,
         )
 
-        # Store reference
+        # Create subtitle label if function_name is provided
+        if spec.function_name:
+            subtitle = ctk.CTkLabel(
+                wrapper_frame,
+                text=spec.function_name,
+                font=("Arial", 30, "bold"),
+                text_color=self.theme.get_color("button_text"),
+                fg_color=color,
+            )
+            subtitle.grid(
+                row=1,
+                column=0,
+                sticky="nsew",
+                padx=0,
+                pady=0,
+            )
+
+        # Store references
         self.buttons[spec.text] = btn
+        self.button_frames[spec.text] = wrapper_frame
 
         # Add long-press detection if handler provided
         if spec.long_press_handler:

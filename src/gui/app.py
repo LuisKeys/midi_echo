@@ -106,6 +106,7 @@ class MidiGui(ctk.CTk):
                 "aqua",
                 self.handlers["SC"].on_button_press,
                 self.handlers["SC"].on_button_long_press,
+                "Scale",
             ),
             ButtonSpec(
                 "AR",
@@ -114,6 +115,7 @@ class MidiGui(ctk.CTk):
                 "aqua",
                 self.handlers["AR"].on_button_press,
                 self.handlers["AR"].on_button_long_press,
+                "Arpeggiator",
             ),
             ButtonSpec(
                 "HZ",
@@ -122,6 +124,7 @@ class MidiGui(ctk.CTk):
                 "violet",
                 self.handlers["HZ"].on_button_press,
                 self.handlers["HZ"].on_button_long_press,
+                "Harmony",
             ),
             ButtonSpec(
                 "TR",
@@ -130,6 +133,7 @@ class MidiGui(ctk.CTk):
                 "aqua",
                 self.handlers["TR"].on_button_press,
                 self.handlers["TR"].on_button_long_press,
+                "Transpose",
             ),
             # Row 1 - Supporting buttons
             ButtonSpec(
@@ -139,6 +143,7 @@ class MidiGui(ctk.CTk):
                 "aqua",
                 self.handlers["OC"].on_button_press,
                 self.handlers["OC"].on_button_long_press,
+                "Octave",
             ),
             ButtonSpec(
                 "CH",
@@ -147,8 +152,16 @@ class MidiGui(ctk.CTk):
                 "cyan",
                 self.handlers["CH"].on_button_press,
                 self.handlers["CH"].on_button_long_press,
+                "Channel",
             ),
-            ButtonSpec("PS", 1, 2, "cyan", self.handlers["PS"].on_button_press),
+            ButtonSpec(
+                "PS",
+                1,
+                2,
+                "cyan",
+                self.handlers["PS"].on_button_press,
+                function_name="Preset",
+            ),
             ButtonSpec(
                 "ST",
                 1,
@@ -156,6 +169,7 @@ class MidiGui(ctk.CTk):
                 "grey",
                 self.handlers["ST"].on_button_press,
                 self.handlers["ST"].on_button_long_press,
+                "Panic Stop",
             ),
         ]
 
