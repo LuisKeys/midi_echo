@@ -25,9 +25,9 @@ class Lightbox(ctk.CTkFrame):
         super().__init__(parent, fg_color=color, corner_radius=0)
         self.command = command
 
-        # Bind click event
+        # Bind click event with propagation stop
         if self.command:
-            self.bind("<Button-1>", lambda e: self.command())
+            self.bind("<Button-1>", self._on_click)
 
     def show(self):
         """Display the lightbox covering the parent."""
@@ -37,3 +37,9 @@ class Lightbox(ctk.CTkFrame):
     def hide(self):
         """Remove the lightbox from view."""
         self.place_forget()
+
+    def _on_click(self, event):
+        """Handle click events and stop propagation."""
+        if self.command:
+            self.command()
+        return "break"  # Stop event propagation

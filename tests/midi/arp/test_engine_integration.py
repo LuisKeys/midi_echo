@@ -6,7 +6,7 @@ Tests the complete engine with all components working together.
 import asyncio
 import pytest
 from unittest.mock import Mock, MagicMock, AsyncMock
-from src.midi.arp.engine_refactored import ArpEngine
+from src.midi.arp.arp_engin import ArpEngine
 from src.midi.arp.state_validator import (
     ArpState,
     TimingConfig,

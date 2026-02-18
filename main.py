@@ -91,7 +91,7 @@ async def main():
 
     # Create ArpEngine and attach to context (engine runs in event_loop)
     try:
-        from src.midi.arp.engine_refactored import ArpEngine
+        from src.midi.arp.arp_engin import ArpEngine
 
         arp_engine = ArpEngine(processor.arp_state, engine, event_loop)
         context.arp_engine = arp_engine

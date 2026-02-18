@@ -96,7 +96,7 @@ class TransposeHandler(BaseHandler):
                 ),
                 text_color=self.context.gui.theme.get_color("text_black"),
             )
-            value_label.pack(pady=theme.get_padding("popup_control"))
+            value_label.pack(pady=self.context.gui.theme.get_padding("popup_control"))
             self._value_label = value_label
 
             # Buttons row
@@ -107,7 +107,7 @@ class TransposeHandler(BaseHandler):
                 fill="both",
                 expand=True,
                 padx=LayoutSpacing.CONTROL_BUTTON_PADX,
-                pady=theme.get_padding("popup_control_small"),
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
             )
 
             # Minus button
@@ -129,7 +129,7 @@ class TransposeHandler(BaseHandler):
             btn_minus.pack(
                 side="left",
                 padx=LayoutSpacing.CONTROL_BUTTON_PADX,
-                pady=theme.get_padding("popup_control_small"),
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
                 fill="both",
                 expand=True,
             )
@@ -181,7 +181,7 @@ class TransposeHandler(BaseHandler):
             btn_zero.pack(
                 side="left",
                 padx=LayoutSpacing.CONTROL_BUTTON_PADX,
-                pady=theme.get_padding("popup_control_small"),
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
                 fill="both",
                 expand=True,
             )
@@ -205,7 +205,7 @@ class TransposeHandler(BaseHandler):
             btn_plus.pack(
                 side="left",
                 padx=LayoutSpacing.CONTROL_BUTTON_PADX,
-                pady=theme.get_padding("popup_control_small"),
+                pady=self.context.gui.theme.get_padding("popup_control_small"),
                 fill="both",
                 expand=True,
             )

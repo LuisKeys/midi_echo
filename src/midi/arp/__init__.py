@@ -21,7 +21,7 @@ Import Examples:
     from src.midi.arp_state import ArpState
 """
 
-from .engine_refactored import ArpEngine
+from .arp_engin import ArpEngine
 from .state_validator import ArpState, TimingConfig, VelocityConfig, PatternConfig
 
 __all__ = ["ArpEngine", "ArpState", "TimingConfig", "VelocityConfig", "PatternConfig"]

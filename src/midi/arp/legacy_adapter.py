@@ -18,7 +18,7 @@ Usage (both work identically):
 """
 
 # Re-export all public names from the refactored modules
-from src.midi.arp.engine_refactored import ArpEngine  # noqa: F401
+from src.midi.arp.arp_engin import ArpEngine  # noqa: F401
 from src.midi.arp.state_validator import (  # noqa: F401
     ArpState,
     TimingConfig,

@@ -20,6 +20,6 @@ LEGACY CODE CAN STILL USE:
 """
 
 # Re-export from refactored module
-from src.midi.arp.engine_refactored import ArpEngine
+from src.midi.arp.arp_engin import ArpEngine
 
 __all__ = ["ArpEngine"]
