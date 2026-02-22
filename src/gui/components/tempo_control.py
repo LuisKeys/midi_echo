@@ -18,7 +18,7 @@ def create_tempo_control(
         context.set_global_tempo(value, source_widget=tempo_widget)
 
     def on_tap() -> None:
-        context.tap_tempo(source_widget=tempo_widget)
+        context.tap_tempo()
 
     tempo_widget = IncrementDecrementWidget(
         parent,

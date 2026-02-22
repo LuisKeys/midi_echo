@@ -154,6 +154,8 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         try:
             den = int(value)
             sequencer.set_time_signature(sequencer.state.time_signature_num, den)
+            if hasattr(time_sig_widget, "suffix_label"):
+                time_sig_widget.suffix_label.configure(text=f"/{den}")
         except:
             pass
 
@@ -365,7 +367,9 @@ def _update_button_states(context):
     if play_button:
         if sequencer.state.is_playing:
             play_button.configure(
-                fg_color=color("state_stop", "#101010"), text="Stop", state="normal"
+                fg_color=color("state_active", "#2A2A2A"),
+                text="Stop",
+                state="normal",
             )
         elif play_disabled:
             play_button.configure(
@@ -375,7 +379,7 @@ def _update_button_states(context):
             )
         else:
             play_button.configure(
-                fg_color=color("state_playing", "#101010"),
+                fg_color=color("state_active", "#2A2A2A"),
                 text="Play",
                 state="normal",
             )
@@ -383,7 +387,7 @@ def _update_button_states(context):
     if record_button:
         if sequencer.state.is_recording:
             record_button.configure(
-                fg_color=color("state_recording", "#131313"),
+                fg_color=color("state_active", "#2A2A2A"),
                 text="Stop Rec",
                 state="normal",
             )
@@ -395,7 +399,7 @@ def _update_button_states(context):
             )
         else:
             record_button.configure(
-                fg_color=color("state_default", "#0A0A0A"),
+                fg_color=color("state_active", "#2A2A2A"),
                 text="Record",
                 state="normal",
             )

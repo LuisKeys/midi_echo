@@ -72,7 +72,7 @@ class ArpHandler(BaseHandler):
         if not self.context:
             return
 
-        bpm = self.context.tap_tempo(source_widget=self._bpm_widget)
+        bpm = self.context.tap_tempo()
         if bpm is not None:
             logger.info(f"Tap tempo BPM set to {bpm}")
             self.update_ui()

@@ -68,9 +68,9 @@ class TransportControls(ctk.CTkFrame):
 
         # Metronome
         met_color = (
-            self.theme.get_color("state_active")
+            self.theme.get_color("state_metronome_on")
             if (sequencer and sequencer.state.metronome_enabled)
-            else self.theme.get_color("button_inactive")
+            else self.theme.get_color("state_metronome_off")
         )
         self.metronome_button = ctk.CTkButton(
             self,
@@ -166,12 +166,12 @@ class TransportControls(ctk.CTkFrame):
         # Metronome color
         if metronome_enabled:
             self.metronome_button.configure(
-                fg_color=self.theme.get_color("state_active"),
+                fg_color=self.theme.get_color("state_metronome_on"),
                 hover_color=self.theme.get_color("control_hover"),
             )
         else:
             self.metronome_button.configure(
-                fg_color=self.theme.get_color("button_inactive"),
+                fg_color=self.theme.get_color("state_metronome_off"),
                 hover_color=self.theme.get_color("control_pressed"),
             )
 

@@ -42,7 +42,7 @@ class Theme:
         "state_disabled": "#060606",
         "state_stop": "#101010",
         "state_warning": "#141414",
-        "state_metronome_on": "#101010",
+        "state_metronome_on": "#2A2A2A",
         "state_metronome_off": "#060606",
         "cyan": "#0A0A0A",
         "violet": "#0A0A0A",
