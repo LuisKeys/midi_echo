@@ -14,45 +14,51 @@ class Theme:
     - Theme-aware color tuples for customtkinter consistency
     """
 
-    # Matrix palette used for both modes: black fills, green borders/text
+    # Simplified 3-color palette: Green (accents), Black (backgrounds), DarkGreen (highlights)
+    GREEN = "#00FF66"
+    DARK_GREEN = "#006633"
+    BLACK = "#000000"
+
+    # Matrix palette mapping: preserve existing semantic keys but map them
+    # to only the three canonical colors so callers remain unchanged.
     MATRIX_COLORS = {
-        "matrix_green": "#00FF66",
-        "matrix_green_bright": "#66FF99",
-        "matrix_green_dim": "#00CC55",
-        "matrix_green_muted": "#008833",
-        "bg": "#000000",
-        "overlay": "#001A0A",
-        "frame_bg": "#050505",
-        "selector_bg": "#0A0A0A",
-        "preset_highlight": "#0F0F0F",
-        "text_white": "#66FF99",
-        "text_black": "#00FF66",
-        "button_text": "#00FF66",
-        "popup_grey": "#0B0B0B",
-        "border": "#00CC55",
-        "control_bg": "#0A0A0A",
-        "control_hover": "#030303",
-        "control_pressed": "#010101",
-        "button_inactive": "#060606",
-        "button_inactive_light": "#0B0B0B",
-        "state_default": "#0A0A0A",
-        "state_active": "#2A2A2A",
-        "state_playing": "#101010",
-        "state_recording": "#131313",
-        "state_disabled": "#060606",
-        "state_stop": "#101010",
-        "state_warning": "#141414",
-        "state_metronome_on": "#2A2A2A",
-        "state_metronome_off": "#060606",
-        "cyan": "#0A0A0A",
-        "violet": "#0A0A0A",
-        "aqua": "#0A0A0A",
-        "main_menu_button": "#0A0A0A",
-        "grey": "#0A0A0A",
-        "red": "#141414",
+        "matrix_green": GREEN,
+        "matrix_green_bright": GREEN,
+        "matrix_green_dim": GREEN,
+        "matrix_green_muted": GREEN,
+        "bg": BLACK,
+        "overlay": BLACK,
+        "frame_bg": BLACK,
+        "selector_bg": BLACK,
+        "preset_highlight": BLACK,
+        "text_white": GREEN,
+        "text_black": GREEN,
+        "button_text": GREEN,
+        "popup_grey": BLACK,
+        "border": GREEN,
+        "control_bg": BLACK,
+        "control_hover": BLACK,
+        "control_pressed": BLACK,
+        "button_inactive": BLACK,
+        "button_inactive_light": BLACK,
+        "state_default": BLACK,
+        "state_active": DARK_GREEN,
+        "state_playing": DARK_GREEN,
+        "state_recording": DARK_GREEN,
+        "state_disabled": BLACK,
+        "state_stop": BLACK,
+        "state_warning": DARK_GREEN,
+        "state_metronome_on": DARK_GREEN,
+        "state_metronome_off": BLACK,
+        "cyan": GREEN,
+        "violet": GREEN,
+        "aqua": GREEN,
+        "main_menu_button": BLACK,
+        "grey": BLACK,
+        "red": DARK_GREEN,
     }
 
-    # Keep light/dark keys for compatibility, but both resolve to matrix colors.
+    # Keep compatibility fields for any callers/tests expecting these names
     COLORS_LIGHT = MATRIX_COLORS
     COLORS_DARK = MATRIX_COLORS
 
@@ -84,7 +90,7 @@ class Theme:
             config: AppConfig instance with window dimensions and theme mode
         """
         self.config = config
-        self.mode = config.theme_mode
+        # Theme mode removed: theme is now a single, fixed 3-color palette.
         self.current_width = config.window_width
         self.current_height = config.window_height
 
@@ -97,8 +103,8 @@ class Theme:
         Returns:
             Hex color string
         """
-        colors = self.COLORS_LIGHT if self.mode == "light" else self.COLORS_DARK
-        return colors.get(name, "#000000")
+        # Always return the mapped color; fall back to BLACK
+        return self.MATRIX_COLORS.get(name, self.BLACK)
 
     def get_color_tuple(self, name: str) -> Tuple[str, str]:
         """Get a color as a tuple for customtkinter light/dark modes.
@@ -109,9 +115,9 @@ class Theme:
         Returns:
             Tuple of (light_mode_color, dark_mode_color)
         """
-        light_color = self.COLORS_LIGHT.get(name, "#000000")
-        dark_color = self.COLORS_DARK.get(name, "#000000")
-        return (light_color, dark_color)
+        # Return identical light/dark tuple for compatibility with customtkinter
+        color = self.MATRIX_COLORS.get(name, self.BLACK)
+        return (color, color)
 
     def get_font_size(self, element_type: str) -> int:
         """Calculate font size based on current window dimensions.

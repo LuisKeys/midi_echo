@@ -20,7 +20,6 @@ def _make_config():
         base_window_height=400,
         preset_range_max=127,
         default_preset=0,
-        theme_mode="dark",
     )
 
 
@@ -31,7 +30,7 @@ def test_theme_color_retrieval():
 
     assert theme.get_color("bg") == "#000000"
     assert theme.get_color("text_black") == "#00FF66"
-    assert theme.get_color("border") == "#00CC55"
+    assert theme.get_color("border") == "#00FF66"
 
 
 def test_theme_color_tuple():
@@ -40,7 +39,7 @@ def test_theme_color_tuple():
     theme = Theme(config)
 
     color_tuple = theme.get_color_tuple("border")
-    assert color_tuple == ("#00CC55", "#00CC55")
+    assert color_tuple == ("#00FF66", "#00FF66")
 
 
 def test_theme_font_size_calculation():

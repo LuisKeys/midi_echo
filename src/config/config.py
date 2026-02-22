@@ -37,7 +37,7 @@ class AppConfig:
     default_preset: int  # Default preset on startup (0-127)
 
     # Theme Configuration
-    theme_mode: str  # "light" or "dark"
+    # Theme Configuration removed: theme mode is fixed to simplified palette
 
     @classmethod
     def from_env(cls) -> "AppConfig":
@@ -56,5 +56,5 @@ class AppConfig:
             hold_increment_rate=int(os.getenv("HOLD_INCREMENT_RATE", "50")),
             preset_range_max=int(os.getenv("PRESET_RANGE_MAX", "127")),
             default_preset=int(os.getenv("DEFAULT_PRESET", "0")),
-            theme_mode=os.getenv("THEME_MODE", "light"),
+            # THEME_MODE deprecated/ignored; theme is simplified to three colors
         )

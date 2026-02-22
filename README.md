@@ -130,7 +130,7 @@ LIST_PORTS=false
 # UI Configuration
 WINDOW_WIDTH=800
 WINDOW_HEIGHT=600
-THEME_MODE=dark
+# THEME_MODE removed — theme simplified to three colors: GREEN, BLACK, DARK_GREEN
 
 # Performance settings
 SHORT_PRESS_THRESHOLD=200
