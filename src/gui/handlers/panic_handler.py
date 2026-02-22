@@ -64,5 +64,12 @@ class PanicHandler(BaseHandler):
         self.context.gui.popup_manager.show_event_monitor(self.context.event_log)
 
     def update_ui(self) -> None:
-        """No persistent UI update needed."""
-        pass
+        """Ensure the ST button uses the inactive color at startup."""
+        if not self.context or not self.context.gui:
+            return
+
+        btn = self.context.gui.button_panel.get_button("ST")
+        if btn:
+            inactive = self.context.gui.theme.get_color("button_inactive")
+            color_tuple = (inactive, inactive)
+            btn.configure(fg_color=color_tuple, hover_color=color_tuple)

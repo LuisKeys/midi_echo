@@ -41,9 +41,9 @@ class ButtonPanel:
         self.buttons: Dict[str, ctk.CTkButton] = {}
         self.button_frames: Dict[str, ctk.CTkFrame] = {}
 
-        # Configure grid layout
+        # Configure grid layout (include row 2 so bottom buttons render correctly)
         self.parent.grid_columnconfigure((0, 1, 2, 3), weight=1, uniform="equal")
-        self.parent.grid_rowconfigure((0, 1), weight=1, uniform="equal")
+        self.parent.grid_rowconfigure((0, 1, 2), weight=1, uniform="equal")
 
     def create_button(
         self,
@@ -125,7 +125,7 @@ class ButtonPanel:
                 text=spec.function_name,
                 font=("Courier New", 30),
                 text_color=self.theme.get_color("button_text"),
-                fg_color=color,
+                fg_color="transparent",
             )
             subtitle.grid(
                 row=1,
