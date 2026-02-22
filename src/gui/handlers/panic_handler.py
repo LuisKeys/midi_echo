@@ -21,7 +21,7 @@ class PanicHandler(BaseHandler):
         # Change button color to red temporarily
         btn = self.context.gui.button_panel.get_button("ST")
         if btn:
-            red_color = self.context.gui.theme.get_color("red")
+            red_color = self.context.gui.theme.ACCENT_RED
             btn.configure(
                 fg_color=(red_color, red_color),
                 hover_color=(red_color, red_color),
@@ -42,12 +42,12 @@ class PanicHandler(BaseHandler):
                 lambda: (
                     btn.configure(
                         fg_color=(
-                            self.context.gui.theme.get_color("button_inactive"),
-                            self.context.gui.theme.get_color("button_inactive"),
+                            self.context.gui.theme.BACKGROUND_UNSELECTED,
+                            self.context.gui.theme.BACKGROUND_UNSELECTED,
                         ),
                         hover_color=(
-                            self.context.gui.theme.get_color("button_inactive"),
-                            self.context.gui.theme.get_color("button_inactive"),
+                            self.context.gui.theme.BACKGROUND_UNSELECTED,
+                            self.context.gui.theme.BACKGROUND_UNSELECTED,
                         ),
                     )
                     if btn
@@ -70,6 +70,6 @@ class PanicHandler(BaseHandler):
 
         btn = self.context.gui.button_panel.get_button("ST")
         if btn:
-            inactive = self.context.gui.theme.get_color("button_inactive")
+            inactive = self.context.gui.theme.BACKGROUND_UNSELECTED
             color_tuple = (inactive, inactive)
             btn.configure(fg_color=color_tuple, hover_color=color_tuple)

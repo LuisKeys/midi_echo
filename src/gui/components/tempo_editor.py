@@ -18,12 +18,12 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         lbl = ctk.CTkLabel(
             parent,
             text="No arpeggiator state found.",
-            text_color=theme.get_color("text_black"),
+            text_color=theme.FONT_AND_BORDER,
         )
         lbl.pack()
         return
 
-    frame = ctk.CTkFrame(parent, fg_color=theme.get_color("selector_bg"))
+    frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     frame.pack(
         expand=True,
         fill="both",
@@ -35,7 +35,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         frame,
         text=f"BPM: {state.timing.bpm}",
         font=("Courier New", 20),
-        text_color=theme.get_color("text_black"),
+        text_color=theme.FONT_AND_BORDER,
     )
     label.pack(
         pady=(
@@ -71,7 +71,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         font_size = theme.get_font_size("label_medium")
 
         label.configure(
-            font=("Courier New", font_size), text_color=theme.get_color("text_black")
+            font=("Courier New", font_size), text_color=theme.FONT_AND_BORDER
         )
         btn.configure(font=("Courier New", theme.get_font_size("label_small")))
 

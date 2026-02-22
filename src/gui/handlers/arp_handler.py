@@ -111,17 +111,18 @@ class ArpHandler(BaseHandler):
             logger.warning("update_ui: button 'AR' not found")
             return
 
+        theme = self.context.gui.theme
         if enabled:
-            active_color = self.context.gui.theme.get_color("state_active")
-            color_tuple = (active_color, active_color)
-            logger.debug(f"update_ui: setting active color {color_tuple}")
-            btn.configure(fg_color=color_tuple, hover_color=color_tuple)
+            btn.configure(
+                fg_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
+                hover_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
+            )
+            logger.debug(f"update_ui: setting active color")
         else:
             logger.debug("update_ui: setting disabled color")
-            disabled_color = self.context.gui.theme.get_color("button_inactive")
-            disabled_color_tuple = (disabled_color, disabled_color)
             btn.configure(
-                fg_color=disabled_color_tuple, hover_color=disabled_color_tuple
+                fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+                hover_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
             )
 
         # Force UI update

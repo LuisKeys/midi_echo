@@ -29,7 +29,7 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
     )
 
     # Main container frame
-    selector_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("selector_bg"))
+    selector_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     selector_frame.pack(
         expand=True,
         fill="both",
@@ -39,12 +39,12 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
 
     # Scrollable frame for the preset grid (handles overflow)
     scroll_frame = ctk.CTkScrollableFrame(
-        selector_frame, fg_color=theme.get_color("selector_bg")
+        selector_frame, fg_color=theme.BACKGROUND_UNSELECTED
     )
     scroll_frame.pack(expand=True, fill="both")
 
     # Grid frame inside scrollable frame
-    grid_frame = ctk.CTkFrame(scroll_frame, fg_color=theme.get_color("selector_bg"))
+    grid_frame = ctk.CTkFrame(scroll_frame, fg_color=theme.BACKGROUND_UNSELECTED)
     grid_frame.pack(
         expand=True,
         fill="both",
@@ -104,12 +104,13 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
             # Update button colors to highlight current preset
             for btn, num in zip(buttons, range(preset_range_max + 1)):
                 if num == preset_num:
-                    fg_color = theme.get_color_tuple("preset_highlight")
+                    fg_color = (theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED)
                 else:
-                    fg_color = theme.get_color_tuple("button_inactive")
-                btn.configure(
-                    fg_color=fg_color, text_color=theme.get_color("text_black")
-                )
+                    fg_color = (
+                        theme.BACKGROUND_UNSELECTED,
+                        theme.BACKGROUND_UNSELECTED,
+                    )
+                btn.configure(fg_color=fg_color, text_color=theme.FONT_AND_BORDER)
 
             logger.info(f"Preset {preset_num} selected (channel {ch})")
 
@@ -123,16 +124,16 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
         # Highlight current preset
         is_current = preset_num == current_program
         if is_current:
-            fg_color = theme.get_color_tuple("preset_highlight")
+            fg_color = (theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED)
         else:
-            fg_color = theme.get_color_tuple("button_inactive")
+            fg_color = (theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED)
 
         btn = ctk.CTkButton(
             grid_frame,
             text=str(preset_num + 1),
             fg_color=fg_color,
-            hover_color=theme.get_color("control_hover"),
-            text_color=theme.get_color("text_black"),
+            hover_color=(theme.BACKGROUND_HOVER, theme.BACKGROUND_HOVER),
+            text_color=theme.FONT_AND_BORDER,
             font=("Courier New", theme.get_font_size("label_medium")),
             corner_radius=0,
             height=50,

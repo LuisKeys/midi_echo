@@ -1,6 +1,7 @@
 """Modes tab for the ARP control interface."""
 
 import customtkinter as ctk
+from ..theme import Theme
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 
@@ -12,7 +13,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm = context.gui.popup_manager
 
     # Mode
-    mode_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    mode_frame = ctk.CTkFrame(parent, fg_color=Theme.BACKGROUND_UNSELECTED)
     mode_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -24,7 +25,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Mode:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=Theme.FONT_AND_BORDER,
     )
     mode_label.configure(width=theme.get_label_width())
     mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -38,13 +39,13 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=Theme.BACKGROUND_UNSELECTED,
+        button_color=Theme.BACKGROUND_UNSELECTED,
+        button_hover_color=Theme.BACKGROUND_HOVER,
+        text_color=Theme.FONT_AND_BORDER,
+        dropdown_fg_color=Theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=Theme.BACKGROUND_HOVER,
+        dropdown_text_color=Theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -70,7 +71,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm.register_element("content_elements", oct_widget)
 
     # Octave direction
-    dir_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    dir_frame = ctk.CTkFrame(parent, fg_color=Theme.BACKGROUND_UNSELECTED)
     dir_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -82,7 +83,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Octave Direction:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=Theme.FONT_AND_BORDER,
     )
     dir_label.configure(width=theme.get_label_width())
     dir_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -96,20 +97,20 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=Theme.BACKGROUND_UNSELECTED,
+        button_color=Theme.BACKGROUND_UNSELECTED,
+        button_hover_color=Theme.BACKGROUND_HOVER,
+        text_color=Theme.FONT_AND_BORDER,
+        dropdown_fg_color=Theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=Theme.BACKGROUND_HOVER,
+        dropdown_text_color=Theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
     dir_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
     # Reset mode
-    reset_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    reset_frame = ctk.CTkFrame(parent, fg_color=Theme.BACKGROUND_UNSELECTED)
     reset_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -121,7 +122,7 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Reset Mode:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=Theme.FONT_AND_BORDER,
     )
     reset_label.configure(width=theme.get_label_width())
     reset_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -135,13 +136,13 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=Theme.BACKGROUND_UNSELECTED,
+        button_color=Theme.BACKGROUND_UNSELECTED,
+        button_hover_color=Theme.BACKGROUND_HOVER,
+        text_color=Theme.FONT_AND_BORDER,
+        dropdown_fg_color=Theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=Theme.BACKGROUND_HOVER,
+        dropdown_text_color=Theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -157,21 +158,21 @@ def _build_modes_tab(parent: ctk.CTkFrame, state, context) -> None:
                 font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
-                text_color=theme.get_color("text_black"),
+                text_color=Theme.FONT_AND_BORDER,
             )
             mode_menu.configure(font=("Courier New", font_size))
             dir_label.configure(
                 font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
-                text_color=theme.get_color("text_black"),
+                text_color=Theme.FONT_AND_BORDER,
             )
             dir_menu.configure(font=("Courier New", font_size))
             reset_label.configure(
                 font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
-                text_color=theme.get_color("text_black"),
+                text_color=Theme.FONT_AND_BORDER,
             )
             reset_menu.configure(font=("Courier New", font_size))
         except Exception:

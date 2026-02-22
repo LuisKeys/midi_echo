@@ -50,8 +50,10 @@ class PresetHandler(BaseHandler):
 
         btn = self.context.gui.button_panel.get_button("PS")
         if btn:
-            # Use black color for PS button (main menu button style)
-            black_color = self.context.gui.theme.get_color("button_inactive")
-            color_tuple = (black_color, black_color)
-            btn.configure(fg_color=color_tuple, hover_color=color_tuple)
-            logger.debug(f"PS button color updated to black")
+            # Use BACKGROUND_UNSELECTED for PS button (main menu button style)
+            theme = self.context.gui.theme
+            btn.configure(
+                fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+                hover_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+            )
+            logger.debug(f"PS button color updated")

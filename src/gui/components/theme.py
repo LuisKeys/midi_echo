@@ -24,6 +24,7 @@ class Theme:
     GREEN = "#00FF66"
     DARK_GREEN = "#006633"
     BLACK = "#000000"
+    RED = "#FF3333"  # Warning/recording indicator color
 
     # 4 Canonical Color Theme
     # Simplified theme system using only 4 colors for easier maintenance and reasoning
@@ -32,53 +33,22 @@ class Theme:
     BACKGROUND_HOVER = DARK_GREEN  # Hover states for buttons and controls
     FONT_AND_BORDER = GREEN  # All text, labels, and borders
 
-    # Legacy Color Mapping: Maps old color names to the 4 canonical colors
-    # This provides backwards compatibility with existing code that uses semantic color names.
-    # Maintainers: When changing colors, only edit the 4 canonical colors above.
-    LEGACY_COLOR_MAP = {
-        # Active/selected states -> BACKGROUND_SELECTED
-        "state_active": BACKGROUND_SELECTED,
-        "state_playing": BACKGROUND_SELECTED,
-        "state_recording": BACKGROUND_SELECTED,
-        "state_metronome_on": BACKGROUND_SELECTED,
-        # Inactive/default states -> BACKGROUND_UNSELECTED
-        "state_default": BACKGROUND_UNSELECTED,
-        "button_inactive": BACKGROUND_UNSELECTED,
-        "button_inactive_light": BACKGROUND_UNSELECTED,
-        "state_disabled": BACKGROUND_UNSELECTED,
-        "state_stop": BACKGROUND_UNSELECTED,
-        "state_metronome_off": BACKGROUND_UNSELECTED,
-        "bg": BACKGROUND_UNSELECTED,
-        "overlay": BACKGROUND_UNSELECTED,
-        "frame_bg": BACKGROUND_UNSELECTED,
-        "selector_bg": BACKGROUND_UNSELECTED,
-        "preset_highlight": BACKGROUND_UNSELECTED,
-        "control_bg": BACKGROUND_UNSELECTED,
-        "control_pressed": BACKGROUND_UNSELECTED,
-        "popup_grey": BACKGROUND_UNSELECTED,
-        "main_menu_button": BACKGROUND_UNSELECTED,
-        # Hover states -> BACKGROUND_HOVER
-        "control_hover": BACKGROUND_HOVER,
-        "state_warning": BACKGROUND_HOVER,
-        # Text and borders -> FONT_AND_BORDER
-        "text_white": FONT_AND_BORDER,
-        "text_black": FONT_AND_BORDER,
-        "button_text": FONT_AND_BORDER,
-        "border": FONT_AND_BORDER,
-        "red": FONT_AND_BORDER,
-        "cyan": FONT_AND_BORDER,
-        "violet": FONT_AND_BORDER,
-        "aqua": FONT_AND_BORDER,
-        "matrix_green": FONT_AND_BORDER,
-        "matrix_green_bright": FONT_AND_BORDER,
-        "matrix_green_dim": FONT_AND_BORDER,
-        "matrix_green_muted": FONT_AND_BORDER,
-        "grey": FONT_AND_BORDER,
-    }
+    # Accent color for warnings, recording state, etc.
+    ACCENT_RED = RED
+
+    # Legacy Color Mapping: REMOVED
+    # All color references have been refactored to use the 4 canonical colors directly.
 
     # Keep compatibility fields for any callers/tests expecting these names
-    COLORS_LIGHT = LEGACY_COLOR_MAP
-    COLORS_DARK = LEGACY_COLOR_MAP
+    # These now simply reference the canonical colors
+    COLORS_LIGHT = {
+        "bg": BACKGROUND_UNSELECTED,
+        "frame_bg": BACKGROUND_UNSELECTED,
+        "button_inactive": BACKGROUND_UNSELECTED,
+        "button_text": FONT_AND_BORDER,
+        "border": FONT_AND_BORDER,
+    }
+    COLORS_DARK = COLORS_LIGHT
 
     # Base font sizes at reference window resolution (600x400)
     BASE_FONT_SIZES = {
@@ -112,31 +82,60 @@ class Theme:
         self.current_width = config.window_width
         self.current_height = config.window_height
 
-    def get_color(self, name: str) -> str:
-        """Get a color by name.
+    @staticmethod
+    def _get_canonical_color(name: str) -> str:
+        """Map semantic color names to canonical colors.
+
+        Internal helper for translating semantic color names (from legacy code)
+        to canonical Theme color constants.
 
         Args:
-            name: Color name (e.g., 'state_active', 'button_text')
+            name: Semantic color name (e.g., 'button_inactive', 'text_black')
 
         Returns:
-            Hex color string mapped to one of the 4 canonical theme colors
+            Hex color string from the 5-color canonical palette
         """
-        # Look up the color in the legacy mapping; fall back to BACKGROUND_UNSELECTED
-        return self.LEGACY_COLOR_MAP.get(name, self.BACKGROUND_UNSELECTED)
-
-    def get_color_tuple(self, name: str) -> Tuple[str, str]:
-        """Get a color as a tuple for customtkinter light/dark modes.
-
-        Args:
-            name: Color name
-
-        Returns:
-            Tuple of (light_mode_color, dark_mode_color) both mapped to the same canonical color
-        """
-        # Look up the color in the legacy mapping; fall back to BACKGROUND_UNSELECTED
-        color = self.LEGACY_COLOR_MAP.get(name, self.BACKGROUND_UNSELECTED)
-        # Return identical light/dark tuple for compatibility with customtkinter
-        return (color, color)
+        mapping = {
+            # BACKGROUND_UNSELECTED mappings
+            "state_active": Theme.BACKGROUND_SELECTED,
+            "state_playing": Theme.BACKGROUND_SELECTED,
+            "state_recording": Theme.BACKGROUND_SELECTED,
+            "state_metronome_on": Theme.BACKGROUND_SELECTED,
+            "state_default": Theme.BACKGROUND_UNSELECTED,
+            "button_inactive": Theme.BACKGROUND_UNSELECTED,
+            "button_inactive_light": Theme.BACKGROUND_UNSELECTED,
+            "state_disabled": Theme.BACKGROUND_UNSELECTED,
+            "state_stop": Theme.BACKGROUND_UNSELECTED,
+            "state_metronome_off": Theme.BACKGROUND_UNSELECTED,
+            "bg": Theme.BACKGROUND_UNSELECTED,
+            "overlay": Theme.BACKGROUND_UNSELECTED,
+            "frame_bg": Theme.BACKGROUND_UNSELECTED,
+            "selector_bg": Theme.BACKGROUND_UNSELECTED,
+            "preset_highlight": Theme.BACKGROUND_SELECTED,
+            "control_bg": Theme.BACKGROUND_UNSELECTED,
+            "control_pressed": Theme.BACKGROUND_UNSELECTED,
+            "popup_grey": Theme.BACKGROUND_UNSELECTED,
+            "main_menu_button": Theme.BACKGROUND_UNSELECTED,
+            # BACKGROUND_HOVER mappings
+            "control_hover": Theme.BACKGROUND_HOVER,
+            "state_warning": Theme.BACKGROUND_HOVER,
+            "grey": Theme.BACKGROUND_HOVER,
+            # FONT_AND_BORDER mappings
+            "text_white": Theme.FONT_AND_BORDER,
+            "text_black": Theme.FONT_AND_BORDER,
+            "button_text": Theme.FONT_AND_BORDER,
+            "border": Theme.FONT_AND_BORDER,
+            "cyan": Theme.FONT_AND_BORDER,
+            "violet": Theme.FONT_AND_BORDER,
+            "aqua": Theme.FONT_AND_BORDER,
+            "matrix_green": Theme.FONT_AND_BORDER,
+            "matrix_green_bright": Theme.FONT_AND_BORDER,
+            "matrix_green_dim": Theme.FONT_AND_BORDER,
+            "matrix_green_muted": Theme.FONT_AND_BORDER,
+            # ACCENT_RED mappings
+            "red": Theme.ACCENT_RED,
+        }
+        return mapping.get(name, Theme.BACKGROUND_UNSELECTED)
 
     def get_font_size(self, element_type: str) -> int:
         """Calculate font size based on current window dimensions.

@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 from typing import Dict, List, Callable, Optional
+from src.gui.components.theme import Theme
 
 
 class CustomTabView(ctk.CTkFrame):
@@ -33,16 +34,16 @@ class CustomTabView(ctk.CTkFrame):
         # Create tab button frame
         self.tab_button_frame = ctk.CTkFrame(
             self,
-            fg_color=self.theme.get_color("frame_bg"),
-            bg_color=self.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
+            bg_color=Theme.BACKGROUND_UNSELECTED,
         )
         self.tab_button_frame.pack(side="top", fill="x")
 
         # Create tab content frame
         self.content_frame = ctk.CTkFrame(
             self,
-            fg_color=self.theme.get_color("frame_bg"),
-            bg_color=self.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
+            bg_color=Theme.BACKGROUND_UNSELECTED,
         )
         self.content_frame.pack(side="top", fill="both", expand=True)
 
@@ -58,7 +59,7 @@ class CustomTabView(ctk.CTkFrame):
         # Create tab content frame
         tab_frame = ctk.CTkFrame(
             self.content_frame,
-            fg_color=self.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
         )
         self._tabs[tab_name] = tab_frame
         self._tab_order.append(tab_name)
@@ -68,9 +69,9 @@ class CustomTabView(ctk.CTkFrame):
             self.tab_button_frame,
             text=tab_name,
             corner_radius=0,
-            fg_color=self.theme.get_color("control_bg"),
-            hover_color=self.theme.get_color("control_hover"),
-            text_color=self.theme.get_color("text_black"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
+            hover_color=Theme.BACKGROUND_HOVER,
+            text_color=Theme.FONT_AND_BORDER,
             font=("Courier New", self.theme.get_font_size("tab_text")),
             command=lambda: self._switch_tab(tab_name),
             height=50,
@@ -99,16 +100,16 @@ class CustomTabView(ctk.CTkFrame):
             if name == tab_name:
                 # Active tab: use selected color
                 button.configure(
-                    fg_color=self.theme.get_color("state_active"),
-                    text_color=self.theme.get_color("text_black"),
-                    hover_color=self.theme.get_color("state_active"),
+                    fg_color=Theme.BACKGROUND_SELECTED,
+                    text_color=Theme.FONT_AND_BORDER,
+                    hover_color=Theme.BACKGROUND_SELECTED,
                 )
             else:
                 # Inactive tab: use control background
                 button.configure(
-                    fg_color=self.theme.get_color("control_bg"),
-                    text_color=self.theme.get_color("text_black"),
-                    hover_color=self.theme.get_color("control_hover"),
+                    fg_color=Theme.BACKGROUND_UNSELECTED,
+                    text_color=Theme.FONT_AND_BORDER,
+                    hover_color=Theme.BACKGROUND_HOVER,
                 )
 
         # Show selected tab

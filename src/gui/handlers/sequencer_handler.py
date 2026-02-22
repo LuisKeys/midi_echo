@@ -55,13 +55,13 @@ class SequencerHandler(BaseHandler):
 
             # Red when recording, dark green when playing, black otherwise
             if sequencer.state.is_recording:
-                color = theme.get_color("red")
+                color = theme.ACCENT_RED
                 color_tuple = (color, color)
             elif sequencer.state.is_playing:
-                color = theme.get_color("state_active")
+                color = theme.BACKGROUND_SELECTED
                 color_tuple = (color, color)
             else:
-                color = theme.get_color("button_inactive")
+                color = theme.BACKGROUND_UNSELECTED
                 color_tuple = (color, color)
 
             btn.configure(fg_color=color_tuple, hover_color=color_tuple)

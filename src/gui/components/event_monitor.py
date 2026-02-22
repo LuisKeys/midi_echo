@@ -16,7 +16,7 @@ class EventMonitor(ctk.CTkFrame):
             theme: Theme instance for colors
             on_close: Optional callback to close the monitor popup
         """
-        super().__init__(parent, fg_color=theme.get_color("bg"))
+        super().__init__(parent, fg_color=theme.BACKGROUND_UNSELECTED)
 
         self.event_log = event_log
         self.theme = theme
@@ -34,7 +34,7 @@ class EventMonitor(ctk.CTkFrame):
         self.close_button = None
 
         # Create header
-        header_frame = ctk.CTkFrame(self, fg_color=theme.get_color("bg"))
+        header_frame = ctk.CTkFrame(self, fg_color=theme.BACKGROUND_UNSELECTED)
         header_frame.grid(
             row=0,
             column=0,
@@ -50,7 +50,7 @@ class EventMonitor(ctk.CTkFrame):
             header_frame,
             text="MIDI Event Monitor",
             font=("Courier New", theme.get_font_size("popup_title"), "bold"),
-            text_color=theme.get_color("text_white"),
+            text_color=theme.FONT_AND_BORDER,
         )
         self.title_label.grid(row=0, column=0, sticky="w", padx=5)
 
@@ -58,7 +58,7 @@ class EventMonitor(ctk.CTkFrame):
             header_frame,
             text="Active",
             font=("Courier New", theme.get_font_size("popup_value")),
-            text_color=theme.get_color("text_white"),
+            text_color=theme.FONT_AND_BORDER,
         )
         self.status_label.grid(row=0, column=1, sticky="e", padx=5)
 
@@ -66,13 +66,13 @@ class EventMonitor(ctk.CTkFrame):
             header_frame,
             text="✕",
             font=("Courier New", theme.get_font_size("popup_close"), "bold"),
-            fg_color=theme.get_color("popup_grey"),
-            text_color=theme.get_color("text_white"),
-            hover_color=theme.get_color("red"),
+            fg_color=theme.BACKGROUND_UNSELECTED,
+            text_color=theme.FONT_AND_BORDER,
+            hover_color=theme.ACCENT_RED,
             width=48,
             height=48,
             border_width=1,
-            border_color=theme.get_color("border"),
+            border_color=theme.FONT_AND_BORDER,
             corner_radius=6,
             command=lambda: None,
         )
@@ -83,7 +83,7 @@ class EventMonitor(ctk.CTkFrame):
         self.close_button.bind("<ButtonRelease-1>", self._on_close_click, add="+")
 
         # Create event display area
-        display_frame = ctk.CTkFrame(self, fg_color=theme.get_color("bg"))
+        display_frame = ctk.CTkFrame(self, fg_color=theme.BACKGROUND_UNSELECTED)
         display_frame.grid(
             row=1,
             column=0,
@@ -98,16 +98,16 @@ class EventMonitor(ctk.CTkFrame):
         self.text_display = ctk.CTkTextbox(
             display_frame,
             font=("Courier New", theme.get_font_size("label_small")),
-            fg_color=theme.get_color("frame_bg"),
-            text_color=theme.get_color("text_white"),
-            border_color=theme.get_color("button_inactive"),
+            fg_color=theme.BACKGROUND_UNSELECTED,
+            text_color=theme.FONT_AND_BORDER,
+            border_color=theme.BACKGROUND_UNSELECTED,
             border_width=1,
         )
         self.text_display.grid(row=0, column=0, sticky="nsew")
         self.text_display.configure(state="disabled")
 
         # Create control panel
-        control_frame = ctk.CTkFrame(self, fg_color=theme.get_color("bg"))
+        control_frame = ctk.CTkFrame(self, fg_color=theme.BACKGROUND_UNSELECTED)
         control_frame.grid(
             row=2,
             column=0,
@@ -121,9 +121,9 @@ class EventMonitor(ctk.CTkFrame):
         self.pause_button = ctk.CTkButton(
             control_frame,
             text="Pause",
-            fg_color=theme.get_color_tuple("aqua"),
-            hover_color=theme.get_color_tuple("cyan"),
-            text_color=theme.get_color("button_text"),
+            fg_color=(theme.FONT_AND_BORDER, theme.FONT_AND_BORDER),
+            hover_color=(theme.FONT_AND_BORDER, theme.FONT_AND_BORDER),
+            text_color=theme.FONT_AND_BORDER,
             font=("Courier New", theme.get_font_size("popup_button")),
             command=self._on_pause_click,
         )
@@ -133,9 +133,9 @@ class EventMonitor(ctk.CTkFrame):
         self.clear_button = ctk.CTkButton(
             control_frame,
             text="Clear",
-            fg_color=theme.get_color_tuple("red"),
-            hover_color=theme.get_color_tuple("grey"),
-            text_color=theme.get_color("button_text"),
+            fg_color=(theme.ACCENT_RED, theme.ACCENT_RED),
+            hover_color=(theme.BACKGROUND_HOVER, theme.BACKGROUND_HOVER),
+            text_color=theme.FONT_AND_BORDER,
             font=("Courier New", theme.get_font_size("popup_button")),
             command=self._on_clear_click,
         )
@@ -146,7 +146,7 @@ class EventMonitor(ctk.CTkFrame):
             control_frame,
             text="0 events",
             font=("Courier New", theme.get_font_size("popup_value")),
-            text_color=theme.get_color("text_white"),
+            text_color=theme.FONT_AND_BORDER,
         )
         self.count_label.grid(row=0, column=1, padx=5)
 
@@ -238,11 +238,11 @@ class EventMonitor(ctk.CTkFrame):
         # Update status
         if self.event_log.is_paused():
             self.status_label.configure(
-                text="⏸ Paused", text_color=self.theme.get_color("red")
+                text="⏸ Paused", text_color=self.theme.ACCENT_RED
             )
         else:
             self.status_label.configure(
-                text="●  Active", text_color=self.theme.get_color("aqua")
+                text="●  Active", text_color=self.theme.FONT_AND_BORDER
             )
 
     def _on_pause_click(self) -> None:

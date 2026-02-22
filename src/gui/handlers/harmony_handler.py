@@ -126,7 +126,7 @@ class HarmonyHandler(BaseHandler):
                 above_frame,
                 text="Above Root:",
                 font=("Courier New", section_font_size, "bold"),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
             )
             above_label.pack(pady=(0, 5), anchor="w")
 
@@ -140,7 +140,7 @@ class HarmonyHandler(BaseHandler):
                 text="Major 3rd (+4)",
                 variable=major_3rd_above_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             major_3rd_above_cb.pack(pady=2, anchor="w")
@@ -150,7 +150,7 @@ class HarmonyHandler(BaseHandler):
                 text="Minor 3rd (+3)",
                 variable=minor_3rd_above_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             minor_3rd_above_cb.pack(pady=2, anchor="w")
@@ -160,7 +160,7 @@ class HarmonyHandler(BaseHandler):
                 text="5th (+7)",
                 variable=fifth_above_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             fifth_above_cb.pack(pady=2, anchor="w")
@@ -170,7 +170,7 @@ class HarmonyHandler(BaseHandler):
                 text="Octave (+12)",
                 variable=octave_above_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             octave_above_cb.pack(pady=2, anchor="w")
@@ -183,7 +183,7 @@ class HarmonyHandler(BaseHandler):
                 below_frame,
                 text="Below Root:",
                 font=("Courier New", section_font_size, "bold"),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
             )
             below_label.pack(pady=(0, 5), anchor="w")
 
@@ -197,7 +197,7 @@ class HarmonyHandler(BaseHandler):
                 text="Major 3rd (-4)",
                 variable=major_3rd_below_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             major_3rd_below_cb.pack(pady=2, anchor="w")
@@ -207,7 +207,7 @@ class HarmonyHandler(BaseHandler):
                 text="Minor 3rd (-3)",
                 variable=minor_3rd_below_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             minor_3rd_below_cb.pack(pady=2, anchor="w")
@@ -217,7 +217,7 @@ class HarmonyHandler(BaseHandler):
                 text="5th (-7)",
                 variable=fifth_below_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             fifth_below_cb.pack(pady=2, anchor="w")
@@ -227,7 +227,7 @@ class HarmonyHandler(BaseHandler):
                 text="Octave (-12)",
                 variable=octave_below_var,
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 command=apply_selection,
             )
             octave_below_cb.pack(pady=2, anchor="w")
@@ -240,7 +240,7 @@ class HarmonyHandler(BaseHandler):
                 frame,
                 text="Velocity:",
                 font=("Courier New", section_font_size, "bold"),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
             )
             velocity_label.pack(pady=(0, 5), anchor="w", padx=10)
 
@@ -264,7 +264,7 @@ class HarmonyHandler(BaseHandler):
                 velocity_frame,
                 text=f"{current_velocity}%",
                 font=("Courier New", checkbox_font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 width=40,
             )
             velocity_value_label.pack(side="right", padx=(10, 0))
@@ -307,14 +307,15 @@ class HarmonyHandler(BaseHandler):
         if btn:
             theme = self.context.gui.theme
             if self.context.processor.harmonizer_enabled:
-                active_color = theme.get_color("state_active")
                 btn.configure(
-                    fg_color=(active_color, active_color),
-                    hover_color=(active_color, active_color),
+                    fg_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
+                    hover_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
                 )
             else:
-                disabled_color = theme.get_color("button_inactive")
                 btn.configure(
-                    fg_color=(disabled_color, disabled_color),
-                    hover_color=(disabled_color, disabled_color),
+                    fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+                    hover_color=(
+                        theme.BACKGROUND_UNSELECTED,
+                        theme.BACKGROUND_UNSELECTED,
+                    ),
                 )

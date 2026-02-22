@@ -175,7 +175,7 @@ class PopupManager:
         # Create frame for the monitor
         monitor_frame = ctk.CTkFrame(
             self.parent,
-            fg_color=self.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
             corner_radius=10,
             width=width,
             height=height,
@@ -263,7 +263,7 @@ class PopupMenu(ctk.CTkFrame):
         """
         super().__init__(
             parent,
-            fg_color=popup_manager.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
             corner_radius=0,
             width=width,
             height=height,
@@ -293,7 +293,7 @@ class PopupMenu(ctk.CTkFrame):
         # Top bar with title and close button
         top_frame = ctk.CTkFrame(
             self,
-            fg_color=self.popup_manager.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
             corner_radius=0,
         )
         top_frame.pack(
@@ -306,7 +306,7 @@ class PopupMenu(ctk.CTkFrame):
             top_frame,
             text=self.title_text,
             font=("Courier New", 32, "bold"),
-            text_color=self.popup_manager.theme.get_color("text_black"),
+            text_color=Theme.FONT_AND_BORDER,
         )
         title_label.pack(side="left", fill="x", expand=True)
         self.popup_manager.register_element("title_label", title_label)
@@ -315,13 +315,13 @@ class PopupMenu(ctk.CTkFrame):
             top_frame,
             text="✕",
             font=("Courier New", 8, "bold"),
-            fg_color=self.popup_manager.theme.get_color("popup_grey"),
-            text_color=self.popup_manager.theme.get_color("button_text"),
-            hover_color=self.popup_manager.theme.get_color("red"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
+            text_color=Theme.FONT_AND_BORDER,
+            hover_color=Theme.ACCENT_RED,
             width=60,
             height=60,
             border_width=1,
-            border_color=self.popup_manager.theme.get_color("border"),
+            border_color=Theme.FONT_AND_BORDER,
             corner_radius=0,
             command=lambda: None,  # Disabled, we use binding instead
         )
@@ -333,7 +333,7 @@ class PopupMenu(ctk.CTkFrame):
         # Content frame
         content_frame = ctk.CTkFrame(
             self,
-            fg_color=self.popup_manager.theme.get_color("frame_bg"),
+            fg_color=Theme.BACKGROUND_UNSELECTED,
             corner_radius=0,
         )
         content_frame.pack(

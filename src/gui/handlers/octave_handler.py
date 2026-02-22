@@ -48,14 +48,15 @@ class OctaveHandler(BaseHandler):
             # Update button colors: active if octave != 0
             theme = self.context.gui.theme
             if self.context.processor.octave != 0:
-                active_color = theme.get_color("state_active")
                 btn.configure(
-                    fg_color=(active_color, active_color),
-                    hover_color=(active_color, active_color),
+                    fg_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
+                    hover_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
                 )
             else:
-                disabled_color = theme.get_color("button_inactive")
                 btn.configure(
-                    fg_color=(disabled_color, disabled_color),
-                    hover_color=(disabled_color, disabled_color),
+                    fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+                    hover_color=(
+                        theme.BACKGROUND_UNSELECTED,
+                        theme.BACKGROUND_UNSELECTED,
+                    ),
                 )

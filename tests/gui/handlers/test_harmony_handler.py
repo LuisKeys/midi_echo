@@ -16,17 +16,18 @@ class MockButtonPanel:
 class MockGuiTheme:
     """Mock theme for testing."""
 
-    def get_color_tuple(self, color_name):
-        return (100, 100, 100)
-
     def get_font_size(self, size_name):
         return 12
 
-    def get_color(self, color_name):
-        return "#000000"
-
     def get_padding(self, padding_name):
         return 10
+
+    # Canonical colors for refactored handlers
+    BACKGROUND_UNSELECTED = "#060606"
+    BACKGROUND_SELECTED = "#006633"
+    BACKGROUND_HOVER = "#006633"
+    FONT_AND_BORDER = "#00FF66"
+    ACCENT_RED = "#FF3333"
 
 
 class MockGui:

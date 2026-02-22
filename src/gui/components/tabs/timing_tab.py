@@ -1,6 +1,7 @@
 """Timing tab for the ARP control interface."""
 
 import customtkinter as ctk
+from ..theme import Theme
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 from ..tempo_control import create_tempo_control
@@ -33,7 +34,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         context.gui.handlers["AR"]._bpm_widget = bpm_widget
 
     # Division
-    div_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    div_frame = ctk.CTkFrame(parent, fg_color=Theme.BACKGROUND_UNSELECTED)
     div_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -45,7 +46,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Division:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=Theme.FONT_AND_BORDER,
     )
     div_label.configure(width=theme.get_label_width())
     div_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -59,13 +60,13 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=Theme.BACKGROUND_UNSELECTED,
+        button_color=Theme.BACKGROUND_UNSELECTED,
+        button_hover_color=Theme.BACKGROUND_HOVER,
+        text_color=Theme.FONT_AND_BORDER,
+        dropdown_fg_color=Theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=Theme.BACKGROUND_HOVER,
+        dropdown_text_color=Theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -112,7 +113,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm.register_element("content_elements", gate_widget)
 
     # External sync
-    sync_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    sync_frame = ctk.CTkFrame(parent, fg_color=Theme.BACKGROUND_UNSELECTED)
     sync_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -126,7 +127,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         variable=sync_var,
         command=lambda: setattr(state, "external_sync", sync_var.get()),
         font=("Courier New", 14),
-        text_color=theme.get_color("text_black"),
+        text_color=Theme.FONT_AND_BORDER,
     )
     sync_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -140,12 +141,12 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
                 font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
-                text_color=theme.get_color("text_black"),
+                text_color=Theme.FONT_AND_BORDER,
             )
             div_menu.configure(font=("Courier New", font_size))
             sync_check.configure(
                 font=("Courier New", font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=Theme.FONT_AND_BORDER,
             )
         except Exception:
             pass  # Widget might be destroyed

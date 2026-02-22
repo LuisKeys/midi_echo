@@ -86,16 +86,17 @@ class TransposeHandler(BaseHandler):
             # Update button colors: active if transpose != 0
             theme = self.context.gui.theme
             if self.context.processor.transpose != 0:
-                active_color = theme.get_color("state_active")
                 btn.configure(
-                    fg_color=(active_color, active_color),
-                    hover_color=(active_color, active_color),
+                    fg_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
+                    hover_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
                 )
             else:
-                disabled_color = theme.get_color("button_inactive")
                 btn.configure(
-                    fg_color=(disabled_color, disabled_color),
-                    hover_color=(disabled_color, disabled_color),
+                    fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+                    hover_color=(
+                        theme.BACKGROUND_UNSELECTED,
+                        theme.BACKGROUND_UNSELECTED,
+                    ),
                 )
 
         # Update popup value label if it exists
@@ -121,14 +122,14 @@ class TransposeHandler(BaseHandler):
                     self.context.gui.theme.get_font_size("popup_value"),
                     "bold",
                 ),
-                text_color=self.context.gui.theme.get_color("text_black"),
+                text_color=self.context.gui.theme.FONT_AND_BORDER,
             )
             value_label.pack(pady=self.context.gui.theme.get_padding("popup_control"))
             self._value_label = value_label
 
             # Buttons row
             buttons_frame = ctk.CTkFrame(
-                frame, fg_color=self.context.gui.theme.get_color("frame_bg")
+                frame, fg_color=self.context.gui.theme.BACKGROUND_UNSELECTED
             )
             buttons_frame.pack(
                 fill="both",
@@ -146,8 +147,11 @@ class TransposeHandler(BaseHandler):
                     self.context.gui.theme.get_font_size("popup_button"),
                     "bold",
                 ),
-                fg_color=self.context.gui.theme.get_color_tuple("aqua"),
-                text_color=self.context.gui.theme.get_color("button_text"),
+                fg_color=(
+                    self.context.gui.theme.FONT_AND_BORDER,
+                    self.context.gui.theme.FONT_AND_BORDER,
+                ),
+                text_color=self.context.gui.theme.FONT_AND_BORDER,
                 width=100,
                 height=100,
                 corner_radius=0,
@@ -198,8 +202,11 @@ class TransposeHandler(BaseHandler):
                     self.context.gui.theme.get_font_size("popup_button"),
                     "bold",
                 ),
-                fg_color=self.context.gui.theme.get_color_tuple("cyan"),
-                text_color=self.context.gui.theme.get_color("button_text"),
+                fg_color=(
+                    self.context.gui.theme.FONT_AND_BORDER,
+                    self.context.gui.theme.FONT_AND_BORDER,
+                ),
+                text_color=self.context.gui.theme.FONT_AND_BORDER,
                 width=100,
                 height=100,
                 corner_radius=0,
@@ -222,8 +229,11 @@ class TransposeHandler(BaseHandler):
                     self.context.gui.theme.get_font_size("popup_button"),
                     "bold",
                 ),
-                fg_color=self.context.gui.theme.get_color_tuple("aqua"),
-                text_color=self.context.gui.theme.get_color("button_text"),
+                fg_color=(
+                    self.context.gui.theme.FONT_AND_BORDER,
+                    self.context.gui.theme.FONT_AND_BORDER,
+                ),
+                text_color=self.context.gui.theme.FONT_AND_BORDER,
                 width=100,
                 height=100,
                 corner_radius=0,

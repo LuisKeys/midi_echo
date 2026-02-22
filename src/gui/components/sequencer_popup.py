@@ -18,7 +18,7 @@ def build_sequencer_popup(parent: ctk.CTkFrame, context) -> None:
         lbl = ctk.CTkLabel(
             parent,
             text="Sequencer not initialized.",
-            text_color=theme.get_color("text_black"),
+            text_color=theme.FONT_AND_BORDER,
         )
         lbl.pack()
         return
@@ -27,7 +27,7 @@ def build_sequencer_popup(parent: ctk.CTkFrame, context) -> None:
 
     # Single frame for sequencer controls (no tabs needed for single tab)
     # But we still use a frame for consistent styling
-    content_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    content_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     content_frame.pack(
         expand=True,
         fill="both",

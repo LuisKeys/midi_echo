@@ -6,6 +6,7 @@ from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 from ..tempo_control import create_tempo_control
 from ..transport_controls import TransportControls
+from ..theme import Theme
 
 
 def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
@@ -21,7 +22,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         error_label = ctk.CTkLabel(
             parent,
             text="Sequencer not initialized",
-            text_color=theme.get_color("text_black"),
+            text_color=theme.FONT_AND_BORDER,
         )
         error_label.pack(padx=20, pady=20)
         return
@@ -33,7 +34,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     compact_control_height = 42
 
     # ── Transport Controls (now a reusable component) ──
-    transport_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    transport_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     transport_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -66,7 +67,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     pm.register_element("content_elements", transport_controls)
 
     # ── Pattern Info ──
-    info_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    info_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     info_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -77,7 +78,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         info_frame,
         text=f"Pattern: {sequencer.pattern.get_event_count()} events",
         font=("Courier New", 12),
-        text_color=theme.get_color("text_black"),
+        text_color=theme.FONT_AND_BORDER,
         anchor="w",
     )
     info_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -130,7 +131,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     time_sig_widget.plus_btn.configure(height=compact_control_height)
 
     # Denominator dropdown (separate frame for den selection)
-    den_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    den_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     den_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -142,7 +143,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         text="Time Sig Den:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=theme.FONT_AND_BORDER,
     )
     den_label.configure(width=theme.get_label_width())
     den_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -167,13 +168,13 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         width=80,
         height=compact_control_height,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=theme.BACKGROUND_UNSELECTED,
+        button_color=theme.BACKGROUND_UNSELECTED,
+        button_hover_color=theme.BACKGROUND_HOVER,
+        text_color=theme.FONT_AND_BORDER,
+        dropdown_fg_color=theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=theme.BACKGROUND_HOVER,
+        dropdown_text_color=theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -206,7 +207,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     pm.register_element("content_elements", bars_widget)
 
     # ── Quantization ──
-    quant_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    quant_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     quant_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -218,7 +219,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         text="Quantize:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=theme.FONT_AND_BORDER,
     )
     quant_label.configure(width=theme.get_label_width())
     quant_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -233,13 +234,13 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         width=80,
         height=compact_control_height,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=theme.BACKGROUND_UNSELECTED,
+        button_color=theme.BACKGROUND_UNSELECTED,
+        button_hover_color=theme.BACKGROUND_HOVER,
+        text_color=theme.FONT_AND_BORDER,
+        dropdown_fg_color=theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=theme.BACKGROUND_HOVER,
+        dropdown_text_color=theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -261,11 +262,11 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
                 font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
             )
             info_label.configure(
                 font=("Courier New", font_size),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
                 anchor="w",
             )
             # Ensure Time Sig denominator label and menu use the same font/width
@@ -276,7 +277,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
                         font=("Courier New", font_size),
                         width=theme.get_label_width(),
                         anchor="e",
-                        text_color=theme.get_color("text_black"),
+                        text_color=theme.FONT_AND_BORDER,
                     )
                 den_menu = getattr(time_sig_widget, "_den_menu", None)
                 if den_menu:
@@ -341,12 +342,8 @@ def _on_metronome_clicked(context):
     button = getattr(context.gui, "_sequencer_metronome_button", None)
     if button:
         theme = getattr(context.gui, "theme", None)
-        on_color = theme.get_color("state_metronome_on") if theme else "#101010"
-        off_color = theme.get_color("state_metronome_off") if theme else "#060606"
-        if context.sequencer.state.metronome_enabled:
-            button.configure(fg_color=on_color)
-        else:
-            button.configure(fg_color=off_color)
+        on_color = theme.BACKGROUND_SELECTED if theme else "#101010"
+        off_color = theme.BACKGROUND_UNSELECTED if theme else "#060606"
 
 
 def _update_button_states(context):
@@ -362,7 +359,7 @@ def _update_button_states(context):
     theme = getattr(context.gui, "theme", None)
 
     def color(key: str, fallback: str) -> str:
-        return theme.get_color(key) if theme else fallback
+        return Theme._get_canonical_color(key) if theme else fallback
 
     if play_button:
         if sequencer.state.is_playing:

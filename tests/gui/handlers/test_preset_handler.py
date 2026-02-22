@@ -24,7 +24,6 @@ def create_test_context(default_preset=0, with_gui=False):
         gui = Mock()
         gui.button_panel = Mock()
         gui.theme = Mock()
-        gui.theme.get_color_tuple = Mock(return_value=("cyan", "cyan"))
         gui.popup_manager = Mock()
         gui.handlers = {}
         event_loop = Mock()

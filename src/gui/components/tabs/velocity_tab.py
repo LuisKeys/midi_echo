@@ -3,6 +3,7 @@
 import customtkinter as ctk
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
+from ..theme import Theme
 
 
 def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -12,7 +13,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm = context.gui.popup_manager
 
     # Mode
-    mode_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    mode_frame = ctk.CTkFrame(parent, fg_color=theme.BACKGROUND_UNSELECTED)
     mode_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
@@ -24,7 +25,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="Velocity Mode:",
         font=("Courier New", 14),
         anchor="e",
-        text_color=theme.get_color("text_black"),
+        text_color=theme.FONT_AND_BORDER,
     )
     mode_label.configure(width=theme.get_label_width())
     mode_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -38,13 +39,13 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color=theme.get_color("control_bg"),
-        button_color=theme.get_color("control_bg"),
-        button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("button_text"),
-        dropdown_fg_color=theme.get_color("control_bg"),
-        dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("button_text"),
+        fg_color=theme.BACKGROUND_UNSELECTED,
+        button_color=theme.BACKGROUND_UNSELECTED,
+        button_hover_color=theme.BACKGROUND_HOVER,
+        text_color=theme.FONT_AND_BORDER,
+        dropdown_fg_color=theme.BACKGROUND_UNSELECTED,
+        dropdown_hover_color=theme.BACKGROUND_HOVER,
+        dropdown_text_color=theme.FONT_AND_BORDER,
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -79,7 +80,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
                 font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
-                text_color=theme.get_color("text_black"),
+                text_color=theme.FONT_AND_BORDER,
             )
             vel_mode_menu.configure(font=("Courier New", font_size))
         except Exception:

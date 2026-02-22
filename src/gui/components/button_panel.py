@@ -63,9 +63,10 @@ class ButtonPanel:
         """
         # Use a unified color for main menu (row 0) buttons; fallback to spec color
         if spec.row == 0:
-            color = self.theme.get_color_tuple("main_menu_button")
+            color = (self.theme.BACKGROUND_UNSELECTED, self.theme.BACKGROUND_UNSELECTED)
         else:
-            color = self.theme.get_color_tuple(spec.color_name)
+            canonical_color = Theme._get_canonical_color(spec.color_name)
+            color = (canonical_color, canonical_color)
 
         # If press/release handlers are provided, use a no-op command
         # so clicks don't also trigger the primary spec.command
@@ -75,7 +76,7 @@ class ButtonPanel:
         wrapper_frame = ctk.CTkFrame(
             self.parent,
             fg_color="transparent",
-            bg_color=self.theme.get_color("bg"),
+            bg_color=self.theme.BACKGROUND_UNSELECTED,
         )
         wrapper_frame.grid(
             row=spec.row,
@@ -94,7 +95,9 @@ class ButtonPanel:
         # Create button
         # For main menu buttons (row 0), use black with no hover effect
         hover_color = (
-            color if spec.row == 0 else self.theme.get_color_tuple("control_hover")
+            color
+            if spec.row == 0
+            else (self.theme.BACKGROUND_HOVER, self.theme.BACKGROUND_HOVER)
         )
 
         btn = ctk.CTkButton(
@@ -102,11 +105,11 @@ class ButtonPanel:
             text=spec.text,
             font=("Courier New", self.theme.get_font_size("main_button")),
             fg_color=color,
-            text_color=self.theme.get_color("button_text"),
+            text_color=self.theme.FONT_AND_BORDER,
             hover_color=hover_color,
             hover=True,
             border_width=1,
-            border_color=self.theme.get_color("border"),
+            border_color=self.theme.FONT_AND_BORDER,
             corner_radius=0,
             command=cmd,
         )
@@ -124,7 +127,7 @@ class ButtonPanel:
                 wrapper_frame,
                 text=spec.function_name,
                 font=("Courier New", 30),
-                text_color=self.theme.get_color("button_text"),
+                text_color=self.theme.FONT_AND_BORDER,
                 fg_color="transparent",
             )
             subtitle.grid(
@@ -178,7 +181,8 @@ class ButtonPanel:
         """
         btn = self.get_button(text)
         if btn:
-            color = self.theme.get_color_tuple(color_name)
+            canonical_color = Theme._get_canonical_color(color_name)
+            color = (canonical_color, canonical_color)
             btn.configure(fg_color=color)
 
     def update_font_sizes(self) -> None:

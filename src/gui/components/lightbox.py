@@ -21,7 +21,7 @@ class Lightbox(ctk.CTkFrame):
             theme: Theme instance for colors
             command: Optional callback when clicked
         """
-        color = theme.get_color("overlay")
+        color = theme.BACKGROUND_UNSELECTED
         super().__init__(parent, fg_color=color, corner_radius=0)
         self.command = command
 

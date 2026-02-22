@@ -23,31 +23,6 @@ def _make_config():
     )
 
 
-def test_theme_color_retrieval():
-    """Test that theme colors are retrieved correctly via legacy mapping."""
-    config = _make_config()
-    theme = Theme(config)
-
-    # Test background colors
-    assert theme.get_color("bg") == "#000000"  # BACKGROUND_UNSELECTED
-    assert theme.get_color("state_active") == "#006633"  # BACKGROUND_SELECTED
-    assert theme.get_color("control_hover") == "#006633"  # BACKGROUND_HOVER
-
-    # Test text/border colors
-    assert theme.get_color("text_black") == "#00FF66"  # FONT_AND_BORDER
-    assert theme.get_color("border") == "#00FF66"  # FONT_AND_BORDER
-    assert theme.get_color("button_text") == "#00FF66"  # FONT_AND_BORDER
-
-
-def test_theme_color_tuple():
-    """Test that color tuples are created correctly."""
-    config = _make_config()
-    theme = Theme(config)
-
-    color_tuple = theme.get_color_tuple("border")
-    assert color_tuple == ("#00FF66", "#00FF66")
-
-
 def test_theme_font_size_calculation():
     """Test font size calculation at base resolution."""
     config = _make_config()
@@ -71,40 +46,8 @@ def test_theme_font_size_scaling():
     assert theme.get_font_size("popup_title") == 40
 
 
-def test_all_colors_defined():
-    """Test that all expected colors are defined in the theme."""
-    config = _make_config()
-    theme = Theme(config)
-
-    expected_colors = [
-        "cyan",
-        "violet",
-        "aqua",
-        "grey",
-        "red",
-        "bg",
-        "overlay",
-        "frame_bg",
-        "selector_bg",
-        "preset_highlight",
-        "control_bg",
-        "control_hover",
-        "border",
-        "button_inactive",
-        "button_inactive_light",
-        "text_white",
-        "text_black",
-        "button_text",
-        "popup_grey",
-    ]
-
-    for color in expected_colors:
-        assert color in theme.COLORS_LIGHT
-        assert color in theme.COLORS_DARK
-
-
 def test_canonical_theme_colors_exist():
-    """Test that the 4 canonical theme colors are defined."""
+    """Test that the 4 canonical theme colors and accent color are defined."""
     config = _make_config()
     theme = Theme(config)
 
@@ -113,9 +56,11 @@ def test_canonical_theme_colors_exist():
     assert theme.BACKGROUND_SELECTED == "#006633"
     assert theme.BACKGROUND_HOVER == "#006633"
     assert theme.FONT_AND_BORDER == "#00FF66"
+    assert theme.ACCENT_RED == "#FF3333"
 
     # Verify they are properly assigned
     assert isinstance(theme.BACKGROUND_UNSELECTED, str)
     assert isinstance(theme.BACKGROUND_SELECTED, str)
     assert isinstance(theme.BACKGROUND_HOVER, str)
     assert isinstance(theme.FONT_AND_BORDER, str)
+    assert isinstance(theme.ACCENT_RED, str)

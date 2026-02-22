@@ -47,7 +47,7 @@ class MidiGui(ctk.CTk):
         # Setup window
         self.title("MIDI Echo - Live Performance")
         self.geometry(f"{config.window_width}x{config.window_height}")
-        self.configure(fg_color=self.theme.get_color("bg"))
+        self.configure(fg_color=self.theme.BACKGROUND_UNSELECTED)
 
         # Maximize window (platform-independent)
         self.update_idletasks()

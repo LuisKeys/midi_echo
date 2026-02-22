@@ -22,10 +22,11 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
     """
     state = getattr(context.processor, "arp_state", None)
     if state is None:
+        theme = context.gui.theme
         lbl = ctk.CTkLabel(
             parent,
             text="No arpeggiator state found.",
-            text_color=theme.get_color("text_black"),
+            text_color=theme.FONT_AND_BORDER,
         )
         lbl.pack()
         return
@@ -36,8 +37,8 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
     tabview = CustomTabView(
         parent,
         theme=theme,
-        fg_color=theme.get_color("frame_bg"),
-        bg_color=theme.get_color("frame_bg"),
+        fg_color=theme.BACKGROUND_UNSELECTED,
+        bg_color=theme.BACKGROUND_UNSELECTED,
     )
     tabview.pack(
         expand=True,

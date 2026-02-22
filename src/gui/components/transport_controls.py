@@ -2,6 +2,7 @@
 
 import customtkinter as ctk
 from typing import Optional
+from .theme import Theme
 
 
 class TransportControls(ctk.CTkFrame):
@@ -16,7 +17,7 @@ class TransportControls(ctk.CTkFrame):
         met_cb: Optional[callable] = None,
         sequencer=None,
     ):
-        super().__init__(parent, fg_color=theme.get_color("frame_bg"))
+        super().__init__(parent, fg_color=theme.BACKGROUND_UNSELECTED)
         self.theme = theme
         self.pm = pm
         self.sequencer = sequencer
@@ -26,13 +27,14 @@ class TransportControls(ctk.CTkFrame):
         self._font = ("Courier New", font_size)
 
         def button_style(state_color_key: str):
+            canonical_color = Theme._get_canonical_color(state_color_key)
             return {
                 "corner_radius": 0,
-                "fg_color": self.theme.get_color(state_color_key),
-                "hover_color": self.theme.get_color("control_hover"),
-                "text_color": self.theme.get_color("button_text"),
+                "fg_color": canonical_color,
+                "hover_color": theme.BACKGROUND_HOVER,
+                "text_color": theme.FONT_AND_BORDER,
                 "border_width": 1,
-                "border_color": self.theme.get_color("border"),
+                "border_color": theme.FONT_AND_BORDER,
                 "font": self._font,
             }
 
@@ -68,9 +70,9 @@ class TransportControls(ctk.CTkFrame):
 
         # Metronome
         met_color = (
-            self.theme.get_color("state_metronome_on")
+            self.theme.BACKGROUND_SELECTED
             if (sequencer and sequencer.state.metronome_enabled)
-            else self.theme.get_color("button_inactive")
+            else self.theme.BACKGROUND_UNSELECTED
         )
         self.metronome_button = ctk.CTkButton(
             self,
@@ -79,10 +81,10 @@ class TransportControls(ctk.CTkFrame):
             height=self._height,
             corner_radius=0,
             fg_color=met_color,
-            hover_color=self.theme.get_color("control_hover"),
-            text_color=self.theme.get_color("button_text"),
+            hover_color=self.theme.BACKGROUND_HOVER,
+            text_color=self.theme.FONT_AND_BORDER,
             border_width=1,
-            border_color=self.theme.get_color("border"),
+            border_color=self.theme.FONT_AND_BORDER,
             font=self._font,
         )
         self.metronome_button.pack(side="left", expand=True, fill="x", padx=2)
@@ -120,22 +122,22 @@ class TransportControls(ctk.CTkFrame):
         # Update play button
         if is_playing:
             self.play_button.configure(
-                fg_color=self.theme.get_color("state_active"),
-                hover_color=self.theme.get_color("control_hover"),
+                fg_color=self.theme.BACKGROUND_SELECTED,
+                hover_color=self.theme.BACKGROUND_HOVER,
                 text="Stop",
                 state="normal",
             )
         elif is_recording or record_arming:
             self.play_button.configure(
-                fg_color=self.theme.get_color("button_inactive"),
-                hover_color=self.theme.get_color("control_pressed"),
+                fg_color=self.theme.BACKGROUND_UNSELECTED,
+                hover_color=self.theme.BACKGROUND_UNSELECTED,
                 text="Play",
                 state="disabled",
             )
         else:
             self.play_button.configure(
-                fg_color=self.theme.get_color("state_active"),
-                hover_color=self.theme.get_color("control_hover"),
+                fg_color=self.theme.BACKGROUND_SELECTED,
+                hover_color=self.theme.BACKGROUND_HOVER,
                 text="Play",
                 state="normal",
             )
@@ -143,22 +145,22 @@ class TransportControls(ctk.CTkFrame):
         # Update record button
         if is_recording:
             self.record_button.configure(
-                fg_color=self.theme.get_color("state_active"),
-                hover_color=self.theme.get_color("control_hover"),
+                fg_color=self.theme.BACKGROUND_SELECTED,
+                hover_color=self.theme.BACKGROUND_HOVER,
                 text="Stop Rec",
                 state="normal",
             )
         elif is_playing:
             self.record_button.configure(
-                fg_color=self.theme.get_color("button_inactive"),
-                hover_color=self.theme.get_color("control_pressed"),
+                fg_color=self.theme.BACKGROUND_UNSELECTED,
+                hover_color=self.theme.BACKGROUND_UNSELECTED,
                 text="Record",
                 state="disabled",
             )
         else:
             self.record_button.configure(
-                fg_color=self.theme.get_color("state_active"),
-                hover_color=self.theme.get_color("control_hover"),
+                fg_color=self.theme.BACKGROUND_SELECTED,
+                hover_color=self.theme.BACKGROUND_HOVER,
                 text="Record",
                 state="normal",
             )
@@ -166,13 +168,13 @@ class TransportControls(ctk.CTkFrame):
         # Metronome color
         if metronome_enabled:
             self.metronome_button.configure(
-                fg_color=self.theme.get_color("state_metronome_on"),
-                hover_color=self.theme.get_color("control_hover"),
+                fg_color=self.theme.BACKGROUND_SELECTED,
+                hover_color=self.theme.BACKGROUND_HOVER,
             )
         else:
             self.metronome_button.configure(
-                fg_color=self.theme.get_color("button_inactive"),
-                hover_color=self.theme.get_color("control_hover"),
+                fg_color=self.theme.BACKGROUND_UNSELECTED,
+                hover_color=self.theme.BACKGROUND_HOVER,
             )
 
     def update_font_sizes(self):
