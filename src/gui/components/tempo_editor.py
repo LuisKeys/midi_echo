@@ -47,7 +47,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
     def on_change(val):
         try:
             bpm = int(float(val))
-            state.timing.bpm = bpm
+            bpm = context.set_global_tempo(bpm)
             label.configure(text=f"BPM: {bpm}")
         except Exception:
             pass

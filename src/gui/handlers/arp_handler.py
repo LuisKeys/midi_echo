@@ -1,7 +1,6 @@
 """Handler for arpeggiator feature."""
 
 import logging
-import time
 from src.gui.handlers.base_handler import BaseHandler
 from src.gui.context import AppContext
 from src.gui.components.pattern_editor import build_pattern_editor
@@ -15,8 +14,6 @@ class ArpHandler(BaseHandler):
 
     def __init__(self, context: AppContext):
         super().__init__(context)
-        # store recent tap timestamps for tap-tempo
-        self._tap_times: list[float] = []
         # store reference to BPM widget for display updates
         self._bpm_widget = None
 
@@ -72,34 +69,13 @@ class ArpHandler(BaseHandler):
 
     def tap_tempo(self) -> None:
         """Record a tap for tempo detection and update BPM."""
-        if not self.context or not self.context.processor:
+        if not self.context:
             return
 
-        now = time.time()
-        self._tap_times.append(now)
-        # Keep last 6 taps
-        if len(self._tap_times) > 6:
-            self._tap_times.pop(0)
-
-        if len(self._tap_times) >= 2:
-            intervals = [
-                t2 - t1 for t1, t2 in zip(self._tap_times[:-1], self._tap_times[1:])
-            ]
-            avg = sum(intervals) / len(intervals)
-            if avg > 0:
-                bpm = int(round(60.0 / avg))
-                bpm = max(20, min(300, bpm))
-                try:
-                    self.context.processor.arp_state.timing.bpm = bpm
-                    logger.info(
-                        f"Tap tempo BPM set to {self.context.processor.arp_state.timing.bpm}"
-                    )
-                    # Update the BPM widget display immediately if available
-                    if self._bpm_widget:
-                        self._bpm_widget.set_value(bpm)
-                except AttributeError as e:
-                    logger.error(f"Failed to set BPM: {e}")
-                self.update_ui()
+        bpm = self.context.tap_tempo(source_widget=self._bpm_widget)
+        if bpm is not None:
+            logger.info(f"Tap tempo BPM set to {bpm}")
+            self.update_ui()
 
     def open_tempo_editor(self) -> None:
         """Open a popup to edit BPM precisely (hold-edit mode)."""

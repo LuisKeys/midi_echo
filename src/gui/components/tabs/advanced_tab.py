@@ -160,6 +160,10 @@ def _load_preset(state, context):
                 context.engine, context, data["sequencer"]
             )
 
+        # Keep arp and sequencer tempos in sync after load
+        if hasattr(context, "set_global_tempo"):
+            context.set_global_tempo(state.timing.bpm)
+
         print("Preset loaded successfully")
     except Exception as e:
         print(f"Load failed: {e}")

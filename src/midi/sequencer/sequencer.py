@@ -350,8 +350,18 @@ class MidiSequencer:
         Args:
             bpm: Tempo in beats per minute (20-300)
         """
-        self.state.on_tempo_changed(bpm)
-        logger.debug(f"Sequencer tempo: {self.state.tempo} BPM")
+        if self.context and getattr(self.context, "sequencer", None) is self:
+            new_bpm = self.context.set_global_tempo(bpm)
+        else:
+            self.state.on_tempo_changed(bpm)
+            new_bpm = self.state.tempo
+            processor = (
+                getattr(self.context, "processor", None) if self.context else None
+            )
+            if processor and hasattr(processor, "arp_state"):
+                processor.arp_state.timing.bpm = int(new_bpm)
+
+        logger.debug(f"Sequencer tempo: {new_bpm} BPM")
 
     def set_time_signature(self, num: int, den: int):
         """Update time signature and recalculate loop length

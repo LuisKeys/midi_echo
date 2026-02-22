@@ -33,6 +33,7 @@ class MidiProcessor:
         self.harmony_state: HarmonyState = HarmonyState()
         self.harmony_engine = None  # Will be set from context
         self.error_state = False
+        self.context = None
         # Clock sync
         self.last_clock_time = None
         self.clock_intervals = []
@@ -145,7 +146,11 @@ class MidiProcessor:
                 avg_interval = sum(self.clock_intervals) / len(self.clock_intervals)
                 quarter_time = avg_interval * 24  # 24 clocks per quarter
                 bpm = 60.0 / quarter_time
-                self.arp_state.timing.bpm = int(max(20, min(300, bpm)))
+                clamped_bpm = int(max(20, min(300, bpm)))
+                if self.context and hasattr(self.context, "set_global_tempo"):
+                    self.context.set_global_tempo(clamped_bpm)
+                else:
+                    self.arp_state.timing.bpm = clamped_bpm
         self.last_clock_time = current_time
 
     def _process_melody_note(self, msg: mido.Message) -> None:

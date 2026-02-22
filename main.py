@@ -89,6 +89,7 @@ async def main():
         event_loop=event_loop,
         event_log=event_log,
     )
+    processor.context = context
 
     # Create ArpEngine and attach to context (engine runs in event_loop)
     try:

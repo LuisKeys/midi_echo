@@ -15,6 +15,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         max_val,
         initial_val,
         step=1,
+        hold_step=None,
         callback=None,
         config=None,
         suffix=None,
@@ -28,7 +29,15 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.min_val = min_val
         self.max_val = max_val
         self.step = step
+        self.hold_step = hold_step if hold_step is not None else step
         self.callback = callback
+        self.config = config
+        self.hold_start_delay = (
+            getattr(config, "long_press_threshold", 500) if config else 500
+        )
+        self.hold_repeat_rate = (
+            getattr(config, "hold_increment_rate", 50) if config else 50
+        )
         self.theme = theme
         self.label_width = label_width
         self.current_val = initial_val
@@ -154,20 +163,16 @@ class IncrementDecrementWidget(ctk.CTkFrame):
     def start_decr(self):
         self.minus_holding = True
         self.decrement()
-        self.minus_timer = self.after(500, self.start_decr_repeat)
+        self.minus_timer = self.after(self.hold_start_delay, self.start_decr_repeat)
 
     def start_decr_repeat(self):
         if self.minus_holding:
-            self.minus_timer = self.after(
-                self.config.hold_increment_rate, self.repeat_decr
-            )
+            self.minus_timer = self.after(self.hold_repeat_rate, self.repeat_decr)
 
     def repeat_decr(self):
         if self.minus_holding:
-            self.decrement()
-            self.minus_timer = self.after(
-                self.config.hold_increment_rate, self.repeat_decr
-            )
+            self.decrement(self.hold_step)
+            self.minus_timer = self.after(self.hold_repeat_rate, self.repeat_decr)
 
     def stop_decr(self):
         self.minus_holding = False
@@ -178,20 +183,16 @@ class IncrementDecrementWidget(ctk.CTkFrame):
     def start_incr(self):
         self.plus_holding = True
         self.increment()
-        self.plus_timer = self.after(500, self.start_incr_repeat)
+        self.plus_timer = self.after(self.hold_start_delay, self.start_incr_repeat)
 
     def start_incr_repeat(self):
         if self.plus_holding:
-            self.plus_timer = self.after(
-                self.config.hold_increment_rate, self.repeat_incr
-            )
+            self.plus_timer = self.after(self.hold_repeat_rate, self.repeat_incr)
 
     def repeat_incr(self):
         if self.plus_holding:
-            self.increment()
-            self.plus_timer = self.after(
-                self.config.hold_increment_rate, self.repeat_incr
-            )
+            self.increment(self.hold_step)
+            self.plus_timer = self.after(self.hold_repeat_rate, self.repeat_incr)
 
     def stop_incr(self):
         self.plus_holding = False
@@ -199,16 +200,18 @@ class IncrementDecrementWidget(ctk.CTkFrame):
             self.after_cancel(self.plus_timer)
             self.plus_timer = None
 
-    def decrement(self):
-        new_val = max(self.min_val, self.current_val - self.step)
+    def decrement(self, amount=None):
+        step = self.step if amount is None else amount
+        new_val = max(self.min_val, self.current_val - step)
         if new_val != self.current_val:
             self.current_val = new_val
             self.value_label.configure(text=str(new_val))
             if self.callback:
                 self.callback(new_val)
 
-    def increment(self):
-        new_val = min(self.max_val, self.current_val + self.step)
+    def increment(self, amount=None):
+        step = self.step if amount is None else amount
+        new_val = min(self.max_val, self.current_val + step)
         if new_val != self.current_val:
             self.current_val = new_val
             self.value_label.configure(text=str(new_val))

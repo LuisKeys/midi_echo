@@ -3,6 +3,7 @@
 import customtkinter as ctk
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
+from ..tempo_control import create_tempo_control
 
 
 def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
@@ -12,17 +13,13 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     pm = context.gui.popup_manager
 
     # BPM control
-    bpm_widget = IncrementDecrementWidget(
+    bpm_widget = create_tempo_control(
         parent,
-        "BPM:",
-        20,
-        300,
-        state.timing.bpm,
-        callback=lambda v: setattr(state.timing, "bpm", v),
-        config=config,
-        tap_callback=lambda: context.gui.handlers["AR"].tap_tempo(),
+        context,
+        label_text="BPM:",
         theme=theme,
         label_width=theme.get_label_width(),
+        show_tap=True,
     )
     bpm_widget.pack(
         fill="x",

@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING
 import asyncio
+import time
 
 if TYPE_CHECKING:
     from src.gui.app import MidiGui
@@ -51,6 +52,8 @@ class AppContext:
         self.app_config = app_config
         self.event_log = event_log
         self.sequencer = sequencer
+        self._tempo_widgets = []
+        self._tap_times: list[float] = []
 
     def update_engine(self, engine: "MidiEngine") -> None:
         """Update the engine reference after initialization."""
@@ -59,3 +62,69 @@ class AppContext:
     def update_gui(self, gui: "MidiGui") -> None:
         """Update the GUI reference after initialization."""
         self.gui = gui
+
+    def get_global_tempo(self) -> int:
+        """Get the current global tempo (BPM)."""
+        if self.processor and hasattr(self.processor, "arp_state"):
+            return int(self.processor.arp_state.timing.bpm)
+        if self.sequencer:
+            return int(self.sequencer.state.tempo)
+        return 120
+
+    def register_tempo_widget(self, widget) -> None:
+        """Register a tempo widget for synchronized UI updates."""
+        if widget not in self._tempo_widgets:
+            self._tempo_widgets.append(widget)
+
+    def _notify_tempo_widgets(self, bpm: int, source_widget=None) -> None:
+        """Update all registered tempo widgets to the latest BPM."""
+        stale_widgets = []
+        for widget in self._tempo_widgets:
+            if widget is source_widget:
+                continue
+            try:
+                if widget.winfo_exists():
+                    widget.set_value(int(bpm))
+                else:
+                    stale_widgets.append(widget)
+            except Exception:
+                stale_widgets.append(widget)
+
+        if stale_widgets:
+            self._tempo_widgets = [
+                widget for widget in self._tempo_widgets if widget not in stale_widgets
+            ]
+
+    def set_global_tempo(self, bpm: int, source_widget=None) -> int:
+        """Set tempo globally for both arpeggiator and sequencer states."""
+        clamped = max(20, min(300, int(bpm)))
+
+        if self.processor and hasattr(self.processor, "arp_state"):
+            self.processor.arp_state.timing.bpm = clamped
+
+        if self.sequencer:
+            self.sequencer.state.on_tempo_changed(clamped)
+
+        self._notify_tempo_widgets(clamped, source_widget=source_widget)
+        return clamped
+
+    def tap_tempo(self, source_widget=None) -> int | None:
+        """Compute and apply tempo from tap intervals."""
+        now = time.time()
+        self._tap_times.append(now)
+
+        if len(self._tap_times) > 6:
+            self._tap_times.pop(0)
+
+        if len(self._tap_times) < 2:
+            return None
+
+        intervals = [
+            t2 - t1 for t1, t2 in zip(self._tap_times[:-1], self._tap_times[1:])
+        ]
+        avg = sum(intervals) / len(intervals)
+        if avg <= 0:
+            return None
+
+        bpm = int(round(60.0 / avg))
+        return self.set_global_tempo(bpm, source_widget=source_widget)

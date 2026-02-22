@@ -4,6 +4,7 @@ import customtkinter as ctk
 import asyncio
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
+from ..tempo_control import create_tempo_control
 
 
 def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
@@ -108,17 +109,13 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     context.gui._sequencer_metronome_button = metronome_button
 
     # ── Tempo Control ──
-    tempo_widget = IncrementDecrementWidget(
+    tempo_widget = create_tempo_control(
         parent,
-        "Tempo:",
-        20,
-        300,
-        sequencer.state.tempo,
-        callback=lambda v: sequencer.set_tempo(v),
-        config=config,
-        suffix=" BPM",
+        context,
+        label_text="Tempo:",
         theme=theme,
         label_width=theme.get_label_width(),
+        show_tap=True,
     )
     tempo_widget.pack(
         fill="x",
