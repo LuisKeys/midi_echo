@@ -61,7 +61,11 @@ class ButtonPanel:
         Returns:
             The created CTkButton
         """
-        color = self.theme.get_color_tuple(spec.color_name)
+        # Use a unified color for main menu (row 0) buttons; fallback to spec color
+        if spec.row == 0:
+            color = self.theme.get_color_tuple("main_menu_button")
+        else:
+            color = self.theme.get_color_tuple(spec.color_name)
 
         # If press/release handlers are provided, use a no-op command
         # so clicks don't also trigger the primary spec.command

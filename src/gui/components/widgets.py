@@ -108,7 +108,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
                 command=tap_callback,
                 corner_radius=0,
             )
-            self.tap_btn.pack(side="right", padx=LayoutSpacing.ELEMENT_PADX)
+            self.tap_btn.pack(side="left", padx=LayoutSpacing.CONTROL_BUTTON_PADX)
 
         # Apply initial scaling
         if self.theme:

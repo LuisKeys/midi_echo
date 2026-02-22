@@ -5,6 +5,7 @@ import asyncio
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 from ..tempo_control import create_tempo_control
+from ..transport_controls import TransportControls
 
 
 def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
@@ -27,86 +28,61 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     config = context.app_config
     theme = context.gui.theme
     pm = context.gui.popup_manager
+    compact_row_pad = max(2, theme.get_padding("popup_control") // 2)
+    compact_transport_height = 50
+    compact_control_height = 42
 
-    # ── Transport Controls Frame ──
+    # ── Transport Controls (now a reusable component) ──
     transport_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     transport_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(theme.get_padding("popup_control"), theme.get_padding("popup_control")),
+        pady=(compact_row_pad, compact_row_pad),
     )
 
-    transport_label = ctk.CTkLabel(
+    transport_controls = TransportControls(
         transport_frame,
-        text="Transport:",
-        font=("Arial", 14),
+        theme,
+        pm=pm,
+        play_cb=lambda: _on_play_clicked(context),
+        record_cb=lambda: _on_record_clicked(context),
+        clear_cb=lambda: _on_clear_clicked(context),
+        met_cb=lambda: _on_metronome_clicked(context),
+        sequencer=sequencer,
+    )
+    transport_controls.pack(fill="x")
+    for button in (
+        transport_controls.play_button,
+        transport_controls.record_button,
+        transport_controls.clear_button,
+        transport_controls.metronome_button,
+    ):
+        button.configure(height=compact_transport_height)
+
+    # Keep compatibility attributes for existing logic/tests
+    context.gui._sequencer_play_button = transport_controls.play_button
+    context.gui._sequencer_record_button = transport_controls.record_button
+    context.gui._sequencer_metronome_button = transport_controls.metronome_button
+    pm.register_element("content_elements", transport_controls)
+
+    # ── Pattern Info ──
+    info_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
+    info_frame.pack(
+        fill="x",
+        padx=LayoutSpacing.CONTAINER_PADX,
+        pady=(0, compact_row_pad),
+    )
+
+    info_label = ctk.CTkLabel(
+        info_frame,
+        text=f"Pattern: {sequencer.pattern.get_event_count()} events",
+        font=("Arial", 12),
         text_color=theme.get_color("text_black"),
+        anchor="w",
     )
-    transport_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
-    pm.register_element("content_elements", transport_label)
-
-    # Play button
-    play_button = ctk.CTkButton(
-        transport_frame,
-        text="Play",
-        command=lambda: _on_play_clicked(context),
-        width=80,
-        height=50,
-        corner_radius=0,
-        fg_color="#4CAF50",
-        hover_color="#45a049",
-        font=("Arial", 14),
-    )
-    play_button.pack(side="left", padx=2)
-    pm.register_element("content_elements", play_button)
-    context.gui._sequencer_play_button = play_button  # Store for state updates
-
-    # Record button
-    record_button = ctk.CTkButton(
-        transport_frame,
-        text="Record",
-        command=lambda: _on_record_clicked(context),
-        width=80,
-        height=50,
-        corner_radius=0,
-        fg_color="#FF9800",
-        hover_color="#F57C00",
-        font=("Arial", 14),
-    )
-    record_button.pack(side="left", padx=2)
-    pm.register_element("content_elements", record_button)
-    context.gui._sequencer_record_button = record_button
-
-    # Clear button
-    clear_button = ctk.CTkButton(
-        transport_frame,
-        text="Clear",
-        command=lambda: _on_clear_clicked(context),
-        width=80,
-        height=50,
-        corner_radius=0,
-        fg_color="#9C27B0",
-        hover_color="#7B1FA2",
-        font=("Arial", 14),
-    )
-    clear_button.pack(side="left", padx=2)
-    pm.register_element("content_elements", clear_button)
-
-    # Metronome toggle button
-    metronome_button = ctk.CTkButton(
-        transport_frame,
-        text="Met",
-        command=lambda: _on_metronome_clicked(context),
-        width=80,
-        height=50,
-        corner_radius=0,
-        fg_color="#2196F3" if sequencer.state.metronome_enabled else "#757575",
-        hover_color="#1976D2",
-        font=("Arial", 14),
-    )
-    metronome_button.pack(side="left", padx=2)
-    pm.register_element("content_elements", metronome_button)
-    context.gui._sequencer_metronome_button = metronome_button
+    info_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
+    pm.register_element("content_elements", info_label)
+    context.gui._sequencer_info_label = info_label
 
     # ── Tempo Control ──
     tempo_widget = create_tempo_control(
@@ -120,8 +96,12 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     tempo_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, theme.get_padding("popup_control")),
+        pady=(0, compact_row_pad),
     )
+    tempo_widget.minus_btn.configure(height=compact_control_height)
+    tempo_widget.plus_btn.configure(height=compact_control_height)
+    if hasattr(tempo_widget, "tap_btn"):
+        tempo_widget.tap_btn.configure(height=compact_control_height)
     pm.register_element("content_elements", tempo_widget)
 
     # ── Time Signature ──
@@ -144,16 +124,17 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     time_sig_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, theme.get_padding("popup_control")),
+        pady=(0, compact_row_pad),
     )
-    pm.register_element("content_elements", time_sig_widget)
+    time_sig_widget.minus_btn.configure(height=compact_control_height)
+    time_sig_widget.plus_btn.configure(height=compact_control_height)
 
     # Denominator dropdown (separate frame for den selection)
     den_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
     den_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, theme.get_padding("popup_control")),
+        pady=(0, compact_row_pad),
     )
 
     den_label = ctk.CTkLabel(
@@ -182,7 +163,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         variable=den_var,
         command=on_den_changed,
         width=80,
-        height=40,
+        height=compact_control_height,
         corner_radius=0,
         fg_color="#B0BEC5",
         button_color="#B0BEC5",
@@ -213,8 +194,10 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     bars_widget.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, theme.get_padding("popup_control")),
+        pady=(0, compact_row_pad),
     )
+    bars_widget.minus_btn.configure(height=compact_control_height)
+    bars_widget.plus_btn.configure(height=compact_control_height)
     pm.register_element("content_elements", bars_widget)
 
     # ── Quantization ──
@@ -222,7 +205,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     quant_frame.pack(
         fill="x",
         padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(0, theme.get_padding("popup_control")),
+        pady=(0, compact_row_pad),
     )
 
     quant_label = ctk.CTkLabel(
@@ -243,7 +226,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         variable=quant_var,
         command=lambda v: sequencer.set_quantization(v),
         width=80,
-        height=40,
+        height=compact_control_height,
         corner_radius=0,
         fg_color="#B0BEC5",
         button_color="#B0BEC5",
@@ -255,35 +238,17 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     quant_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
     pm.register_element("content_elements", quant_menu)
 
-    # ── Pattern Info ──
-    info_frame = ctk.CTkFrame(parent, fg_color=theme.get_color("frame_bg"))
-    info_frame.pack(
-        fill="x",
-        padx=LayoutSpacing.CONTAINER_PADX,
-        pady=(theme.get_padding("popup_control"), 0),
-    )
-
-    info_label = ctk.CTkLabel(
-        info_frame,
-        text=f"Pattern: {sequencer.pattern.get_event_count()} events",
-        font=("Arial", 12),
-        text_color=theme.get_color("text_black"),
-    )
-    info_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
-    pm.register_element("content_elements", info_label)
-    context.gui._sequencer_info_label = info_label
-
     # Font size update
     def update_font_sizes():
         try:
             if not parent.winfo_exists():
                 return
             font_size = theme.get_font_size("label_small")
-
-            transport_label.configure(
-                font=("Arial", font_size),
-                text_color=theme.get_color("text_black"),
-            )
+            # transport controls font
+            try:
+                transport_controls.update_font_sizes()
+            except Exception:
+                pass
             quant_label.configure(
                 font=("Arial", font_size),
                 width=theme.get_label_width(),
@@ -291,8 +256,25 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
                 text_color=theme.get_color("text_black"),
             )
             info_label.configure(
-                font=("Arial", font_size), text_color=theme.get_color("text_black")
+                font=("Arial", font_size),
+                text_color=theme.get_color("text_black"),
+                anchor="w",
             )
+            # Ensure Time Sig denominator label and menu use the same font/width
+            try:
+                den_label = getattr(time_sig_widget, "_den_label", None)
+                if den_label:
+                    den_label.configure(
+                        font=("Arial", font_size),
+                        width=theme.get_label_width(),
+                        anchor="e",
+                        text_color=theme.get_color("text_black"),
+                    )
+                den_menu = getattr(time_sig_widget, "_den_menu", None)
+                if den_menu:
+                    den_menu.configure(font=("Arial", font_size))
+            except Exception:
+                pass
         except Exception:
             pass
 
