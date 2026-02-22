@@ -301,6 +301,18 @@ class TestMidiSequencer:
         sequencer.toggle_metronome()
         assert sequencer.state.metronome_enabled is True
 
+    @pytest.mark.asyncio
+    async def test_start_playback_triggers_initial_downbeat(self, sequencer):
+        """Playback should emit the first downbeat immediately at start."""
+        sequencer.state.metronome_enabled = True
+        sequencer.clicker.play_downbeat = Mock()
+
+        await sequencer.start_playback()
+
+        assert sequencer.clicker.play_downbeat.call_count == 1
+
+        await sequencer.stop_playback()
+
     def test_sequencer_serialization(self, sequencer):
         """Test to_dict and from_dict preserve sequencer state."""
         sequencer.state.tempo = 140
@@ -317,6 +329,25 @@ class TestMidiSequencer:
 
         assert new_sequencer.state.tempo == 140
         assert new_sequencer.pattern.get_event_count() == 1
+
+    @pytest.mark.asyncio
+    async def test_start_recording_runs_one_bar_precount(self, sequencer):
+        """Test start_recording performs one-bar pre-count when stopped."""
+        sequencer.state.time_signature_num = 4
+        sequencer.state.tempo = 120
+        sequencer.state.metronome_enabled = True
+
+        sequencer.clicker.play_downbeat = Mock()
+        sequencer.clicker.play_beat = Mock()
+
+        with patch("src.midi.sequencer.sequencer.asyncio.sleep", new=AsyncMock()):
+            await sequencer.start_recording()
+
+        # One downbeat for the count-in bar + one downbeat at playback start
+        assert sequencer.clicker.play_downbeat.call_count == 2
+        assert sequencer.clicker.play_beat.call_count == 3
+        assert sequencer.state.is_recording is True
+        assert sequencer.state.is_playing is True
 
 
 class TestInternalClock:

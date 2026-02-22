@@ -97,14 +97,14 @@ class InternalClock:
 
                     self._accumulated_ticks += ticks_this_frame
 
-                    # Dispatch all accumulated complete ticks
+                    # Dispatch complete ticks one-by-one to avoid skipping
+                    # beat/bar boundaries when dt produces multiple ticks.
                     while self._accumulated_ticks >= 1:
-                        tick_increment = int(self._accumulated_ticks)
-                        self._accumulated_ticks -= tick_increment
+                        self._accumulated_ticks -= 1
 
-                        # Update playhead position
+                        # Update playhead position by exactly one tick
                         self.state.current_tick = (
-                            self.state.current_tick + tick_increment
+                            self.state.current_tick + 1
                         ) % self.state.loop_length_ticks
 
                         # Fire the main tick callback (playback happens here)

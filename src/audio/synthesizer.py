@@ -1,13 +1,12 @@
 """Metronome click synthesis and playback.
 
 Generates high-quality metronome clicks using sine wave synthesis and
-plays them on the default audio output device.
+plays them on the default audio output device using a non-blocking thread pool.
 """
 
-import asyncio
 import logging
 import numpy as np
-from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,7 @@ class MetronomeClicker:
         self.sample_rate = sample_rate
         self._audio_output = None
         self._initialized = False
+        self._audio_executor = ThreadPoolExecutor(max_workers=2)
 
         # Configure default click parameters (can be customized)
         self.downbeat_freq = 1000  # Hz
@@ -73,26 +73,31 @@ class MetronomeClicker:
                 )
                 self._initialized = False
 
-    async def play_downbeat(self):
+    def play_downbeat(self):
         """Play a downbeat click (louder, lower frequency).
 
-        This is called at the start of each bar. Runs asynchronously
-        to avoid blocking the clock.
+        This is called at the start of each bar. Returns immediately without
+        blocking the clock - audio plays on a background thread.
         """
-        await self._play_click(
+        self._play_click_nonblocking(
             frequency=self.downbeat_freq, velocity=self.downbeat_velocity
         )
 
-    async def play_beat(self):
+    def play_beat(self):
         """Play a regular beat click (softer, higher frequency).
 
-        This is called on each beat. Runs asynchronously to avoid
-        blocking the clock.
+        This is called on each beat. Returns immediately without blocking
+        the clock - audio plays on a background thread.
         """
-        await self._play_click(frequency=self.beat_freq, velocity=self.beat_velocity)
+        self._play_click_nonblocking(
+            frequency=self.beat_freq, velocity=self.beat_velocity
+        )
 
-    async def _play_click(self, frequency: float, velocity: int):
-        """Internal method to synthesize and play a click.
+    def _play_click_nonblocking(self, frequency: float, velocity: int):
+        """Schedule click audio playback on background thread (non-blocking).
+
+        Returns immediately - the click sound plays asynchronously on a
+        separate thread pool executor.
 
         Args:
             frequency: Fundamental frequency in Hz
@@ -102,18 +107,28 @@ class MetronomeClicker:
             try:
                 self._initialize_audio_output()
             except Exception:
-                logger.debug("Audio not available")
                 return
 
+        # Submit audio playback to thread pool - returns immediately
+        self._audio_executor.submit(self._play_click_blocking, frequency, velocity)
+
+    def _play_click_blocking(self, frequency: float, velocity: int):
+        """Internal method to synthesize and play a click.
+
+        This runs on a background thread and blocks that thread during playback,
+        but doesn't block the main asyncio clock.
+
+        Args:
+            frequency: Fundamental frequency in Hz
+            velocity: MIDI velocity (0-127) controlling amplitude
+        """
         try:
             # Generate click sound
             audio_data = self._synthesize_click(frequency, velocity)
 
-            # Play on default output (non-blocking in async context)
+            # Play on default output (blocks this thread only)
             if hasattr(self._audio_output, "play"):  # sounddevice
-                await asyncio.to_thread(
-                    self._audio_output.play, audio_data, self.sample_rate
-                )
+                self._audio_output.play(audio_data, self.sample_rate, blocking=True)
             elif hasattr(self._audio_output, "play_buffer"):  # simpleaudio
                 # Convert to int16 for simpleaudio
                 audio_int16 = (audio_data * 32767).astype(np.int16)
@@ -123,8 +138,8 @@ class MetronomeClicker:
                     bytes_per_sample=2,
                     sample_rate=self.sample_rate,
                 )
-                # Wait for playback in a thread to avoid blocking
-                await asyncio.to_thread(play_obj.wait_done)
+                # Wait for playback to finish on this thread
+                play_obj.wait_done()
         except Exception as e:
             logger.debug(f"Error playing click: {e}")
 

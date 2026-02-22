@@ -170,9 +170,9 @@ class MidiSequencer:
         - Metronome downbeat click (loud) via internal audio synthesis
         """
         if self.state.metronome_enabled:
-            # Schedule async audio playback without blocking
+            # Trigger non-blocking audio playback directly
             try:
-                asyncio.create_task(self.clicker.play_downbeat())
+                self.clicker.play_downbeat()
             except Exception as e:
                 logger.debug(f"Error scheduling downbeat audio: {e}")
 
@@ -186,9 +186,9 @@ class MidiSequencer:
             beat_index: 0-based beat number within the bar
         """
         if self.state.metronome_enabled and beat_index > 0:
-            # Schedule async audio playback without blocking
+            # Trigger non-blocking audio playback directly
             try:
-                asyncio.create_task(self.clicker.play_beat())
+                self.clicker.play_beat()
             except Exception as e:
                 logger.debug(f"Error scheduling beat audio: {e}")
 
@@ -234,6 +234,10 @@ class MidiSequencer:
         self.state.is_playing = True
         self.state.current_tick = 0
 
+        # Emit initial downbeat immediately so playback starts in time
+        # (clock beat callbacks are generated after first tick advance).
+        self._on_bar_start()
+
         await self.clock.start()
         logger.info(f"Sequencer playback started (BPM={self.state.tempo})")
 
@@ -272,17 +276,48 @@ class MidiSequencer:
         Process:
         1. Clear pattern
         2. Clear held notes
-        3. Set is_recording flag
-        4. Start playback
+        3. Run one-bar pre-count when starting from stopped state
+        4. Set is_recording flag
+        5. Start playback
 
         When recording, all processed MIDI will be captured via record_message().
         """
         self.pattern.clear()
         self._notes_held.clear()
+
+        was_playing = self.state.is_playing
+        self.state.is_recording = False
+
+        if not was_playing:
+            await self._run_precount_bar()
+
         self.state.is_recording = True
 
         await self.start_playback()
         logger.info("Sequencer recording started")
+
+    async def _run_precount_bar(self):
+        """Run a one-bar pre-count before recording starts.
+
+        Uses the current time signature and tempo. Clicks are emitted only when
+        metronome is enabled, but timing delay is always applied.
+        """
+        beats_in_bar = max(1, int(self.state.time_signature_num))
+        seconds_per_beat = self._seconds_per_beat()
+
+        for beat_index in range(beats_in_bar):
+            if self.state.metronome_enabled:
+                if beat_index == 0:
+                    self.clicker.play_downbeat()
+                else:
+                    self.clicker.play_beat()
+
+            await asyncio.sleep(seconds_per_beat)
+
+    def _seconds_per_beat(self) -> float:
+        """Return seconds per beat from current tempo."""
+        bpm = max(20.0, min(300.0, float(self.state.tempo)))
+        return 60.0 / bpm
 
     async def stop_recording(self):
         """Disarm recording and stop playback
