@@ -95,7 +95,7 @@ class ButtonPanel:
         btn = ctk.CTkButton(
             wrapper_frame,
             text=spec.text,
-            font=("Courier New", self.theme.get_font_size("main_button"), "bold"),
+            font=("Courier New", self.theme.get_font_size("main_button")),
             fg_color=color,
             text_color=self.theme.get_color("button_text"),
             hover_color=self.theme.get_color_tuple("control_hover"),
@@ -118,7 +118,7 @@ class ButtonPanel:
             subtitle = ctk.CTkLabel(
                 wrapper_frame,
                 text=spec.function_name,
-                font=("Courier New", 30, "bold"),
+                font=("Courier New", 30),
                 text_color=self.theme.get_color("button_text"),
                 fg_color=color,
             )
@@ -180,7 +180,7 @@ class ButtonPanel:
         """Update all button fonts after window resize."""
         new_font_size = self.theme.get_font_size("main_button")
         for btn in self.buttons.values():
-            btn.configure(font=("Courier New", new_font_size, "bold"))
+            btn.configure(font=("Courier New", new_font_size))
 
     def force_redraw(self) -> None:
         """Force redraw of all buttons to fix rendering glitches."""

@@ -183,7 +183,12 @@ class PopupManager:
         monitor_frame.pack_propagate(False)
 
         # Add the event monitor widget
-        event_monitor = EventMonitor(monitor_frame, event_log, self.theme)
+        event_monitor = EventMonitor(
+            monitor_frame,
+            event_log,
+            self.theme,
+            on_close=self._close_current,
+        )
         event_monitor.pack(fill="both", expand=True)
 
         # Store reference for cleanup

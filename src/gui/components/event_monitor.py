@@ -7,18 +7,20 @@ from src.midi.event_log import EventLog
 class EventMonitor(ctk.CTkFrame):
     """Widget for monitoring MIDI events in real-time."""
 
-    def __init__(self, parent, event_log: EventLog, theme):
+    def __init__(self, parent, event_log: EventLog, theme, on_close=None):
         """Initialize event monitor.
 
         Args:
             parent: Parent widget
             event_log: EventLog instance to monitor
             theme: Theme instance for colors
+            on_close: Optional callback to close the monitor popup
         """
         super().__init__(parent, fg_color=theme.get_color("bg"))
 
         self.event_log = event_log
         self.theme = theme
+        self.on_close = on_close
         self.grid_rowconfigure(1, weight=1)  # Row 1 (display) gets extra space
         self.grid_columnconfigure(0, weight=1)
 
@@ -29,6 +31,7 @@ class EventMonitor(ctk.CTkFrame):
         self.pause_button = None
         self.clear_button = None
         self.count_label = None
+        self.close_button = None
 
         # Create header
         header_frame = ctk.CTkFrame(self, fg_color=theme.get_color("bg"))
@@ -40,6 +43,8 @@ class EventMonitor(ctk.CTkFrame):
             pady=theme.get_padding("popup_frame"),
         )
         header_frame.grid_columnconfigure(1, weight=1)
+        # Reserve space for the close button so it's always visible
+        header_frame.grid_columnconfigure(2, minsize=48)
 
         self.title_label = ctk.CTkLabel(
             header_frame,
@@ -56,6 +61,26 @@ class EventMonitor(ctk.CTkFrame):
             text_color=theme.get_color("text_white"),
         )
         self.status_label.grid(row=0, column=1, sticky="e", padx=5)
+
+        self.close_button = ctk.CTkButton(
+            header_frame,
+            text="✕",
+            font=("Courier New", theme.get_font_size("popup_close"), "bold"),
+            fg_color=theme.get_color("popup_grey"),
+            text_color=theme.get_color("text_white"),
+            hover_color=theme.get_color("red"),
+            width=48,
+            height=48,
+            border_width=1,
+            border_color=theme.get_color("border"),
+            corner_radius=6,
+            command=lambda: None,
+        )
+        self.close_button.grid(row=0, column=2, sticky="e", padx=(5, 0))
+        # Bind to ButtonRelease and stop propagation so underlying controls
+        # (e.g. transport buttons) don't receive the click when the popup
+        # is closed. Use add+ to preserve default button behavior.
+        self.close_button.bind("<ButtonRelease-1>", self._on_close_click, add="+")
 
         # Create event display area
         display_frame = ctk.CTkFrame(self, fg_color=theme.get_color("bg"))
@@ -171,6 +196,15 @@ class EventMonitor(ctk.CTkFrame):
                 self.count_label.configure(
                     font=("Courier New", self.theme.get_font_size("popup_value"))
                 )
+
+            if self.close_button and self.close_button.winfo_exists():
+                self.close_button.configure(
+                    font=(
+                        "Courier New",
+                        self.theme.get_font_size("popup_close"),
+                        "bold",
+                    )
+                )
         except Exception:
             pass  # Widget might have been destroyed
 
@@ -226,6 +260,13 @@ class EventMonitor(ctk.CTkFrame):
         """Handle clear button click."""
         self.event_log.clear()
         self._update_display()
+
+    def _on_close_click(self, event=None) -> str:
+        """Handle close button click and stop event propagation."""
+        if callable(self.on_close):
+            self.on_close()
+
+        return "break"
 
     def cleanup(self) -> None:
         """Clean up when monitor is closed."""
