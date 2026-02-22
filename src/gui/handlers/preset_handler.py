@@ -43,14 +43,15 @@ class PresetHandler(BaseHandler):
         pass
 
     def update_ui(self) -> None:
-        """Update PS button color to cyan (active state)."""
+        """Update PS button color to black (default state)."""
         if not self.context.gui or not self.context.processor:
             logger.warning("Cannot update UI: missing GUI or processor")
             return
 
         btn = self.context.gui.button_panel.get_button("PS")
         if btn:
-            # Always use cyan color for PS button (matching other state buttons)
-            color_tuple = self.context.gui.theme.get_color_tuple("cyan")
+            # Use black color for PS button (main menu button style)
+            black_color = self.context.gui.theme.get_color("button_inactive")
+            color_tuple = (black_color, black_color)
             btn.configure(fg_color=color_tuple, hover_color=color_tuple)
-            logger.debug(f"PS button color updated to cyan")
+            logger.debug(f"PS button color updated to black")

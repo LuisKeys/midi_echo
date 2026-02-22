@@ -62,10 +62,10 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         fg_color=theme.get_color("control_bg"),
         button_color=theme.get_color("control_bg"),
         button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("text_black"),
+        text_color=theme.get_color("button_text"),
         dropdown_fg_color=theme.get_color("control_bg"),
         dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("text_black"),
+        dropdown_text_color=theme.get_color("button_text"),
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )

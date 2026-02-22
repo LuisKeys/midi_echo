@@ -113,18 +113,16 @@ class ArpHandler(BaseHandler):
 
         if enabled:
             active_color = self.context.gui.theme.get_color("state_active")
-            hover_color = self.context.gui.theme.get_color("control_hover")
             color_tuple = (active_color, active_color)
-            hover_tuple = (hover_color, hover_color)
             logger.debug(f"update_ui: setting active color {color_tuple}")
-            btn.configure(fg_color=color_tuple, hover_color=hover_tuple)
+            btn.configure(fg_color=color_tuple, hover_color=color_tuple)
         else:
             logger.debug("update_ui: setting disabled color")
-            disabled_base = self.context.gui.theme.get_color("button_inactive")
-            pressed_color = self.context.gui.theme.get_color("control_pressed")
-            disabled_color = (disabled_base, disabled_base)
-            hover_color = (pressed_color, pressed_color)
-            btn.configure(fg_color=disabled_color, hover_color=hover_color)
+            disabled_color = self.context.gui.theme.get_color("button_inactive")
+            disabled_color_tuple = (disabled_color, disabled_color)
+            btn.configure(
+                fg_color=disabled_color_tuple, hover_color=disabled_color_tuple
+            )
 
         # Force UI update
         try:

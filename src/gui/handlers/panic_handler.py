@@ -18,10 +18,14 @@ class PanicHandler(BaseHandler):
         if not self.context.gui or not self.context.engine:
             return
 
-        # Change button color to red
+        # Change button color to red temporarily
         btn = self.context.gui.button_panel.get_button("ST")
         if btn:
-            btn.configure(fg_color=self.context.gui.theme.get_color_tuple("red"))
+            red_color = self.context.gui.theme.get_color("red")
+            btn.configure(
+                fg_color=(red_color, red_color),
+                hover_color=(red_color, red_color),
+            )
 
         # Send All Notes Off (CC 123) to all 16 channels
         for ch in range(16):
@@ -31,13 +35,20 @@ class PanicHandler(BaseHandler):
                     self.context.engine.queue.put_nowait, msg
                 )
 
-        # Reset button color after 500ms
+        # Reset button color to black after 500ms
         if self.context.gui:
             self.context.gui.root.after(
                 500,
                 lambda: (
                     btn.configure(
-                        fg_color=self.context.gui.theme.get_color_tuple("grey")
+                        fg_color=(
+                            self.context.gui.theme.get_color("button_inactive"),
+                            self.context.gui.theme.get_color("button_inactive"),
+                        ),
+                        hover_color=(
+                            self.context.gui.theme.get_color("button_inactive"),
+                            self.context.gui.theme.get_color("button_inactive"),
+                        ),
                     )
                     if btn
                     else None

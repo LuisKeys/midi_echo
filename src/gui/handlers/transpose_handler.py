@@ -83,6 +83,20 @@ class TransposeHandler(BaseHandler):
         btn = self.context.gui.button_panel.get_button("TR")
         if btn:
             btn.configure(text=tr_text)
+            # Update button colors: active if transpose != 0
+            theme = self.context.gui.theme
+            if self.context.processor.transpose != 0:
+                active_color = theme.get_color("state_active")
+                btn.configure(
+                    fg_color=(active_color, active_color),
+                    hover_color=(active_color, active_color),
+                )
+            else:
+                disabled_color = theme.get_color("button_inactive")
+                btn.configure(
+                    fg_color=(disabled_color, disabled_color),
+                    hover_color=(disabled_color, disabled_color),
+                )
 
         # Update popup value label if it exists
         if self._value_label:

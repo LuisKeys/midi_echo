@@ -42,7 +42,7 @@ class TransportControls(ctk.CTkFrame):
             text="Play",
             command=lambda: play_cb() if play_cb else None,
             height=self._height,
-            **button_style("state_active"),
+            **button_style("button_inactive"),
         )
         self.play_button.pack(side="left", expand=True, fill="x", padx=2)
 
@@ -52,7 +52,7 @@ class TransportControls(ctk.CTkFrame):
             text="Record",
             command=lambda: record_cb() if record_cb else None,
             height=self._height,
-            **button_style("state_active"),
+            **button_style("button_inactive"),
         )
         self.record_button.pack(side="left", expand=True, fill="x", padx=2)
 
@@ -62,7 +62,7 @@ class TransportControls(ctk.CTkFrame):
             text="Clear",
             command=lambda: clear_cb() if clear_cb else None,
             height=self._height,
-            **button_style("state_active"),
+            **button_style("button_inactive"),
         )
         self.clear_button.pack(side="left", expand=True, fill="x", padx=2)
 
@@ -70,7 +70,7 @@ class TransportControls(ctk.CTkFrame):
         met_color = (
             self.theme.get_color("state_metronome_on")
             if (sequencer and sequencer.state.metronome_enabled)
-            else self.theme.get_color("state_metronome_off")
+            else self.theme.get_color("button_inactive")
         )
         self.metronome_button = ctk.CTkButton(
             self,
@@ -171,8 +171,8 @@ class TransportControls(ctk.CTkFrame):
             )
         else:
             self.metronome_button.configure(
-                fg_color=self.theme.get_color("state_metronome_off"),
-                hover_color=self.theme.get_color("control_pressed"),
+                fg_color=self.theme.get_color("button_inactive"),
+                hover_color=self.theme.get_color("control_hover"),
             )
 
     def update_font_sizes(self):

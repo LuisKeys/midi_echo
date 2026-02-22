@@ -41,10 +41,10 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         fg_color=theme.get_color("control_bg"),
         button_color=theme.get_color("control_bg"),
         button_hover_color=theme.get_color("control_hover"),
-        text_color=theme.get_color("text_black"),
+        text_color=theme.get_color("button_text"),
         dropdown_fg_color=theme.get_color("control_bg"),
         dropdown_hover_color=theme.get_color("control_hover"),
-        dropdown_text_color=theme.get_color("text_black"),
+        dropdown_text_color=theme.get_color("button_text"),
         font=("Courier New", 20),
         dropdown_font=("Courier New", 30),
     )
@@ -66,6 +66,10 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         command=lambda: setattr(state, "enabled", enable_var.get()),
         font=("Courier New", 14),
         text_color=theme.get_color("text_black"),
+        fg_color=theme.get_color("control_bg"),
+        hover_color=theme.get_color("control_hover"),
+        border_color=theme.get_color("border"),
+        checkmark_color=theme.get_color("button_text"),
     )
     enable_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -83,6 +87,11 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=120,
         height=50,
         corner_radius=0,
+        fg_color=theme.get_color("control_bg"),
+        hover_color=theme.get_color("control_hover"),
+        text_color=theme.get_color("button_text"),
+        border_color=theme.get_color("border"),
+        border_width=1,
         command=lambda: _save_preset(state, context),
     )
     save_btn.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -93,6 +102,11 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=120,
         height=50,
         corner_radius=0,
+        fg_color=theme.get_color("control_bg"),
+        hover_color=theme.get_color("control_hover"),
+        text_color=theme.get_color("button_text"),
+        border_color=theme.get_color("border"),
+        border_width=1,
         command=lambda: _load_preset(state, context),
     )
     load_btn.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)

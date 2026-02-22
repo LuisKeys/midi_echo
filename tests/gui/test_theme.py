@@ -24,13 +24,19 @@ def _make_config():
 
 
 def test_theme_color_retrieval():
-    """Test that theme colors are retrieved correctly."""
+    """Test that theme colors are retrieved correctly via legacy mapping."""
     config = _make_config()
     theme = Theme(config)
 
-    assert theme.get_color("bg") == "#000000"
-    assert theme.get_color("text_black") == "#00FF66"
-    assert theme.get_color("border") == "#00FF66"
+    # Test background colors
+    assert theme.get_color("bg") == "#000000"  # BACKGROUND_UNSELECTED
+    assert theme.get_color("state_active") == "#006633"  # BACKGROUND_SELECTED
+    assert theme.get_color("control_hover") == "#006633"  # BACKGROUND_HOVER
+
+    # Test text/border colors
+    assert theme.get_color("text_black") == "#00FF66"  # FONT_AND_BORDER
+    assert theme.get_color("border") == "#00FF66"  # FONT_AND_BORDER
+    assert theme.get_color("button_text") == "#00FF66"  # FONT_AND_BORDER
 
 
 def test_theme_color_tuple():
@@ -95,3 +101,21 @@ def test_all_colors_defined():
     for color in expected_colors:
         assert color in theme.COLORS_LIGHT
         assert color in theme.COLORS_DARK
+
+
+def test_canonical_theme_colors_exist():
+    """Test that the 4 canonical theme colors are defined."""
+    config = _make_config()
+    theme = Theme(config)
+
+    # Verify the 4 canonical color constants exist and are hex colors
+    assert theme.BACKGROUND_UNSELECTED == "#000000"
+    assert theme.BACKGROUND_SELECTED == "#006633"
+    assert theme.BACKGROUND_HOVER == "#006633"
+    assert theme.FONT_AND_BORDER == "#00FF66"
+
+    # Verify they are properly assigned
+    assert isinstance(theme.BACKGROUND_UNSELECTED, str)
+    assert isinstance(theme.BACKGROUND_SELECTED, str)
+    assert isinstance(theme.BACKGROUND_HOVER, str)
+    assert isinstance(theme.FONT_AND_BORDER, str)

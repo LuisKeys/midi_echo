@@ -5,6 +5,7 @@ import customtkinter as ctk
 from src.midi.arp.state_validator import ArpState
 from .widgets import IncrementDecrementWidget
 from .layout_utils import LayoutSpacing
+from .custom_tabview import CustomTabView
 from .tabs import (
     _build_pattern_tab,
     _build_timing_tab,
@@ -31,23 +32,19 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
 
     theme = context.gui.theme
 
-    # Main tabview
-    tabview = ctk.CTkTabview(parent)
+    # Main tabview using custom component
+    tabview = CustomTabView(
+        parent,
+        theme=theme,
+        fg_color=theme.get_color("frame_bg"),
+        bg_color=theme.get_color("frame_bg"),
+    )
     tabview.pack(
         expand=True,
         fill="both",
         padx=LayoutSpacing.CONTAINER_PADX,
         pady=theme.get_padding("tab_container"),
     )
-
-    # Configure tab appearance for touch-friendly interface
-    if hasattr(tabview, "_segmented_button"):
-        # Increase font size for tabs
-        tab_font_size = theme.get_font_size("tab_text")
-        tabview._segmented_button.configure(
-            font=("Courier New", tab_font_size),
-            text_color=theme.get_color("text_black"),
-        )
 
     # Register tabview for font scaling
     if hasattr(parent.master, "popup_manager"):

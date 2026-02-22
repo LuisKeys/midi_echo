@@ -308,15 +308,13 @@ class HarmonyHandler(BaseHandler):
             theme = self.context.gui.theme
             if self.context.processor.harmonizer_enabled:
                 active_color = theme.get_color("state_active")
-                hover_color = theme.get_color("control_hover")
                 btn.configure(
                     fg_color=(active_color, active_color),
-                    hover_color=(hover_color, hover_color),
+                    hover_color=(active_color, active_color),
                 )
             else:
-                disabled_base = theme.get_color("button_inactive")
-                pressed_color = theme.get_color("control_pressed")
+                disabled_color = theme.get_color("button_inactive")
                 btn.configure(
-                    fg_color=(disabled_base, disabled_base),
-                    hover_color=(pressed_color, pressed_color),
+                    fg_color=(disabled_color, disabled_color),
+                    hover_color=(disabled_color, disabled_color),
                 )

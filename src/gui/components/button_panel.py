@@ -92,13 +92,18 @@ class ButtonPanel:
         wrapper_frame.grid_columnconfigure(0, weight=1)
 
         # Create button
+        # For main menu buttons (row 0), use black with no hover effect
+        hover_color = (
+            color if spec.row == 0 else self.theme.get_color_tuple("control_hover")
+        )
+
         btn = ctk.CTkButton(
             wrapper_frame,
             text=spec.text,
             font=("Courier New", self.theme.get_font_size("main_button")),
             fg_color=color,
             text_color=self.theme.get_color("button_text"),
-            hover_color=self.theme.get_color_tuple("control_hover"),
+            hover_color=hover_color,
             hover=True,
             border_width=1,
             border_color=self.theme.get_color("border"),

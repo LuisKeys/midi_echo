@@ -68,3 +68,17 @@ class ChannelHandler(BaseHandler):
         btn = self.context.gui.button_panel.get_button("CH")
         if btn:
             btn.configure(text=f"CH\n{ch_text}")
+            # Update button colors: active if channel is not set to bypass (None)
+            theme = self.context.gui.theme
+            if self.context.processor.output_channel is not None:
+                active_color = theme.get_color("state_active")
+                btn.configure(
+                    fg_color=(active_color, active_color),
+                    hover_color=(active_color, active_color),
+                )
+            else:
+                disabled_color = theme.get_color("button_inactive")
+                btn.configure(
+                    fg_color=(disabled_color, disabled_color),
+                    hover_color=(disabled_color, disabled_color),
+                )

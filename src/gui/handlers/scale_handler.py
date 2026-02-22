@@ -46,17 +46,15 @@ class ScaleHandler(BaseHandler):
             theme = self.context.gui.theme
             if self.context.processor.scale_enabled:
                 active_color = theme.get_color("state_active")
-                hover_color = theme.get_color("control_hover")
                 btn.configure(
                     fg_color=(active_color, active_color),
-                    hover_color=(hover_color, hover_color),
+                    hover_color=(active_color, active_color),
                 )
             else:
-                disabled_base = theme.get_color("button_inactive")
-                pressed_color = theme.get_color("control_pressed")
+                disabled_color = theme.get_color("button_inactive")
                 btn.configure(
-                    fg_color=(disabled_base, disabled_base),
-                    hover_color=(pressed_color, pressed_color),
+                    fg_color=(disabled_color, disabled_color),
+                    hover_color=(disabled_color, disabled_color),
                 )
 
     def _show_scale_popup(self) -> None:
@@ -111,7 +109,7 @@ class ScaleHandler(BaseHandler):
                 fg_color=theme.get_color("control_bg"),
                 button_color=theme.get_color("control_bg"),
                 button_hover_color=theme.get_color("control_hover"),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.get_color("button_text"),
                 dropdown_fg_color=theme.get_color("control_bg"),
                 dropdown_hover_color=theme.get_color("control_hover"),
                 dropdown_text_color=theme.get_color("button_text"),
@@ -155,10 +153,10 @@ class ScaleHandler(BaseHandler):
                 fg_color=theme.get_color("control_bg"),
                 button_color=theme.get_color("control_bg"),
                 button_hover_color=theme.get_color("control_hover"),
-                text_color=theme.get_color("text_black"),
+                text_color=theme.get_color("button_text"),
                 dropdown_fg_color=theme.get_color("control_bg"),
                 dropdown_hover_color=theme.get_color("control_hover"),
-                dropdown_text_color=theme.get_color("text_black"),
+                dropdown_text_color=theme.get_color("button_text"),
                 font=("Courier New", 20),
                 dropdown_font=("Courier New", 30),
             )
