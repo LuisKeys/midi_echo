@@ -10,6 +10,7 @@ from src.midi.ports import PortManager
 from src.midi.processor import MidiProcessor
 from src.midi.engine import MidiEngine
 from src.midi.event_log import EventLog
+from src.midi.sequencer import MidiSequencer
 from src.gui.app import MidiGui
 
 # Load environment variables
@@ -109,6 +110,15 @@ async def main():
         processor.harmony_engine = harmony_engine
     except Exception:
         harmony_engine = None
+
+    # Create MidiSequencer
+    try:
+        sequencer = MidiSequencer(engine, context)
+        context.sequencer = sequencer
+        engine.set_sequencer(sequencer)
+    except Exception as e:
+        logger.error(f"Failed to initialize sequencer: {e}")
+        sequencer = None
 
     # Start MIDI engine in a background thread
     engine_thread = threading.Thread(

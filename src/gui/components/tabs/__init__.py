@@ -5,6 +5,7 @@ from .timing_tab import _build_timing_tab
 from .modes_tab import _build_modes_tab
 from .velocity_tab import _build_velocity_tab
 from .advanced_tab import _build_advanced_tab
+from .sequencer_tab import _build_sequencer_tab
 
 __all__ = [
     "_build_pattern_tab",
@@ -12,4 +13,5 @@ __all__ = [
     "_build_modes_tab",
     "_build_velocity_tab",
     "_build_advanced_tab",
+    "_build_sequencer_tab",
 ]

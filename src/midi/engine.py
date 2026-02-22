@@ -19,6 +19,15 @@ class MidiEngine:
         self._running = False
         self._loop = None
         self._stop_event = None
+        self.sequencer = None  # MidiSequencer for recording processed output
+
+    def set_sequencer(self, sequencer):
+        """Attach a MidiSequencer to record processed output
+
+        Args:
+            sequencer: MidiSequencer instance
+        """
+        self.sequencer = sequencer
 
     def _callback(self, msg, port_name):
         """Thread-safe callback to push messages into the async queue."""
@@ -90,8 +99,13 @@ class MidiEngine:
                 msg = await self.queue.get()
                 processed_msg = self.processor.process(msg)
 
-                if processed_msg and self.output:
-                    self.output.send(processed_msg)
+                if processed_msg:
+                    # Tap for sequencer recording (before sending to output)
+                    if self.sequencer:
+                        self.sequencer.record_message(processed_msg)
+
+                    if self.output:
+                        self.output.send(processed_msg)
 
                 self.queue.task_done()
             except asyncio.CancelledError:

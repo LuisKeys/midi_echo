@@ -9,6 +9,7 @@ from .scale_handler import ScaleHandler
 from .arp_handler import ArpHandler
 from .preset_handler import PresetHandler
 from .panic_handler import PanicHandler
+from .sequencer_handler import SequencerHandler
 
 __all__ = [
     "BaseHandler",
@@ -20,4 +21,5 @@ __all__ = [
     "ArpHandler",
     "PresetHandler",
     "PanicHandler",
+    "SequencerHandler",
 ]

@@ -6,3 +6,5 @@ customtkinter
 pytest
 pytest-cov
 pytest-asyncio
+sounddevice
+numpy

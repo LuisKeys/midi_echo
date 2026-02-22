@@ -1,6 +1,7 @@
 """Advanced tab for the ARP control interface."""
 
 import customtkinter as ctk
+import json
 from src.midi.arp.state_validator import ArpState
 from ..layout_utils import LayoutSpacing
 
@@ -79,7 +80,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=120,
         height=50,
         corner_radius=0,
-        command=lambda: _save_preset(state),
+        command=lambda: _save_preset(state, context),
     )
     save_btn.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -89,7 +90,7 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=120,
         height=50,
         corner_radius=0,
-        command=lambda: _load_preset(state),
+        command=lambda: _load_preset(state, context),
     )
     load_btn.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -119,21 +120,46 @@ def _build_advanced_tab(parent: ctk.CTkFrame, state, context) -> None:
     update_font_sizes()
 
 
-def _save_preset(state):
-    """Save current state to a preset file."""
+def _save_preset(state, context):
+    """Save current state to a preset file (arp_state + sequencer)."""
     try:
-        state.save("arp_preset.json")
+        preset_data = {
+            "arp_state": state.to_dict(),
+        }
+
+        # Also save sequencer state if available
+        if hasattr(context, "sequencer") and context.sequencer:
+            preset_data["sequencer"] = context.sequencer.to_dict()
+
+        with open("arp_preset.json", "w", encoding="utf-8") as f:
+            json.dump(preset_data, f, indent=2)
+        print("Preset saved successfully")
     except Exception as e:
         print(f"Save failed: {e}")
 
 
-def _load_preset(state):
-    """Load state from a preset file."""
+def _load_preset(state, context):
+    """Load state from a preset file (arp_state + sequencer)."""
     try:
-        loaded = ArpState.load("arp_preset.json")
-        # Copy attributes
-        for attr in vars(loaded):
-            if hasattr(state, attr):
-                setattr(state, attr, getattr(loaded, attr))
+        with open("arp_preset.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # Load arp_state
+        if "arp_state" in data:
+            loaded = ArpState.from_dict(data["arp_state"])
+            # Copy attributes
+            for attr in vars(loaded):
+                if hasattr(state, attr):
+                    setattr(state, attr, getattr(loaded, attr))
+
+        # Load sequencer state if available
+        if "sequencer" in data and hasattr(context, "sequencer") and context.sequencer:
+            from src.midi.sequencer import MidiSequencer
+
+            context.sequencer = MidiSequencer.from_dict(
+                context.engine, context, data["sequencer"]
+            )
+
+        print("Preset loaded successfully")
     except Exception as e:
         print(f"Load failed: {e}")

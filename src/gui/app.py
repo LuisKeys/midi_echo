@@ -15,6 +15,7 @@ from src.gui.handlers import (
     ArpHandler,
     PresetHandler,
     PanicHandler,
+    SequencerHandler,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,6 +72,7 @@ class MidiGui(ctk.CTk):
             "SC": ScaleHandler(context),
             "AR": ArpHandler(context),
             "PS": PresetHandler(context),
+            "SQ": SequencerHandler(context),
             "ST": PanicHandler(context),
         }
 
@@ -163,9 +165,17 @@ class MidiGui(ctk.CTk):
                 function_name="Preset",
             ),
             ButtonSpec(
-                "ST",
+                "SQ",
                 1,
                 3,
+                "cyan",
+                self.handlers["SQ"].on_button_press,
+                function_name="Sequencer",
+            ),
+            ButtonSpec(
+                "ST",
+                2,
+                0,
                 "grey",
                 self.handlers["ST"].on_button_press,
                 self.handlers["ST"].on_button_long_press,
