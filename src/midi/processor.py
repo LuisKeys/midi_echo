@@ -5,6 +5,7 @@ from src.midi.arp.state_validator import ArpState
 from src.midi.harmony.state import HarmonyState
 from src.midi.message_wrapper import MidiMessageWrapper
 from src.midi.scales import ScaleType, snap_note_to_scale
+from src.state import AppState
 
 logger = logging.getLogger(__name__)
 
@@ -12,31 +13,140 @@ logger = logging.getLogger(__name__)
 class MidiProcessor:
     """Handles MIDI message transformation and routing logic."""
 
-    def __init__(self, verbose: bool = False, config: object = None, event_log=None):
+    def __init__(
+        self,
+        verbose: bool = False,
+        config: object = None,
+        event_log=None,
+        app_state: AppState = None,
+    ):
         self.verbose = verbose
         self.config = config
         self.event_log = event_log
-        # State for live performance
-        self.output_channel = None  # None means keep original
-        self.transpose = 0
-        self.octave = 0
-        self.fx_enabled = False
-        self.harmonizer_enabled = False
-        self.scale_enabled = False
-        self.scale_root = 0  # 0-11, default C
-        self.scale_type = ScaleType.MAJOR
-        # Backwards-compatible boolean flag
-        self.arp_enabled = False
-        # Full arpeggiator state container
-        self.arp_state: ArpState = ArpState()
-        # Harmonizer state
-        self.harmony_state: HarmonyState = HarmonyState()
+        self.app_state = app_state or AppState()
         self.harmony_engine = None  # Will be set from context
-        self.error_state = False
         self.context = None
-        # Clock sync
-        self.last_clock_time = None
-        self.clock_intervals = []
+
+    @property
+    def output_channel(self):
+        return self.app_state.performance.output_channel
+
+    @output_channel.setter
+    def output_channel(self, value):
+        self.app_state.performance.output_channel = value
+
+    @property
+    def transpose(self):
+        return self.app_state.performance.transpose
+
+    @transpose.setter
+    def transpose(self, value):
+        self.app_state.performance.transpose = int(value)
+
+    @property
+    def octave(self):
+        return self.app_state.performance.octave
+
+    @octave.setter
+    def octave(self, value):
+        self.app_state.performance.octave = int(value)
+
+    @property
+    def fx_enabled(self):
+        return self.app_state.performance.fx_enabled
+
+    @fx_enabled.setter
+    def fx_enabled(self, value):
+        self.app_state.performance.fx_enabled = bool(value)
+
+    @property
+    def harmonizer_enabled(self):
+        return self.app_state.performance.harmonizer_enabled
+
+    @harmonizer_enabled.setter
+    def harmonizer_enabled(self, value):
+        self.app_state.performance.harmonizer_enabled = bool(value)
+
+    @property
+    def scale_enabled(self):
+        return self.app_state.performance.scale_enabled
+
+    @scale_enabled.setter
+    def scale_enabled(self, value):
+        self.app_state.performance.scale_enabled = bool(value)
+
+    @property
+    def scale_root(self):
+        return self.app_state.performance.scale_root
+
+    @scale_root.setter
+    def scale_root(self, value):
+        self.app_state.performance.scale_root = max(0, min(11, int(value)))
+
+    @property
+    def scale_type(self):
+        return self.app_state.performance.scale_type
+
+    @scale_type.setter
+    def scale_type(self, value):
+        if isinstance(value, ScaleType):
+            self.app_state.performance.scale_type = value
+        else:
+            try:
+                self.app_state.performance.scale_type = ScaleType(value)
+            except Exception:
+                self.app_state.performance.scale_type = ScaleType.MAJOR
+
+    @property
+    def arp_enabled(self):
+        return self.app_state.performance.arp_enabled
+
+    @arp_enabled.setter
+    def arp_enabled(self, value):
+        enabled = bool(value)
+        self.app_state.performance.arp_enabled = enabled
+        self.app_state.arp.enabled = enabled
+
+    @property
+    def arp_state(self) -> ArpState:
+        return self.app_state.arp
+
+    @arp_state.setter
+    def arp_state(self, value: ArpState):
+        self.app_state.arp = value
+        self.app_state.performance.arp_enabled = bool(getattr(value, "enabled", False))
+
+    @property
+    def harmony_state(self) -> HarmonyState:
+        return self.app_state.harmony
+
+    @harmony_state.setter
+    def harmony_state(self, value: HarmonyState):
+        self.app_state.harmony = value
+
+    @property
+    def error_state(self):
+        return self.app_state.transport_io.error_state
+
+    @error_state.setter
+    def error_state(self, value):
+        self.app_state.transport_io.error_state = bool(value)
+
+    @property
+    def last_clock_time(self):
+        return self.app_state.transport_io.last_clock_time
+
+    @last_clock_time.setter
+    def last_clock_time(self, value):
+        self.app_state.transport_io.last_clock_time = value
+
+    @property
+    def clock_intervals(self):
+        return self.app_state.transport_io.clock_intervals
+
+    @clock_intervals.setter
+    def clock_intervals(self, value):
+        self.app_state.transport_io.clock_intervals = list(value)
 
     def process(self, msg) -> mido.Message | None:
         """

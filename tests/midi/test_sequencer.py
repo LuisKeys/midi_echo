@@ -313,6 +313,50 @@ class TestMidiSequencer:
 
         await sequencer.stop_playback()
 
+    @pytest.mark.asyncio
+    async def test_start_playback_ignored_while_recording(self, sequencer):
+        """Play start is ignored while recording mode is active."""
+        sequencer.state.is_recording = True
+        sequencer.clock.start = AsyncMock()
+
+        await sequencer.start_playback()
+
+        assert sequencer.state.is_playing is False
+        sequencer.clock.start.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_start_recording_ignored_while_playing(self, sequencer):
+        """Record start is ignored while pure playback mode is active."""
+        sequencer.state.is_playing = True
+        sequencer._run_precount_bar = AsyncMock()
+
+        await sequencer.start_recording()
+
+        assert sequencer.state.is_recording is False
+        sequencer._run_precount_bar.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_play_toggle_start_then_stop(self, sequencer):
+        """Play transport toggles from start to stop."""
+        await sequencer.start_playback()
+        assert sequencer.state.is_playing is True
+
+        await sequencer.stop_playback()
+        assert sequencer.state.is_playing is False
+
+    @pytest.mark.asyncio
+    async def test_record_toggle_start_then_stop(self, sequencer):
+        """Record transport toggles from start to stop."""
+        with patch("src.midi.sequencer.sequencer.asyncio.sleep", new=AsyncMock()):
+            await sequencer.start_recording()
+
+        assert sequencer.state.is_recording is True
+        assert sequencer.state.is_playing is True
+
+        await sequencer.stop_recording()
+        assert sequencer.state.is_recording is False
+        assert sequencer.state.is_playing is False
+
     def test_sequencer_serialization(self, sequencer):
         """Test to_dict and from_dict preserve sequencer state."""
         sequencer.state.tempo = 140

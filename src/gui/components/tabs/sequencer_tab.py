@@ -306,11 +306,15 @@ def _on_play_clicked(context):
     sequencer = context.sequencer
     loop = context.event_loop
 
-    if sequencer.state.is_playing:
-        asyncio.run_coroutine_threadsafe(sequencer.stop_playback(), loop)
-    else:
-        asyncio.run_coroutine_threadsafe(sequencer.start_playback(), loop)
+    if sequencer.state.is_recording:
+        return
 
+    if sequencer.state.is_playing:
+        future = asyncio.run_coroutine_threadsafe(sequencer.stop_playback(), loop)
+    else:
+        future = asyncio.run_coroutine_threadsafe(sequencer.start_playback(), loop)
+
+    _schedule_button_state_refresh(context, future)
     _update_button_states(context)
 
 
@@ -319,11 +323,17 @@ def _on_record_clicked(context):
     sequencer = context.sequencer
     loop = context.event_loop
 
-    if sequencer.state.is_recording:
-        asyncio.run_coroutine_threadsafe(sequencer.stop_recording(), loop)
-    else:
-        asyncio.run_coroutine_threadsafe(sequencer.start_recording(), loop)
+    if sequencer.state.is_playing and not sequencer.state.is_recording:
+        return
 
+    if sequencer.state.is_recording:
+        context.gui._sequencer_record_arming = False
+        future = asyncio.run_coroutine_threadsafe(sequencer.stop_recording(), loop)
+    else:
+        context.gui._sequencer_record_arming = True
+        future = asyncio.run_coroutine_threadsafe(sequencer.start_recording(), loop)
+
+    _schedule_button_state_refresh(context, future)
     _update_button_states(context)
 
 
@@ -350,22 +360,51 @@ def _on_metronome_clicked(context):
 def _update_button_states(context):
     """Update transport button appearance based on state"""
     sequencer = context.sequencer
-    theme = context.gui.theme
 
     play_button = getattr(context.gui, "_sequencer_play_button", None)
     record_button = getattr(context.gui, "_sequencer_record_button", None)
 
+    record_arming = bool(getattr(context.gui, "_sequencer_record_arming", False))
+    play_disabled = sequencer.state.is_recording or record_arming
+    record_disabled = sequencer.state.is_playing
+
     if play_button:
         if sequencer.state.is_playing:
-            play_button.configure(fg_color="#1565C0", text="Stop")
+            play_button.configure(fg_color="#1565C0", text="Stop", state="normal")
+        elif play_disabled:
+            play_button.configure(fg_color="#757575", text="Play", state="disabled")
         else:
-            play_button.configure(fg_color="#4CAF50", text="Play")
+            play_button.configure(fg_color="#4CAF50", text="Play", state="normal")
 
     if record_button:
         if sequencer.state.is_recording:
-            record_button.configure(fg_color="#D32F2F", text="Stop Rec")
+            record_button.configure(fg_color="#D32F2F", text="Stop Rec", state="normal")
+        elif record_disabled:
+            record_button.configure(fg_color="#757575", text="Record", state="disabled")
         else:
-            record_button.configure(fg_color="#FF9800", text="Record")
+            record_button.configure(fg_color="#FF9800", text="Record", state="normal")
+
+
+def _schedule_button_state_refresh(context, future):
+    """Refresh transport UI when async transport task settles."""
+
+    def refresh():
+        _update_button_states(context)
+
+    def on_done(_):
+        context.gui._sequencer_record_arming = False
+        gui = getattr(context, "gui", None)
+        root = getattr(gui, "root", None) if gui else None
+        tk_root = getattr(gui, "tk_root", None) if gui else None
+        scheduler = root or tk_root
+
+        if scheduler and hasattr(scheduler, "after"):
+            scheduler.after(0, refresh)
+        else:
+            refresh()
+
+    if future is not None and hasattr(future, "add_done_callback"):
+        future.add_done_callback(on_done)
 
 
 def _update_info_label(context):

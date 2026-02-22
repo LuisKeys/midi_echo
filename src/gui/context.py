@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 import asyncio
 import time
+from src.state import AppState
 
 if TYPE_CHECKING:
     from src.gui.app import MidiGui
@@ -31,6 +32,7 @@ class AppContext:
         harmony_engine: object = None,
         event_log: "EventLog" = None,
         sequencer: "MidiSequencer" = None,
+        app_state: AppState = None,
     ):
         """Initialize application context.
 
@@ -52,8 +54,14 @@ class AppContext:
         self.app_config = app_config
         self.event_log = event_log
         self.sequencer = sequencer
-        self._tempo_widgets = []
-        self._tap_times: list[float] = []
+        if app_state:
+            self.app_state = app_state
+        elif processor and hasattr(processor, "app_state"):
+            self.app_state = processor.app_state
+        else:
+            self.app_state = AppState()
+        self._tempo_widgets = self.app_state.ui_runtime.tempo_widgets
+        self._tap_times = self.app_state.ui_runtime.tap_times
 
     def update_engine(self, engine: "MidiEngine") -> None:
         """Update the engine reference after initialization."""
@@ -65,8 +73,8 @@ class AppContext:
 
     def get_global_tempo(self) -> int:
         """Get the current global tempo (BPM)."""
-        if self.processor and hasattr(self.processor, "arp_state"):
-            return int(self.processor.arp_state.timing.bpm)
+        if self.app_state and self.app_state.arp:
+            return int(self.app_state.arp.timing.bpm)
         if self.sequencer:
             return int(self.sequencer.state.tempo)
         return 120
@@ -99,10 +107,14 @@ class AppContext:
         """Set tempo globally for both arpeggiator and sequencer states."""
         clamped = max(20, min(300, int(bpm)))
 
-        if self.processor and hasattr(self.processor, "arp_state"):
+        if self.app_state and self.app_state.arp:
+            self.app_state.arp.timing.bpm = clamped
+        elif self.processor and hasattr(self.processor, "arp_state"):
             self.processor.arp_state.timing.bpm = clamped
 
-        if self.sequencer:
+        if self.app_state and self.app_state.sequencer:
+            self.app_state.sequencer.on_tempo_changed(clamped)
+        elif self.sequencer:
             self.sequencer.state.on_tempo_changed(clamped)
 
         self._notify_tempo_widgets(clamped, source_widget=source_widget)

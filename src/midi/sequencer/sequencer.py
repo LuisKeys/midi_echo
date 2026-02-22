@@ -21,6 +21,7 @@ from .sequencer_state import SequencerState
 from .pattern import Pattern
 from .clock import InternalClock
 from ...audio import MetronomeClicker
+from ...state import AppState
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,12 @@ class MidiSequencer:
         self.context = context
 
         # State models
-        self.state = SequencerState()
+        shared_state = None
+        if context:
+            context_state = getattr(context, "app_state", None)
+            if isinstance(context_state, AppState):
+                shared_state = context_state.sequencer
+        self.state = shared_state or SequencerState()
         self.pattern = Pattern()
         self.clock = InternalClock(self)
         self.clicker = MetronomeClicker()  # Internal audio for metronome
@@ -219,7 +225,7 @@ class MidiSequencer:
 
     # ── Transport Control ──
 
-    async def start_playback(self):
+    async def start_playback(self, allow_while_recording: bool = False):
         """Begin pattern playback (looping)
 
         Process:
@@ -229,6 +235,10 @@ class MidiSequencer:
         4. Start the internal clock
         """
         if self.state.is_playing:
+            return
+
+        if self.state.is_recording and not allow_while_recording:
+            logger.debug("Ignoring start_playback while recording is active")
             return
 
         self.state.is_playing = True
@@ -282,6 +292,13 @@ class MidiSequencer:
 
         When recording, all processed MIDI will be captured via record_message().
         """
+        if self.state.is_recording:
+            return
+
+        if self.state.is_playing:
+            logger.debug("Ignoring start_recording while playback is active")
+            return
+
         self.pattern.clear()
         self._notes_held.clear()
 
@@ -293,7 +310,7 @@ class MidiSequencer:
 
         self.state.is_recording = True
 
-        await self.start_playback()
+        await self.start_playback(allow_while_recording=True)
         logger.info("Sequencer recording started")
 
     async def _run_precount_bar(self):
@@ -427,7 +444,10 @@ class MidiSequencer:
         sequencer = cls(engine, context)
 
         if "state" in data and isinstance(data["state"], dict):
-            sequencer.state = SequencerState.from_dict(data["state"])
+            loaded_state = SequencerState.from_dict(data["state"])
+            sequencer.state = loaded_state
+            if context and getattr(context, "app_state", None):
+                context.app_state.sequencer = loaded_state
 
         if "pattern" in data and isinstance(data["pattern"], list):
             sequencer.pattern = Pattern.from_dict(data["pattern"])

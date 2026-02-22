@@ -12,6 +12,7 @@ from src.midi.engine import MidiEngine
 from src.midi.event_log import EventLog
 from src.midi.sequencer import MidiSequencer
 from src.gui.app import MidiGui
+from src.state import AppState
 
 # Load environment variables
 load_dotenv()
@@ -73,8 +74,14 @@ async def main():
     # Create event log for monitoring
     event_log = EventLog(max_events=50)
 
+    # Create centralized app state
+    app_state = AppState()
+
     processor = MidiProcessor(
-        verbose=config.verbose, config=config, event_log=event_log
+        verbose=config.verbose,
+        config=config,
+        event_log=event_log,
+        app_state=app_state,
     )
     engine = MidiEngine(processor, event_log=event_log)
 
@@ -87,7 +94,9 @@ async def main():
         engine=engine,
         processor=processor,
         event_loop=event_loop,
+        app_config=config,
         event_log=event_log,
+        app_state=app_state,
     )
     processor.context = context
 
