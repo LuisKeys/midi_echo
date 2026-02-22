@@ -32,8 +32,6 @@ class ScaleHandler(BaseHandler):
         if not self.context.gui or not self.context.processor:
             return
 
-        new_color = "aqua" if self.context.processor.scale_enabled else None
-
         scale_name = ""
         if self.context.processor.scale_enabled:
             scale_name = get_scale_display_name(
@@ -45,15 +43,20 @@ class ScaleHandler(BaseHandler):
         btn = self.context.gui.button_panel.get_button("SC")
         if btn:
             btn.configure(text=btn_text)
-            if new_color:
+            theme = self.context.gui.theme
+            if self.context.processor.scale_enabled:
+                active_color = theme.get_color("state_active")
+                hover_color = theme.get_color("control_hover")
                 btn.configure(
-                    fg_color=self.context.gui.theme.get_color_tuple(new_color)
+                    fg_color=(active_color, active_color),
+                    hover_color=(hover_color, hover_color),
                 )
             else:
+                disabled_base = theme.get_color("button_inactive")
+                pressed_color = theme.get_color("control_pressed")
                 btn.configure(
-                    fg_color=self.context.gui.theme.get_color_tuple(
-                        "button_inactive_light"
-                    )
+                    fg_color=(disabled_base, disabled_base),
+                    hover_color=(pressed_color, pressed_color),
                 )
 
     def _show_scale_popup(self) -> None:
@@ -87,7 +90,7 @@ class ScaleHandler(BaseHandler):
             root_label = ctk.CTkLabel(
                 root_frame,
                 text="Root Note:",
-                font=("Arial", 14),
+                font=("Courier New", 14),
                 anchor="e",
                 text_color=theme.get_color("text_black"),
             )
@@ -105,12 +108,15 @@ class ScaleHandler(BaseHandler):
                 width=150,
                 height=50,
                 corner_radius=0,
-                fg_color="#B0BEC5",
-                button_color="#B0BEC5",
-                button_hover_color="#B0BEC5",
+                fg_color=theme.get_color("control_bg"),
+                button_color=theme.get_color("control_bg"),
+                button_hover_color=theme.get_color("control_hover"),
                 text_color=theme.get_color("button_text"),
-                font=("Arial", 20),
-                dropdown_font=("Arial", 30),
+                dropdown_fg_color=theme.get_color("control_bg"),
+                dropdown_hover_color=theme.get_color("control_hover"),
+                dropdown_text_color=theme.get_color("button_text"),
+                font=("Courier New", 20),
+                dropdown_font=("Courier New", 30),
             )
             root_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -128,7 +134,7 @@ class ScaleHandler(BaseHandler):
             type_label = ctk.CTkLabel(
                 type_frame,
                 text="Scale Type:",
-                font=("Arial", 14),
+                font=("Courier New", 14),
                 anchor="e",
                 text_color=theme.get_color("text_black"),
             )
@@ -146,12 +152,15 @@ class ScaleHandler(BaseHandler):
                 width=150,
                 height=50,
                 corner_radius=0,
-                fg_color="#B0BEC5",
-                button_color="#B0BEC5",
-                button_hover_color="#B0BEC5",
+                fg_color=theme.get_color("control_bg"),
+                button_color=theme.get_color("control_bg"),
+                button_hover_color=theme.get_color("control_hover"),
                 text_color=theme.get_color("button_text"),
-                font=("Arial", 20),
-                dropdown_font=("Arial", 30),
+                dropdown_fg_color=theme.get_color("control_bg"),
+                dropdown_hover_color=theme.get_color("control_hover"),
+                dropdown_text_color=theme.get_color("button_text"),
+                font=("Courier New", 20),
+                dropdown_font=("Courier New", 30),
             )
             type_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -162,19 +171,19 @@ class ScaleHandler(BaseHandler):
                     font_size = theme.get_font_size("label_small")
 
                     root_label.configure(
-                        font=("Arial", font_size),
+                        font=("Courier New", font_size),
                         width=theme.get_label_width(),
                         anchor="e",
                         text_color=theme.get_color("text_black"),
                     )
-                    root_menu.configure(font=("Arial", font_size))
+                    root_menu.configure(font=("Courier New", font_size))
                     type_label.configure(
-                        font=("Arial", font_size),
+                        font=("Courier New", font_size),
                         width=theme.get_label_width(),
                         anchor="e",
                         text_color=theme.get_color("text_black"),
                     )
-                    type_menu.configure(font=("Arial", font_size))
+                    type_menu.configure(font=("Courier New", font_size))
                 except Exception:
                     pass  # Widget might be destroyed
 

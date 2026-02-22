@@ -45,7 +45,8 @@ def build_pattern_editor(parent: ctk.CTkFrame, context) -> None:
         # Increase font size for tabs
         tab_font_size = theme.get_font_size("tab_text")
         tabview._segmented_button.configure(
-            font=("Arial", tab_font_size), text_color=theme.get_color("text_black")
+            font=("Courier New", tab_font_size),
+            text_color=theme.get_color("text_black"),
         )
 
     # Register tabview for font scaling

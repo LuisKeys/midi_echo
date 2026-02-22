@@ -15,18 +15,18 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     - Transport buttons: Play, Record, Clear, Metronome
     - Controls: Tempo, Time Signature, Pattern Bars, Quantization
     """
+    theme = context.gui.theme
     sequencer = context.sequencer
     if not sequencer:
         error_label = ctk.CTkLabel(
             parent,
             text="Sequencer not initialized",
-            text_color="red",
+            text_color=theme.get_color("text_black"),
         )
         error_label.pack(padx=20, pady=20)
         return
 
     config = context.app_config
-    theme = context.gui.theme
     pm = context.gui.popup_manager
     compact_row_pad = max(2, theme.get_padding("popup_control") // 2)
     compact_transport_height = 50
@@ -76,7 +76,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     info_label = ctk.CTkLabel(
         info_frame,
         text=f"Pattern: {sequencer.pattern.get_event_count()} events",
-        font=("Arial", 12),
+        font=("Courier New", 12),
         text_color=theme.get_color("text_black"),
         anchor="w",
     )
@@ -140,7 +140,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     den_label = ctk.CTkLabel(
         den_frame,
         text="Time Sig Den:",
-        font=("Arial", 14),
+        font=("Courier New", 14),
         anchor="e",
         text_color=theme.get_color("text_black"),
     )
@@ -165,12 +165,15 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         width=80,
         height=compact_control_height,
         corner_radius=0,
-        fg_color="#B0BEC5",
-        button_color="#B0BEC5",
-        button_hover_color="#B0BEC5",
+        fg_color=theme.get_color("control_bg"),
+        button_color=theme.get_color("control_bg"),
+        button_hover_color=theme.get_color("control_hover"),
         text_color=theme.get_color("button_text"),
-        font=("Arial", 14),
-        dropdown_font=("Arial", 20),
+        dropdown_fg_color=theme.get_color("control_bg"),
+        dropdown_hover_color=theme.get_color("control_hover"),
+        dropdown_text_color=theme.get_color("button_text"),
+        font=("Courier New", 14),
+        dropdown_font=("Courier New", 20),
     )
     den_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
     pm.register_element("content_elements", den_menu)
@@ -211,7 +214,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     quant_label = ctk.CTkLabel(
         quant_frame,
         text="Quantize:",
-        font=("Arial", 14),
+        font=("Courier New", 14),
         anchor="e",
         text_color=theme.get_color("text_black"),
     )
@@ -228,12 +231,15 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         width=80,
         height=compact_control_height,
         corner_radius=0,
-        fg_color="#B0BEC5",
-        button_color="#B0BEC5",
-        button_hover_color="#B0BEC5",
+        fg_color=theme.get_color("control_bg"),
+        button_color=theme.get_color("control_bg"),
+        button_hover_color=theme.get_color("control_hover"),
         text_color=theme.get_color("button_text"),
-        font=("Arial", 14),
-        dropdown_font=("Arial", 20),
+        dropdown_fg_color=theme.get_color("control_bg"),
+        dropdown_hover_color=theme.get_color("control_hover"),
+        dropdown_text_color=theme.get_color("button_text"),
+        font=("Courier New", 14),
+        dropdown_font=("Courier New", 20),
     )
     quant_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
     pm.register_element("content_elements", quant_menu)
@@ -250,13 +256,13 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
             except Exception:
                 pass
             quant_label.configure(
-                font=("Arial", font_size),
+                font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
                 text_color=theme.get_color("text_black"),
             )
             info_label.configure(
-                font=("Arial", font_size),
+                font=("Courier New", font_size),
                 text_color=theme.get_color("text_black"),
                 anchor="w",
             )
@@ -265,14 +271,14 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
                 den_label = getattr(time_sig_widget, "_den_label", None)
                 if den_label:
                     den_label.configure(
-                        font=("Arial", font_size),
+                        font=("Courier New", font_size),
                         width=theme.get_label_width(),
                         anchor="e",
                         text_color=theme.get_color("text_black"),
                     )
                 den_menu = getattr(time_sig_widget, "_den_menu", None)
                 if den_menu:
-                    den_menu.configure(font=("Arial", font_size))
+                    den_menu.configure(font=("Courier New", font_size))
             except Exception:
                 pass
         except Exception:
@@ -332,11 +338,13 @@ def _on_metronome_clicked(context):
     # Update button color
     button = getattr(context.gui, "_sequencer_metronome_button", None)
     if button:
-        theme = context.gui.theme
+        theme = getattr(context.gui, "theme", None)
+        on_color = theme.get_color("state_metronome_on") if theme else "#101010"
+        off_color = theme.get_color("state_metronome_off") if theme else "#060606"
         if context.sequencer.state.metronome_enabled:
-            button.configure(fg_color="#2196F3")
+            button.configure(fg_color=on_color)
         else:
-            button.configure(fg_color="#757575")
+            button.configure(fg_color=off_color)
 
 
 def _update_button_states(context):
@@ -349,22 +357,48 @@ def _update_button_states(context):
     record_arming = bool(getattr(context.gui, "_sequencer_record_arming", False))
     play_disabled = sequencer.state.is_recording or record_arming
     record_disabled = sequencer.state.is_playing
+    theme = getattr(context.gui, "theme", None)
+
+    def color(key: str, fallback: str) -> str:
+        return theme.get_color(key) if theme else fallback
 
     if play_button:
         if sequencer.state.is_playing:
-            play_button.configure(fg_color="#1565C0", text="Stop", state="normal")
+            play_button.configure(
+                fg_color=color("state_stop", "#101010"), text="Stop", state="normal"
+            )
         elif play_disabled:
-            play_button.configure(fg_color="#757575", text="Play", state="disabled")
+            play_button.configure(
+                fg_color=color("state_disabled", "#060606"),
+                text="Play",
+                state="disabled",
+            )
         else:
-            play_button.configure(fg_color="#4CAF50", text="Play", state="normal")
+            play_button.configure(
+                fg_color=color("state_playing", "#101010"),
+                text="Play",
+                state="normal",
+            )
 
     if record_button:
         if sequencer.state.is_recording:
-            record_button.configure(fg_color="#D32F2F", text="Stop Rec", state="normal")
+            record_button.configure(
+                fg_color=color("state_recording", "#131313"),
+                text="Stop Rec",
+                state="normal",
+            )
         elif record_disabled:
-            record_button.configure(fg_color="#757575", text="Record", state="disabled")
+            record_button.configure(
+                fg_color=color("state_disabled", "#060606"),
+                text="Record",
+                state="disabled",
+            )
         else:
-            record_button.configure(fg_color="#FF9800", text="Record", state="normal")
+            record_button.configure(
+                fg_color=color("state_default", "#0A0A0A"),
+                text="Record",
+                state="normal",
+            )
 
 
 def _schedule_button_state_refresh(context, future):

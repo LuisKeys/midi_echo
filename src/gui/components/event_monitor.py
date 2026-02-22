@@ -44,7 +44,7 @@ class EventMonitor(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(
             header_frame,
             text="MIDI Event Monitor",
-            font=("Arial", theme.get_font_size("popup_title"), "bold"),
+            font=("Courier New", theme.get_font_size("popup_title"), "bold"),
             text_color=theme.get_color("text_white"),
         )
         self.title_label.grid(row=0, column=0, sticky="w", padx=5)
@@ -52,7 +52,7 @@ class EventMonitor(ctk.CTkFrame):
         self.status_label = ctk.CTkLabel(
             header_frame,
             text="Active",
-            font=("Arial", theme.get_font_size("popup_value")),
+            font=("Courier New", theme.get_font_size("popup_value")),
             text_color=theme.get_color("text_white"),
         )
         self.status_label.grid(row=0, column=1, sticky="e", padx=5)
@@ -72,7 +72,7 @@ class EventMonitor(ctk.CTkFrame):
         # Text widget for displaying events
         self.text_display = ctk.CTkTextbox(
             display_frame,
-            font=("Courier", theme.get_font_size("label_small")),
+            font=("Courier New", theme.get_font_size("label_small")),
             fg_color=theme.get_color("frame_bg"),
             text_color=theme.get_color("text_white"),
             border_color=theme.get_color("button_inactive"),
@@ -99,7 +99,7 @@ class EventMonitor(ctk.CTkFrame):
             fg_color=theme.get_color_tuple("aqua"),
             hover_color=theme.get_color_tuple("cyan"),
             text_color=theme.get_color("button_text"),
-            font=("Arial", theme.get_font_size("popup_button")),
+            font=("Courier New", theme.get_font_size("popup_button")),
             command=self._on_pause_click,
         )
         self.pause_button.grid(row=0, column=0, padx=5, pady=5)
@@ -111,7 +111,7 @@ class EventMonitor(ctk.CTkFrame):
             fg_color=theme.get_color_tuple("red"),
             hover_color=theme.get_color_tuple("grey"),
             text_color=theme.get_color("button_text"),
-            font=("Arial", theme.get_font_size("popup_button")),
+            font=("Courier New", theme.get_font_size("popup_button")),
             command=self._on_clear_click,
         )
         self.clear_button.grid(row=0, column=2, padx=5, pady=5)
@@ -120,7 +120,7 @@ class EventMonitor(ctk.CTkFrame):
         self.count_label = ctk.CTkLabel(
             control_frame,
             text="0 events",
-            font=("Arial", theme.get_font_size("popup_value")),
+            font=("Courier New", theme.get_font_size("popup_value")),
             text_color=theme.get_color("text_white"),
         )
         self.count_label.grid(row=0, column=1, padx=5)
@@ -140,32 +140,36 @@ class EventMonitor(ctk.CTkFrame):
         try:
             if self.title_label and self.title_label.winfo_exists():
                 self.title_label.configure(
-                    font=("Arial", self.theme.get_font_size("popup_title"), "bold")
+                    font=(
+                        "Courier New",
+                        self.theme.get_font_size("popup_title"),
+                        "bold",
+                    )
                 )
 
             if self.status_label and self.status_label.winfo_exists():
                 self.status_label.configure(
-                    font=("Arial", self.theme.get_font_size("popup_value"))
+                    font=("Courier New", self.theme.get_font_size("popup_value"))
                 )
 
             if self.text_display and self.text_display.winfo_exists():
                 self.text_display.configure(
-                    font=("Courier", self.theme.get_font_size("label_small"))
+                    font=("Courier New", self.theme.get_font_size("label_small"))
                 )
 
             if self.pause_button and self.pause_button.winfo_exists():
                 self.pause_button.configure(
-                    font=("Arial", self.theme.get_font_size("popup_button"))
+                    font=("Courier New", self.theme.get_font_size("popup_button"))
                 )
 
             if self.clear_button and self.clear_button.winfo_exists():
                 self.clear_button.configure(
-                    font=("Arial", self.theme.get_font_size("popup_button"))
+                    font=("Courier New", self.theme.get_font_size("popup_button"))
                 )
 
             if self.count_label and self.count_label.winfo_exists():
                 self.count_label.configure(
-                    font=("Arial", self.theme.get_font_size("popup_value"))
+                    font=("Courier New", self.theme.get_font_size("popup_value"))
                 )
         except Exception:
             pass  # Widget might have been destroyed

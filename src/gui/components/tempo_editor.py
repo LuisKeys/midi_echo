@@ -34,7 +34,7 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
     label = ctk.CTkLabel(
         frame,
         text=f"BPM: {state.timing.bpm}",
-        font=("Arial", 20),
+        font=("Courier New", 20),
         text_color=theme.get_color("text_black"),
     )
     label.pack(
@@ -71,9 +71,9 @@ def build_tempo_editor(parent: ctk.CTkFrame, context) -> None:
         font_size = theme.get_font_size("label_medium")
 
         label.configure(
-            font=("Arial", font_size), text_color=theme.get_color("text_black")
+            font=("Courier New", font_size), text_color=theme.get_color("text_black")
         )
-        btn.configure(font=("Arial", theme.get_font_size("label_small")))
+        btn.configure(font=("Courier New", theme.get_font_size("label_small")))
 
     frame.update_font_sizes = update_font_sizes
     pm.register_element("content_elements", frame)

@@ -22,7 +22,7 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
     mode_label = ctk.CTkLabel(
         mode_frame,
         text="Velocity Mode:",
-        font=("Arial", 14),
+        font=("Courier New", 14),
         anchor="e",
         text_color=theme.get_color("text_black"),
     )
@@ -38,12 +38,15 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color="#B0BEC5",
-        button_color="#B0BEC5",
-        button_hover_color="#B0BEC5",
+        fg_color=theme.get_color("control_bg"),
+        button_color=theme.get_color("control_bg"),
+        button_hover_color=theme.get_color("control_hover"),
         text_color=theme.get_color("button_text"),
-        font=("Arial", 20),
-        dropdown_font=("Arial", 30),
+        dropdown_fg_color=theme.get_color("control_bg"),
+        dropdown_hover_color=theme.get_color("control_hover"),
+        dropdown_text_color=theme.get_color("button_text"),
+        font=("Courier New", 20),
+        dropdown_font=("Courier New", 30),
     )
     vel_mode_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -73,12 +76,12 @@ def _build_velocity_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             mode_label.configure(
-                font=("Arial", font_size),
+                font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
                 text_color=theme.get_color("text_black"),
             )
-            vel_mode_menu.configure(font=("Arial", font_size))
+            vel_mode_menu.configure(font=("Courier New", font_size))
         except Exception:
             pass  # Widget might be destroyed
 

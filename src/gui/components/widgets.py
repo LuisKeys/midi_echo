@@ -24,7 +24,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         label_width=None,
     ):
         super().__init__(
-            parent, fg_color=theme.get_color("frame_bg") if theme else "#F5F5F5"
+            parent, fg_color=theme.get_color("frame_bg") if theme else "#0A0A0A"
         )
         self.min_val = min_val
         self.max_val = max_val
@@ -46,7 +46,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.label = ctk.CTkLabel(
             self,
             text=label_text,
-            font=("Arial", 14),
+            font=("Courier New", 14),
             anchor="e",
             text_color=theme.get_color("text_black") if theme else None,
         )
@@ -69,7 +69,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         self.value_label = ctk.CTkLabel(
             self,
             text=str(self.current_val),
-            font=("Arial", 16),
+            font=("Courier New", 16),
             anchor="center",
             text_color=theme.get_color("text_black") if theme else None,
         )
@@ -93,7 +93,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
             self.suffix_label = ctk.CTkLabel(
                 self,
                 text=suffix,
-                font=("Arial", 14),
+                font=("Courier New", 14),
                 text_color=theme.get_color("text_black") if theme else None,
             )
             self.suffix_label.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -114,6 +114,18 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         if self.theme:
             self.update_font_sizes()
 
+            button_style = {
+                "fg_color": self.theme.get_color("control_bg"),
+                "hover_color": self.theme.get_color("control_hover"),
+                "text_color": self.theme.get_color("button_text"),
+                "border_width": 1,
+                "border_color": self.theme.get_color("border"),
+            }
+            self.minus_btn.configure(**button_style)
+            self.plus_btn.configure(**button_style)
+            if hasattr(self, "tap_btn"):
+                self.tap_btn.configure(**button_style)
+
     def update_font_sizes(self) -> None:
         """Update font sizes based on theme (dimensions stay fixed)."""
         if not self.theme:
@@ -132,7 +144,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
 
         # Update label in single configure call
         label_config = {
-            "font": ("Arial", label_font_size),
+            "font": ("Courier New", label_font_size),
             "anchor": "e",
             "text_color": self.theme.get_color("text_black"),
         }
@@ -142,23 +154,23 @@ class IncrementDecrementWidget(ctk.CTkFrame):
 
         # Update value label in single configure call
         self.value_label.configure(
-            font=("Arial", value_font_size),
+            font=("Courier New", value_font_size),
             width=self.theme.get_value_width(),
             anchor="center",
             text_color=self.theme.get_color("text_black"),
         )
 
         for btn in [self.minus_btn, self.plus_btn]:
-            btn.configure(font=("Arial", btn_font_size))
+            btn.configure(font=("Courier New", btn_font_size))
 
         if hasattr(self, "suffix_label"):
             self.suffix_label.configure(
-                font=("Arial", label_font_size),
+                font=("Courier New", label_font_size),
                 text_color=self.theme.get_color("text_black"),
             )
 
         if hasattr(self, "tap_btn"):
-            self.tap_btn.configure(font=("Arial", label_font_size))
+            self.tap_btn.configure(font=("Courier New", label_font_size))
 
     def start_decr(self):
         self.minus_holding = True
@@ -234,6 +246,7 @@ class SquareDropdown(ctk.CTkFrame):
         command=None,
         width=150,
         height=50,
+        theme=None,
         **kwargs,
     ):
         """Initialize dropdown with squared corners and large touch targets.
@@ -247,7 +260,9 @@ class SquareDropdown(ctk.CTkFrame):
             height: Height of the dropdown
             **kwargs: Additional arguments to pass to CTkFrame
         """
-        super().__init__(parent, fg_color="#B0BEC5", corner_radius=0, **kwargs)
+        self.theme = theme
+        frame_color = theme.get_color("control_bg") if theme else "#0A0A0A"
+        super().__init__(parent, fg_color=frame_color, corner_radius=0, **kwargs)
 
         self.values = values
         self.variable = variable
@@ -264,7 +279,12 @@ class SquareDropdown(ctk.CTkFrame):
             width=width,
             height=height,
             corner_radius=0,
-            font=("Arial", 20),
+            font=("Courier New", 20),
+            fg_color=theme.get_color("control_bg") if theme else None,
+            hover_color=theme.get_color("control_hover") if theme else None,
+            text_color=theme.get_color("button_text") if theme else None,
+            border_width=1 if theme else 0,
+            border_color=theme.get_color("border") if theme else None,
             command=self._toggle_dropdown,
         )
         self.button.pack(fill="both", expand=True)
@@ -300,7 +320,11 @@ class SquareDropdown(ctk.CTkFrame):
         self._dropdown_window.attributes("-topmost", True)
 
         # Create frame for items
-        frame = ctk.CTkFrame(self._dropdown_window, fg_color="#F5F5F5", corner_radius=0)
+        frame = ctk.CTkFrame(
+            self._dropdown_window,
+            fg_color=(self.theme.get_color("frame_bg") if self.theme else "#0A0A0A"),
+            corner_radius=0,
+        )
         frame.pack(fill="both", expand=True)
 
         # Add buttons for each value
@@ -310,7 +334,14 @@ class SquareDropdown(ctk.CTkFrame):
                 text=value,
                 height=60,
                 corner_radius=0,
-                font=("Arial", 24),
+                font=("Courier New", 24),
+                fg_color=self.theme.get_color("control_bg") if self.theme else None,
+                hover_color=(
+                    self.theme.get_color("control_hover") if self.theme else None
+                ),
+                text_color=self.theme.get_color("button_text") if self.theme else None,
+                border_width=1 if self.theme else 0,
+                border_color=self.theme.get_color("border") if self.theme else None,
                 command=lambda v=value: self._select_value(v),
             )
             btn.pack(fill="x", padx=0, pady=1)

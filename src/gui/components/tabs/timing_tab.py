@@ -43,7 +43,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
     div_label = ctk.CTkLabel(
         div_frame,
         text="Division:",
-        font=("Arial", 14),
+        font=("Courier New", 14),
         anchor="e",
         text_color=theme.get_color("text_black"),
     )
@@ -59,12 +59,15 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         width=150,
         height=50,
         corner_radius=0,
-        fg_color="#B0BEC5",
-        button_color="#B0BEC5",
-        button_hover_color="#B0BEC5",
+        fg_color=theme.get_color("control_bg"),
+        button_color=theme.get_color("control_bg"),
+        button_hover_color=theme.get_color("control_hover"),
         text_color=theme.get_color("button_text"),
-        font=("Arial", 20),
-        dropdown_font=("Arial", 30),
+        dropdown_fg_color=theme.get_color("control_bg"),
+        dropdown_hover_color=theme.get_color("control_hover"),
+        dropdown_text_color=theme.get_color("button_text"),
+        font=("Courier New", 20),
+        dropdown_font=("Courier New", 30),
     )
     div_menu.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
 
@@ -122,7 +125,7 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
         text="External Clock Sync",
         variable=sync_var,
         command=lambda: setattr(state, "external_sync", sync_var.get()),
-        font=("Arial", 14),
+        font=("Courier New", 14),
         text_color=theme.get_color("text_black"),
     )
     sync_check.pack(side="left", padx=LayoutSpacing.ELEMENT_PADX)
@@ -134,14 +137,15 @@ def _build_timing_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             div_label.configure(
-                font=("Arial", font_size),
+                font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
                 text_color=theme.get_color("text_black"),
             )
-            div_menu.configure(font=("Arial", font_size))
+            div_menu.configure(font=("Courier New", font_size))
             sync_check.configure(
-                font=("Arial", font_size), text_color=theme.get_color("text_black")
+                font=("Courier New", font_size),
+                text_color=theme.get_color("text_black"),
             )
         except Exception:
             pass  # Widget might be destroyed

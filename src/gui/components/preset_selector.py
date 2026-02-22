@@ -72,7 +72,7 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
             font_size = theme.get_font_size("label_medium")
 
             for btn in buttons:
-                btn.configure(font=("Arial", font_size))
+                btn.configure(font=("Courier New", font_size))
         except Exception:
             pass
 
@@ -131,8 +131,9 @@ def build_preset_selector(parent: ctk.CTkFrame, context: AppContext) -> None:
             grid_frame,
             text=str(preset_num + 1),
             fg_color=fg_color,
+            hover_color=theme.get_color("control_hover"),
             text_color=theme.get_color("text_black"),
-            font=("Arial", theme.get_font_size("label_medium")),
+            font=("Courier New", theme.get_font_size("label_medium")),
             corner_radius=0,
             height=50,
             command=make_preset_button(preset_num),

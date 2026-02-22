@@ -103,7 +103,7 @@ class TransposeHandler(BaseHandler):
                 frame,
                 text=f"Value: {self.context.processor.transpose}",
                 font=(
-                    "Arial",
+                    "Courier New",
                     self.context.gui.theme.get_font_size("popup_value"),
                     "bold",
                 ),
@@ -128,7 +128,7 @@ class TransposeHandler(BaseHandler):
                 buttons_frame,
                 text="-",
                 font=(
-                    "Arial",
+                    "Courier New",
                     self.context.gui.theme.get_font_size("popup_button"),
                     "bold",
                 ),
@@ -180,7 +180,7 @@ class TransposeHandler(BaseHandler):
                 buttons_frame,
                 text="0",
                 font=(
-                    "Arial",
+                    "Courier New",
                     self.context.gui.theme.get_font_size("popup_button"),
                     "bold",
                 ),
@@ -204,7 +204,7 @@ class TransposeHandler(BaseHandler):
                 buttons_frame,
                 text="+",
                 font=(
-                    "Arial",
+                    "Courier New",
                     self.context.gui.theme.get_font_size("popup_button"),
                     "bold",
                 ),

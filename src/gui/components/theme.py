@@ -14,47 +14,47 @@ class Theme:
     - Theme-aware color tuples for customtkinter consistency
     """
 
-    # Color definitions for light mode
-    COLORS_LIGHT = {
-        "cyan": "#B3E5FC",
-        "violet": "#F8BBD9",
-        "aqua": "#C8E6C9",
-        "main_menu_button": "#C8E6C9",
-        "grey": "#F5F5F5",
-        "red": "#FFCDD2",
-        "bg": "#A3A3a3",
-        "overlay": "#E8F5E8",
-        "frame_bg": "#A3A3a3",
-        "selector_bg": "#c9c8c8",
-        "preset_highlight": "#A3A3a3",
-        "button_inactive": "#B0BEC5",
-        "button_inactive_light": "#CFD8DC",
-        "text_white": "#CCCBCB",
-        "text_black": "#454444",
-        "button_text": "#000000",
-        "popup_grey": "#A3A3a3",
+    # Matrix palette used for both modes: black fills, green borders/text
+    MATRIX_COLORS = {
+        "matrix_green": "#00FF66",
+        "matrix_green_bright": "#66FF99",
+        "matrix_green_dim": "#00CC55",
+        "matrix_green_muted": "#008833",
+        "bg": "#000000",
+        "overlay": "#001A0A",
+        "frame_bg": "#050505",
+        "selector_bg": "#0A0A0A",
+        "preset_highlight": "#0F0F0F",
+        "text_white": "#66FF99",
+        "text_black": "#00FF66",
+        "button_text": "#00FF66",
+        "popup_grey": "#0B0B0B",
+        "border": "#00CC55",
+        "control_bg": "#0A0A0A",
+        "control_hover": "#030303",
+        "control_pressed": "#010101",
+        "button_inactive": "#060606",
+        "button_inactive_light": "#0B0B0B",
+        "state_default": "#0A0A0A",
+        "state_active": "#2A2A2A",
+        "state_playing": "#101010",
+        "state_recording": "#131313",
+        "state_disabled": "#060606",
+        "state_stop": "#101010",
+        "state_warning": "#141414",
+        "state_metronome_on": "#101010",
+        "state_metronome_off": "#060606",
+        "cyan": "#0A0A0A",
+        "violet": "#0A0A0A",
+        "aqua": "#0A0A0A",
+        "main_menu_button": "#0A0A0A",
+        "grey": "#0A0A0A",
+        "red": "#141414",
     }
 
-    # Color definitions for dark mode
-    COLORS_DARK = {
-        "cyan": "#B3E5FC",
-        "violet": "#F8BBD9",
-        "aqua": "#C8E6C9",
-        "main_menu_button": "#C8E6C9",
-        "grey": "#F5F5F5",
-        "red": "#FFCDD2",
-        "bg": "#2D2D2D",
-        "overlay": "#1E3A1E",
-        "frame_bg": "#2D2D2D",
-        "selector_bg": "#4D4D4D",
-        "preset_highlight": "#2D2D2D",
-        "button_inactive": "#555555",
-        "button_inactive_light": "#666666",
-        "text_white": "#FFFFFF",
-        "text_black": "#D3D3D3",
-        "button_text": "#000000",
-        "popup_grey": "#2D2D2D",
-    }
+    # Keep light/dark keys for compatibility, but both resolve to matrix colors.
+    COLORS_LIGHT = MATRIX_COLORS
+    COLORS_DARK = MATRIX_COLORS
 
     # Base font sizes at reference window resolution (600x400)
     BASE_FONT_SIZES = {

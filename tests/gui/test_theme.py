@@ -20,6 +20,7 @@ def _make_config():
         base_window_height=400,
         preset_range_max=127,
         default_preset=0,
+        theme_mode="dark",
     )
 
 
@@ -28,9 +29,9 @@ def test_theme_color_retrieval():
     config = _make_config()
     theme = Theme(config)
 
-    assert theme.get_color("cyan") == "#B3E5FC"
-    assert theme.get_color("violet") == "#F8BBD9"
-    assert theme.get_color("red") == "#FFCDD2"
+    assert theme.get_color("bg") == "#000000"
+    assert theme.get_color("text_black") == "#00FF66"
+    assert theme.get_color("border") == "#00CC55"
 
 
 def test_theme_color_tuple():
@@ -38,8 +39,8 @@ def test_theme_color_tuple():
     config = _make_config()
     theme = Theme(config)
 
-    color_tuple = theme.get_color_tuple("cyan")
-    assert color_tuple == ("#B3E5FC", "#B3E5FC")
+    color_tuple = theme.get_color_tuple("border")
+    assert color_tuple == ("#00CC55", "#00CC55")
 
 
 def test_theme_font_size_calculation():
@@ -81,12 +82,17 @@ def test_all_colors_defined():
         "frame_bg",
         "selector_bg",
         "preset_highlight",
+        "control_bg",
+        "control_hover",
+        "border",
         "button_inactive",
         "button_inactive_light",
         "text_white",
         "text_black",
+        "button_text",
         "popup_grey",
     ]
 
     for color in expected_colors:
-        assert color in theme.COLORS
+        assert color in theme.COLORS_LIGHT
+        assert color in theme.COLORS_DARK

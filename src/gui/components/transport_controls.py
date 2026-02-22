@@ -23,7 +23,18 @@ class TransportControls(ctk.CTkFrame):
         self._height = 60
 
         font_size = theme.get_font_size("popup_button")
-        self._font = ("Arial", font_size)
+        self._font = ("Courier New", font_size)
+
+        def button_style(state_color_key: str):
+            return {
+                "corner_radius": 0,
+                "fg_color": self.theme.get_color(state_color_key),
+                "hover_color": self.theme.get_color("control_hover"),
+                "text_color": self.theme.get_color("button_text"),
+                "border_width": 1,
+                "border_color": self.theme.get_color("border"),
+                "font": self._font,
+            }
 
         # Play
         self.play_button = ctk.CTkButton(
@@ -31,10 +42,7 @@ class TransportControls(ctk.CTkFrame):
             text="Play",
             command=lambda: play_cb() if play_cb else None,
             height=self._height,
-            corner_radius=0,
-            fg_color="#4CAF50",
-            hover_color="#45a049",
-            font=self._font,
+            **button_style("state_active"),
         )
         self.play_button.pack(side="left", expand=True, fill="x", padx=2)
 
@@ -44,10 +52,7 @@ class TransportControls(ctk.CTkFrame):
             text="Record",
             command=lambda: record_cb() if record_cb else None,
             height=self._height,
-            corner_radius=0,
-            fg_color="#FF9800",
-            hover_color="#F57C00",
-            font=self._font,
+            **button_style("state_active"),
         )
         self.record_button.pack(side="left", expand=True, fill="x", padx=2)
 
@@ -57,18 +62,15 @@ class TransportControls(ctk.CTkFrame):
             text="Clear",
             command=lambda: clear_cb() if clear_cb else None,
             height=self._height,
-            corner_radius=0,
-            fg_color="#9C27B0",
-            hover_color="#7B1FA2",
-            font=self._font,
+            **button_style("state_active"),
         )
         self.clear_button.pack(side="left", expand=True, fill="x", padx=2)
 
         # Metronome
         met_color = (
-            "#2196F3"
+            self.theme.get_color("state_active")
             if (sequencer and sequencer.state.metronome_enabled)
-            else "#757575"
+            else self.theme.get_color("button_inactive")
         )
         self.metronome_button = ctk.CTkButton(
             self,
@@ -77,7 +79,10 @@ class TransportControls(ctk.CTkFrame):
             height=self._height,
             corner_radius=0,
             fg_color=met_color,
-            hover_color="#1976D2",
+            hover_color=self.theme.get_color("control_hover"),
+            text_color=self.theme.get_color("button_text"),
+            border_width=1,
+            border_color=self.theme.get_color("border"),
             font=self._font,
         )
         self.metronome_button.pack(side="left", expand=True, fill="x", padx=2)
@@ -114,38 +119,66 @@ class TransportControls(ctk.CTkFrame):
     ):
         # Update play button
         if is_playing:
-            self.play_button.configure(fg_color="#1565C0", text="Stop", state="normal")
+            self.play_button.configure(
+                fg_color=self.theme.get_color("state_active"),
+                hover_color=self.theme.get_color("control_hover"),
+                text="Stop",
+                state="normal",
+            )
         elif is_recording or record_arming:
             self.play_button.configure(
-                fg_color="#757575", text="Play", state="disabled"
+                fg_color=self.theme.get_color("button_inactive"),
+                hover_color=self.theme.get_color("control_pressed"),
+                text="Play",
+                state="disabled",
             )
         else:
-            self.play_button.configure(fg_color="#4CAF50", text="Play", state="normal")
+            self.play_button.configure(
+                fg_color=self.theme.get_color("state_active"),
+                hover_color=self.theme.get_color("control_hover"),
+                text="Play",
+                state="normal",
+            )
 
         # Update record button
         if is_recording:
             self.record_button.configure(
-                fg_color="#D32F2F", text="Stop Rec", state="normal"
+                fg_color=self.theme.get_color("state_active"),
+                hover_color=self.theme.get_color("control_hover"),
+                text="Stop Rec",
+                state="normal",
             )
         elif is_playing:
             self.record_button.configure(
-                fg_color="#757575", text="Record", state="disabled"
+                fg_color=self.theme.get_color("button_inactive"),
+                hover_color=self.theme.get_color("control_pressed"),
+                text="Record",
+                state="disabled",
             )
         else:
             self.record_button.configure(
-                fg_color="#FF9800", text="Record", state="normal"
+                fg_color=self.theme.get_color("state_active"),
+                hover_color=self.theme.get_color("control_hover"),
+                text="Record",
+                state="normal",
             )
 
         # Metronome color
         if metronome_enabled:
-            self.metronome_button.configure(fg_color="#2196F3")
+            self.metronome_button.configure(
+                fg_color=self.theme.get_color("state_active"),
+                hover_color=self.theme.get_color("control_hover"),
+            )
         else:
-            self.metronome_button.configure(fg_color="#757575")
+            self.metronome_button.configure(
+                fg_color=self.theme.get_color("button_inactive"),
+                hover_color=self.theme.get_color("control_pressed"),
+            )
 
     def update_font_sizes(self):
         try:
             font_size = self.theme.get_font_size("popup_button")
-            self._font = ("Arial", font_size)
+            self._font = ("Courier New", font_size)
             self.play_button.configure(font=self._font)
             self.record_button.configure(font=self._font)
             self.clear_button.configure(font=self._font)

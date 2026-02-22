@@ -39,12 +39,12 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             font_size = theme.get_font_size("label_small")
 
             for btn in buttons:
-                btn.configure(font=("Arial", font_size))
+                btn.configure(font=("Courier New", font_size))
             for btn in accent_buttons:
-                btn.configure(font=("Arial", font_size))
+                btn.configure(font=("Courier New", font_size))
 
             held_label.configure(
-                font=("Arial", font_size),
+                font=("Courier New", font_size),
                 width=theme.get_label_width(),
                 anchor="e",
                 text_color=theme.get_color("text_black"),
@@ -86,7 +86,10 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
             else "None"
         )
         held_label.configure(
-            text=f"Held Notes: {held_text}", width=theme.get_label_width(), anchor="e", text_color=theme.get_color("text_black")
+            text=f"Held Notes: {held_text}",
+            width=theme.get_label_width(),
+            anchor="e",
+            text_color=theme.get_color("text_black"),
         )
 
     def make_toggle(i: int):
@@ -129,6 +132,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 grid_frame,
                 text=text,
                 fg_color=fg,
+                hover_color=theme.get_color("control_hover"),
                 text_color=theme.get_color("text_black"),
                 corner_radius=0,
                 command=make_toggle(idx),
@@ -155,6 +159,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
                 grid_frame,
                 text="A",
                 fg_color=fg,
+                hover_color=theme.get_color("control_hover"),
                 text_color=theme.get_color("text_black"),
                 corner_radius=0,
                 command=make_accent_toggle(idx),
@@ -184,7 +189,7 @@ def _build_pattern_tab(parent: ctk.CTkFrame, state, context) -> None:
     held_label = ctk.CTkLabel(
         held_frame,
         text=f"Held Notes: {held_text}",
-        font=("Arial", 14),
+        font=("Courier New", 14),
         anchor="e",
         text_color=theme.get_color("text_black"),
     )

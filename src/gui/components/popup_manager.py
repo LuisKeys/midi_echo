@@ -300,7 +300,7 @@ class PopupMenu(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             top_frame,
             text=self.title_text,
-            font=("Arial", 32, "bold"),
+            font=("Courier New", 32, "bold"),
             text_color=self.popup_manager.theme.get_color("text_black"),
         )
         title_label.pack(side="left", fill="x", expand=True)
@@ -309,12 +309,14 @@ class PopupMenu(ctk.CTkFrame):
         close_btn = ctk.CTkButton(
             top_frame,
             text="✕",
-            font=("Arial", 8, "bold"),
+            font=("Courier New", 8, "bold"),
             fg_color=self.popup_manager.theme.get_color("popup_grey"),
             text_color=self.popup_manager.theme.get_color("button_text"),
             hover_color=self.popup_manager.theme.get_color("red"),
             width=60,
             height=60,
+            border_width=1,
+            border_color=self.popup_manager.theme.get_color("border"),
             corner_radius=0,
             command=lambda: None,  # Disabled, we use binding instead
         )
@@ -365,13 +367,13 @@ class PopupMenu(ctk.CTkFrame):
             title_label = self.popup_manager.popup_elements.get("title_label")
             if title_label and title_label.winfo_exists():
                 font_size = theme.get_font_size("popup_title")
-                title_label.configure(font=("Arial", font_size, "bold"))
+                title_label.configure(font=("Courier New", font_size, "bold"))
 
             # Update close button
             close_btn = self.popup_manager.popup_elements.get("close_btn")
             if close_btn and close_btn.winfo_exists():
                 font_size = theme.get_font_size("popup_close")
-                close_btn.configure(font=("Arial", font_size, "bold"))
+                close_btn.configure(font=("Courier New", font_size, "bold"))
 
             # Update content elements
             for element in self.popup_manager.popup_elements.get(

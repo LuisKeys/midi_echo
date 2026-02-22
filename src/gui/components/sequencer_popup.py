@@ -14,10 +14,11 @@ def build_sequencer_popup(parent: ctk.CTkFrame, context) -> None:
     """
     sequencer = context.sequencer
     if sequencer is None:
+        theme = context.gui.theme
         lbl = ctk.CTkLabel(
             parent,
             text="Sequencer not initialized.",
-            text_color="red",
+            text_color=theme.get_color("text_black"),
         )
         lbl.pack()
         return

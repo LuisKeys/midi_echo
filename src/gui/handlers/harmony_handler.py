@@ -125,7 +125,7 @@ class HarmonyHandler(BaseHandler):
             above_label = ctk.CTkLabel(
                 above_frame,
                 text="Above Root:",
-                font=("Arial", section_font_size, "bold"),
+                font=("Courier New", section_font_size, "bold"),
                 text_color=theme.get_color("text_black"),
             )
             above_label.pack(pady=(0, 5), anchor="w")
@@ -139,7 +139,7 @@ class HarmonyHandler(BaseHandler):
                 above_frame,
                 text="Major 3rd (+4)",
                 variable=major_3rd_above_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -149,7 +149,7 @@ class HarmonyHandler(BaseHandler):
                 above_frame,
                 text="Minor 3rd (+3)",
                 variable=minor_3rd_above_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -159,7 +159,7 @@ class HarmonyHandler(BaseHandler):
                 above_frame,
                 text="5th (+7)",
                 variable=fifth_above_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -169,7 +169,7 @@ class HarmonyHandler(BaseHandler):
                 above_frame,
                 text="Octave (+12)",
                 variable=octave_above_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -182,7 +182,7 @@ class HarmonyHandler(BaseHandler):
             below_label = ctk.CTkLabel(
                 below_frame,
                 text="Below Root:",
-                font=("Arial", section_font_size, "bold"),
+                font=("Courier New", section_font_size, "bold"),
                 text_color=theme.get_color("text_black"),
             )
             below_label.pack(pady=(0, 5), anchor="w")
@@ -196,7 +196,7 @@ class HarmonyHandler(BaseHandler):
                 below_frame,
                 text="Major 3rd (-4)",
                 variable=major_3rd_below_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -206,7 +206,7 @@ class HarmonyHandler(BaseHandler):
                 below_frame,
                 text="Minor 3rd (-3)",
                 variable=minor_3rd_below_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -216,7 +216,7 @@ class HarmonyHandler(BaseHandler):
                 below_frame,
                 text="5th (-7)",
                 variable=fifth_below_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -226,7 +226,7 @@ class HarmonyHandler(BaseHandler):
                 below_frame,
                 text="Octave (-12)",
                 variable=octave_below_var,
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 command=apply_selection,
             )
@@ -239,7 +239,7 @@ class HarmonyHandler(BaseHandler):
             velocity_label = ctk.CTkLabel(
                 frame,
                 text="Velocity:",
-                font=("Arial", section_font_size, "bold"),
+                font=("Courier New", section_font_size, "bold"),
                 text_color=theme.get_color("text_black"),
             )
             velocity_label.pack(pady=(0, 5), anchor="w", padx=10)
@@ -263,7 +263,7 @@ class HarmonyHandler(BaseHandler):
             velocity_value_label = ctk.CTkLabel(
                 velocity_frame,
                 text=f"{current_velocity}%",
-                font=("Arial", checkbox_font_size),
+                font=("Courier New", checkbox_font_size),
                 text_color=theme.get_color("text_black"),
                 width=40,
             )
@@ -303,11 +303,20 @@ class HarmonyHandler(BaseHandler):
                 self.context.processor.harmony_state
             )
 
-        if self.context.processor.harmonizer_enabled:
-            color_name = "violet"
-        else:
-            color_name = "button_inactive_light"
-
         btn = self.context.gui.button_panel.get_button("HZ")
         if btn:
-            btn.configure(fg_color=self.context.gui.theme.get_color_tuple(color_name))
+            theme = self.context.gui.theme
+            if self.context.processor.harmonizer_enabled:
+                active_color = theme.get_color("state_active")
+                hover_color = theme.get_color("control_hover")
+                btn.configure(
+                    fg_color=(active_color, active_color),
+                    hover_color=(hover_color, hover_color),
+                )
+            else:
+                disabled_base = theme.get_color("button_inactive")
+                pressed_color = theme.get_color("control_pressed")
+                btn.configure(
+                    fg_color=(disabled_base, disabled_base),
+                    hover_color=(pressed_color, pressed_color),
+                )
