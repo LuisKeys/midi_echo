@@ -121,10 +121,12 @@ class EventMonitor(ctk.CTkFrame):
         self.pause_button = ctk.CTkButton(
             control_frame,
             text="Pause",
-            fg_color=(theme.FONT_AND_BORDER, theme.FONT_AND_BORDER),
-            hover_color=(theme.FONT_AND_BORDER, theme.FONT_AND_BORDER),
+            fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
+            hover_color=(theme.BACKGROUND_HOVER, theme.BACKGROUND_HOVER),
             text_color=theme.FONT_AND_BORDER,
             font=("Courier New", theme.get_font_size("popup_button")),
+            border_width=1,
+            border_color=theme.FONT_AND_BORDER,
             command=self._on_pause_click,
         )
         self.pause_button.grid(row=0, column=0, padx=5, pady=5)
@@ -133,10 +135,12 @@ class EventMonitor(ctk.CTkFrame):
         self.clear_button = ctk.CTkButton(
             control_frame,
             text="Clear",
-            fg_color=(theme.ACCENT_RED, theme.ACCENT_RED),
+            fg_color=(theme.BACKGROUND_UNSELECTED, theme.BACKGROUND_UNSELECTED),
             hover_color=(theme.BACKGROUND_HOVER, theme.BACKGROUND_HOVER),
             text_color=theme.FONT_AND_BORDER,
             font=("Courier New", theme.get_font_size("popup_button")),
+            border_width=1,
+            border_color=theme.FONT_AND_BORDER,
             command=self._on_clear_click,
         )
         self.clear_button.grid(row=0, column=2, padx=5, pady=5)
