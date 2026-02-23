@@ -99,6 +99,9 @@ class MidiEngine:
                 msg = await self.queue.get()
                 processed_msg = self.processor.process(msg)
 
+                # Determine the underlying message for logging (unwrap wrapper if present)
+                original_msg = msg.msg if isinstance(msg, MidiMessageWrapper) else msg
+
                 if processed_msg:
                     # Tap for sequencer recording (before sending to output)
                     if self.sequencer:
@@ -112,7 +115,7 @@ class MidiEngine:
                         self.output.send(processed_msg)
                 else:
                     logger.debug(
-                        f"Processor returned None for message type: {msg.type}"
+                        f"Processor returned None for message type: {getattr(original_msg, 'type', 'unknown')}"
                     )
 
                 self.queue.task_done()

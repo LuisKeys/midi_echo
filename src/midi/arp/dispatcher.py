@@ -42,9 +42,11 @@ class MidiDispatcher:
             )
             wrapped_message = MidiMessageWrapper(message, is_arp=True)
             result = self._enqueue_message(wrapped_message)
-            logger.info(
-                f"AR dispatcher sending note_on: note={note} velocity={velocity} enqueued={result}"
-            )
+            verbose = getattr(self.midi_engine, "verbose", False)
+            if verbose:
+                logger.info(
+                    f"AR dispatcher sending note_on: note={note} velocity={velocity} enqueued={result}"
+                )
             return result
         except Exception as e:
             logger.error(f"Error creating note_on message: {e}")

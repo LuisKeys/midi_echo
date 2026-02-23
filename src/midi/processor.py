@@ -280,7 +280,8 @@ class MidiProcessor:
         - Arpeggiator held notes
         - Harmony engine active voices
         """
-        logger.info("MIDI PANIC - clearing all internal state")
+        if getattr(self, "verbose", False):
+            logger.info("MIDI PANIC - clearing all internal state")
 
         # Clear arpeggiator state
         self.clear_arp_cache()
@@ -288,7 +289,8 @@ class MidiProcessor:
         # Clear harmony engine state if available
         if self.harmony_engine:
             self.harmony_engine.panic()
-            logger.info("Harmony engine panic executed")
+            if getattr(self, "verbose", False):
+                logger.info("Harmony engine panic executed")
 
     def _process_melody_note(self, msg: mido.Message) -> None:
         """Process melody note for harmonizer."""
@@ -303,4 +305,5 @@ class MidiProcessor:
         """Clear all arpeggiator state to prevent stale notes."""
         self.arp_state.held_notes.clear()
         self.arp_state.pattern.notes.clear()
-        logger.info("AR cache cleared: held_notes and pattern.notes reset to empty")
+        if getattr(self, "verbose", False):
+            logger.info("AR cache cleared: held_notes and pattern.notes reset to empty")
