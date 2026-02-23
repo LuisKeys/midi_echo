@@ -320,6 +320,16 @@ def _on_record_clicked(context):
     if sequencer.state.is_recording:
         context.gui._sequencer_record_arming = False
         future = asyncio.run_coroutine_threadsafe(sequencer.stop_recording(), loop)
+
+        # Schedule info label update after recording stops
+        def on_stop_complete(f):
+            try:
+                f.result()
+            except Exception:
+                pass
+            _update_info_label(context)
+
+        future.add_done_callback(on_stop_complete)
     else:
         context.gui._sequencer_record_arming = True
         future = asyncio.run_coroutine_threadsafe(sequencer.start_recording(), loop)

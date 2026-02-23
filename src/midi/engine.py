@@ -103,9 +103,17 @@ class MidiEngine:
                     # Tap for sequencer recording (before sending to output)
                     if self.sequencer:
                         self.sequencer.record_message(processed_msg)
+                    else:
+                        logger.debug(
+                            f"Sequencer not available, skipping record_message"
+                        )
 
                     if self.output:
                         self.output.send(processed_msg)
+                else:
+                    logger.debug(
+                        f"Processor returned None for message type: {msg.type}"
+                    )
 
                 self.queue.task_done()
             except asyncio.CancelledError:

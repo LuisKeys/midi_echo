@@ -120,10 +120,14 @@ class MidiSequencer:
             message: mido.Message to record
         """
         if not self.state.is_recording:
+            logger.debug(
+                f"record_message called but is_recording={self.state.is_recording}"
+            )
             return
 
         # Filter: only record musical messages
         if message.type not in ("note_on", "note_off", "control_change"):
+            logger.debug(f"record_message ignoring message type: {message.type}")
             return
 
         # Get current position and quantize
@@ -132,6 +136,9 @@ class MidiSequencer:
 
         # Add to pattern
         self.pattern.add_event(quantized_tick, message)
+        logger.info(
+            f"Recorded {message.type} at tick {tick} (quantized: {quantized_tick}) - total events: {self.pattern.get_event_count()}"
+        )
 
         # Track held notes
         if message.type == "note_on" and message.velocity > 0:
@@ -161,29 +168,38 @@ class MidiSequencer:
         """Called by clock on each tick—the core playback engine
 
         Playback algorithm:
-        1. Check if playing (safety check)
-        2. Get all events due at this tick
-        3. Send each event directly to output
+        1. Update current tick position for recording timestamp
+        2. Check if playing (safety check)
+        3. Get all events due at this tick
+        4. Send each event directly to output
 
         Thread-safe: Called from clock (asyncio task on event loop)
 
         Args:
             tick: Current tick position in loop
         """
+        # Update current tick for recording (needed to timestamp recorded events)
+        self.state.current_tick = tick
+
         if not self.state.is_playing:
             return
 
         # Get all events scheduled for this tick
-        for event in self.pattern.events_at_tick(tick):
-            self._send_message_direct(event.message)
+        events = self.pattern.events_at_tick(tick)
+        if events:
+            logger.info(f"Playback: tick {tick} has {len(events)} event(s)")
+            for event in events:
+                logger.info(f"  Playing: {event.message}")
+                self._send_message_direct(event.message)
 
     def _on_bar_start(self):
         """Called at the start of each bar (when tick wraps to 0)
 
         Triggers:
         - Metronome downbeat click (loud) via internal audio synthesis
+        - Only plays during recording (not during playback-only)
         """
-        if self.state.metronome_enabled:
+        if self.state.metronome_enabled and self.state.is_recording:
             # Trigger non-blocking audio playback directly
             try:
                 self.clicker.play_downbeat()
@@ -195,11 +211,12 @@ class MidiSequencer:
 
         Triggers:
         - Metronome beat click (softer than downbeat) via internal audio synthesis
+        - Only plays during recording (not during playback-only)
 
         Args:
             beat_index: 0-based beat number within the bar
         """
-        if self.state.metronome_enabled and beat_index > 0:
+        if self.state.metronome_enabled and self.state.is_recording and beat_index > 0:
             # Trigger non-blocking audio playback directly
             try:
                 self.clicker.play_beat()
@@ -220,14 +237,11 @@ class MidiSequencer:
         """
         try:
             # Access the output port directly from the engine
-            if (
-                self.engine
-                and hasattr(self.engine, "output_port")
-                and self.engine.output_port
-            ):
-                self.engine.output_port.send(message)
+            if self.engine and hasattr(self.engine, "output") and self.engine.output:
+                self.engine.output.send(message)
+                logger.debug(f"Sent to output: {message}")
             else:
-                logger.debug(f"Output port not available, cannot send: {message}")
+                logger.warning(f"Output port not available, cannot send: {message}")
         except Exception as e:
             logger.error(f"Error sending message: {e}")
 
@@ -251,6 +265,17 @@ class MidiSequencer:
 
         self.state.is_playing = True
         self.state.current_tick = 0
+
+        # Log pattern info for debugging
+        event_count = self.pattern.get_event_count()
+        if event_count > 0:
+            event_ticks = sorted(set(e.tick for e in self.pattern.events))
+            logger.info(
+                f"Starting playback with {event_count} events at ticks: {event_ticks[:10]}{'...' if len(event_ticks) > 10 else ''}"
+            )
+            logger.info(f"Loop length: {self.state.loop_length_ticks} ticks")
+        else:
+            logger.info("Starting playback with empty pattern")
 
         # Emit initial downbeat immediately so playback starts in time
         # (clock beat callbacks are generated after first tick advance).
