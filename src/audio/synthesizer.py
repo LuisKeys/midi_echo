@@ -18,13 +18,15 @@ class MetronomeClicker:
     Supports different click types (downbeat, beat) with customizable parameters.
     """
 
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 44100, device_id: int | None = None):
         """Initialize metronome clicker.
 
         Args:
             sample_rate: Audio sample rate in Hz (default 44100)
+            device_id: Audio device index to use, or None for default device
         """
         self.sample_rate = sample_rate
+        self.device_id = device_id
         self._audio_output = None
         self._initialized = False
         self._audio_executor = ThreadPoolExecutor(max_workers=2)
@@ -47,8 +49,9 @@ class MetronomeClicker:
     def _initialize_audio_output(self):
         """Initialize audio output device.
 
-        Tries to use sounddevice library if available, falls back to
-        alternative methods if needed.
+        Tries to use sounddevice library first. Falls back to silent mode if
+        audio libraries have compatibility issues (common on Linux with certain
+        audio configurations).
         """
         if self._initialized:
             return
@@ -59,19 +62,24 @@ class MetronomeClicker:
             self._audio_output = sd
             self._initialized = True
             logger.info("Audio output initialized with sounddevice")
-        except ImportError:
-            logger.warning("sounddevice not available, trying simpleaudio...")
-            try:
-                import simpleaudio as sa
+            return
+        except (ImportError, OSError) as e:
+            logger.warning(
+                f"sounddevice unavailable ({type(e).__name__}). "
+                "This is common on Linux with complex audio setups (JACK, PulseAudio, ALSA). "
+                "Audio will run in silent mode. "
+                "To fix audio output: install system audio dev libraries, or configure your audio system. "
+                "On Ubuntu/Debian: sudo apt-get install libsndfile1 libasound2-dev"
+            )
 
-                self._audio_output = sa
-                self._initialized = True
-                logger.info("Audio output initialized with simpleaudio")
-            except ImportError:
-                logger.error(
-                    "No audio library available. Install sounddevice or simpleaudio."
-                )
-                self._initialized = False
+        # Note: simpleaudio is not used as fallback on Linux due to compatibility issues
+        # that can cause segmentation faults
+        logger.error(
+            "No audio library available. Metronome will run in silent mode. "
+            "To enable audio, install sounddevice or configure your Linux audio system."
+        )
+        self._audio_output = None
+        self._initialized = True  # Mark as initialized to prevent repeated attempts
 
     def play_downbeat(self):
         """Play a downbeat click (louder, lower frequency).
@@ -122,13 +130,19 @@ class MetronomeClicker:
             frequency: Fundamental frequency in Hz
             velocity: MIDI velocity (0-127) controlling amplitude
         """
+        if self._audio_output is None:
+            # Silent mode - no audio library available
+            return
+
         try:
             # Generate click sound
             audio_data = self._synthesize_click(frequency, velocity)
 
-            # Play on default output (blocks this thread only)
+            # Play on specified output device (or default if device_id is None)
             if hasattr(self._audio_output, "play"):  # sounddevice
-                self._audio_output.play(audio_data, self.sample_rate, blocking=True)
+                self._audio_output.play(
+                    audio_data, self.sample_rate, device=self.device_id, blocking=True
+                )
             elif hasattr(self._audio_output, "play_buffer"):  # simpleaudio
                 # Convert to int16 for simpleaudio
                 audio_int16 = (audio_data * 32767).astype(np.int16)

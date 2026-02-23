@@ -16,6 +16,9 @@ class AppConfig:
     verbose: bool
     list_ports: bool
 
+    # Audio Configuration
+    audio_device_id: int | None  # Specific audio device ID, or None for default
+
     # UI Configuration - Press Detection
     short_press_threshold: int  # milliseconds
     long_press_threshold: int  # milliseconds
@@ -42,10 +45,19 @@ class AppConfig:
     @classmethod
     def from_env(cls) -> "AppConfig":
         """Load configuration from environment variables."""
+        audio_device_str = os.getenv("AUDIO_DEVICE", "").strip()
+        audio_device_id = None
+        if audio_device_str:
+            try:
+                audio_device_id = int(audio_device_str)
+            except ValueError:
+                audio_device_id = None
+
         return cls(
             output=os.getenv("OUTPUT", ""),
             verbose=os.getenv("VERBOSE", "false").lower() == "true",
             list_ports=os.getenv("LIST_PORTS", "false").lower() == "true",
+            audio_device_id=audio_device_id,
             short_press_threshold=int(os.getenv("SHORT_PRESS_THRESHOLD", "200")),
             long_press_threshold=int(os.getenv("LONG_PRESS_THRESHOLD", "500")),
             long_press_increment=int(os.getenv("LONG_PRESS_INCREMENT", "5")),

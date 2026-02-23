@@ -42,12 +42,18 @@ class MidiSequencer:
     - All async operations thread-safe via asyncio event loop
     """
 
-    def __init__(self, engine: "MidiEngine", context: "AppContext"):
+    def __init__(
+        self,
+        engine: "MidiEngine",
+        context: "AppContext",
+        audio_device_id: int | None = None,
+    ):
         """Initialize sequencer
 
         Args:
             engine: MidiEngine instance for output port access
             context: AppContext for event loop reference
+            audio_device_id: Optional audio device ID for metronome playback
         """
         self.engine = engine
         self.context = context
@@ -61,7 +67,9 @@ class MidiSequencer:
         self.state = shared_state or SequencerState()
         self.pattern = Pattern()
         self.clock = InternalClock(self)
-        self.clicker = MetronomeClicker()  # Internal audio for metronome
+        self.clicker = MetronomeClicker(
+            device_id=audio_device_id
+        )  # Internal audio for metronome
 
         # Quantization grid in ticks
         self._quantization_grid_ticks = self._calculate_quantization_grid()

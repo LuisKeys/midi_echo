@@ -123,7 +123,9 @@ async def main():
 
     # Create MidiSequencer
     try:
-        sequencer = MidiSequencer(engine, context)
+        sequencer = MidiSequencer(
+            engine, context, audio_device_id=config.audio_device_id
+        )
         context.sequencer = sequencer
         engine.set_sequencer(sequencer)
     except Exception as e:
