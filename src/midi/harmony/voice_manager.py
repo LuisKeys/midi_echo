@@ -46,3 +46,22 @@ class VoiceManager:
     def get_active_harmonies(self, melody_note: int) -> List[int]:
         """Get currently active harmony notes for a melody note."""
         return self.active_voices.get(melody_note, [])
+
+    def get_all_active_voices(self) -> Dict[int, List[int]]:
+        """Get all currently active voices.
+
+        Returns:
+            Dictionary mapping melody_note -> list of harmony_notes
+        """
+        return self.active_voices.copy()
+
+    def clear_all_voices(self) -> Dict[int, List[int]]:
+        """Clear all active voices and return them.
+
+        Returns:
+            Dictionary of all voices that were active before clearing
+        """
+        active = self.active_voices.copy()
+        self.active_voices.clear()
+        self.voice_count = 0
+        return active

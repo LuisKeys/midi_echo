@@ -37,6 +37,11 @@ def run_engine(engine, inputs, output, event_loop):
 
 
 async def main():
+    # Create sequences folder if it doesn't exist
+    sequences_dir = os.path.join(os.path.dirname(__file__), "sequences")
+    os.makedirs(sequences_dir, exist_ok=True)
+    logger.info(f"Sequences folder: {sequences_dir}")
+
     # Load configuration from environment
     config = AppConfig.from_env()
 

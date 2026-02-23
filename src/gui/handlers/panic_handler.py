@@ -35,6 +35,17 @@ class PanicHandler(BaseHandler):
                     self.context.engine.queue.put_nowait, msg
                 )
 
+        # Also send explicit note-off messages for all 128 notes on all channels
+        # This ensures notes stop even if the synth doesn't support CC 123
+        logger.info("Sending explicit note-offs for all notes on all channels")
+        for ch in range(16):
+            for note in range(128):
+                msg = mido.Message("note_off", channel=ch, note=note, velocity=0)
+                if self.context.event_loop:
+                    self.context.event_loop.call_soon_threadsafe(
+                        self.context.engine.queue.put_nowait, msg
+                    )
+
         # Reset button color to black after 500ms
         if self.context.gui:
             self.context.gui.root.after(

@@ -291,8 +291,9 @@ class MidiSequencer:
         1. Clear is_playing flag
         2. Stop the clock
         3. Send All Notes Off (CC 123) on all 16 channels
-        4. Clear held notes tracker
-        5. Reset playhead to 0
+        4. Send explicit note_off for all 128 notes (some synths ignore CC 123)
+        5. Clear held notes tracker
+        6. Reset playhead to 0
         """
         if not self.state.is_playing:
             return
@@ -300,12 +301,21 @@ class MidiSequencer:
         self.state.is_playing = False
         await self.clock.stop()
 
-        # Send All Notes Off on all channels
+        # Send All Notes Off (CC 123) on all channels
         for channel in range(16):
             all_notes_off = mido.Message(
-                "control_change", control=123, value=0, channel=channel  # All Notes Off
+                "control_change", control=123, value=0, channel=channel
             )
             self._send_message_direct(all_notes_off)
+
+        # Send explicit note_off for all notes on all channels
+        # This ensures notes stop even if the synth doesn't support CC 123
+        for channel in range(16):
+            for note in range(128):
+                note_off = mido.Message(
+                    "note_off", channel=channel, note=note, velocity=0
+                )
+                self._send_message_direct(note_off)
 
         # Clear state
         self._notes_held.clear()
@@ -391,6 +401,37 @@ class MidiSequencer:
         """
         self.pattern.clear()
         logger.info("Sequencer pattern cleared")
+
+    def save_pattern(self, filepath: str):
+        """Save pattern as a standard MIDI file
+
+        Args:
+            filepath: Full path to save the MIDI file (e.g., "sequences/name.mid")
+
+        Raises:
+            ValueError: If pattern is empty
+            IOError: If file cannot be written
+        """
+        if self.pattern.is_empty():
+            raise ValueError("Cannot save empty pattern")
+
+        try:
+            # Export pattern to MIDI file with current tempo/time signature
+            midi_file = self.pattern.to_midi_file(
+                tempo=self.state.tempo,
+                time_signature_num=self.state.time_signature_num,
+                time_signature_den=self.state.time_signature_den,
+            )
+
+            # Save to disk
+            midi_file.save(filepath)
+            logger.info(
+                f"Pattern saved to {filepath} ({self.pattern.get_event_count()} events)"
+            )
+
+        except Exception as e:
+            logger.error(f"Failed to save pattern: {e}")
+            raise IOError(f"Failed to save pattern: {e}")
 
     # ── State Updates (from GUI) ──
 

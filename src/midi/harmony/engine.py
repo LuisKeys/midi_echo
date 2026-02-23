@@ -70,3 +70,19 @@ class HarmonyEngine:
         # Send harmony note-offs
         for h_note in harmony_notes:
             self.dispatcher.send_note_off(h_note, 0, channel)
+
+    def panic(self) -> None:
+        """Stop all harmony notes immediately.
+
+        Sends note-off for all active harmony voices and clears state.
+        This is called during MIDI panic to ensure all harmony notes stop.
+        """
+        active_voices = self.voice_manager.clear_all_voices()
+
+        # Send note-offs for all active harmony notes
+        # We send on all channels since we don't track per-channel state
+        for melody_note, harmony_notes in active_voices.items():
+            for h_note in harmony_notes:
+                # Send on multiple channels to ensure coverage
+                for channel in range(16):
+                    self.dispatcher.send_note_off(h_note, 0, channel)

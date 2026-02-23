@@ -133,5 +133,54 @@ class Pattern:
             pattern.events.append(PatternEvent.from_dict(event_data))
         return pattern
 
+    def to_midi_file(
+        self, tempo: float, time_signature_num: int, time_signature_den: int
+    ) -> mido.MidiFile:
+        """Export pattern as a MIDI file
+
+        Args:
+            tempo: BPM for tempo meta message
+            time_signature_num: Time signature numerator
+            time_signature_den: Time signature denominator
+
+        Returns:
+            mido.MidiFile ready to save
+        """
+        # Create MIDI file with single track (type 0)
+        mid = mido.MidiFile(type=0, ticks_per_beat=960)
+        track = mido.MidiTrack()
+        mid.tracks.append(track)
+
+        # Add tempo meta message (microseconds per quarter note)
+        tempo_mpqn = int(60_000_000 / tempo)
+        track.append(mido.MetaMessage("set_tempo", tempo=tempo_mpqn, time=0))
+
+        # Add time signature meta message
+        track.append(
+            mido.MetaMessage(
+                "time_signature",
+                numerator=time_signature_num,
+                denominator=time_signature_den,
+                time=0,
+            )
+        )
+
+        # Sort events by tick position
+        sorted_events = sorted(self.events, key=lambda e: e.tick)
+
+        # Convert absolute ticks to delta times
+        last_tick = 0
+        for event in sorted_events:
+            delta = event.tick - last_tick
+            # Create new message with delta time
+            msg = event.message.copy(time=delta)
+            track.append(msg)
+            last_tick = event.tick
+
+        # Add end of track meta message
+        track.append(mido.MetaMessage("end_of_track", time=0))
+
+        return mid
+
     def __repr__(self) -> str:
         return f"Pattern(events={len(self.events)})"

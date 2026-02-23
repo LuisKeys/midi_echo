@@ -14,6 +14,7 @@ class TransportControls(ctk.CTkFrame):
         play_cb: Optional[callable] = None,
         record_cb: Optional[callable] = None,
         clear_cb: Optional[callable] = None,
+        save_cb: Optional[callable] = None,
         met_cb: Optional[callable] = None,
         sequencer=None,
     ):
@@ -68,6 +69,16 @@ class TransportControls(ctk.CTkFrame):
         )
         self.clear_button.pack(side="left", expand=True, fill="x", padx=2)
 
+        # Save
+        self.save_button = ctk.CTkButton(
+            self,
+            text="Save",
+            command=lambda: save_cb() if save_cb else None,
+            height=self._height,
+            **button_style("button_inactive"),
+        )
+        self.save_button.pack(side="left", expand=True, fill="x", padx=2)
+
         # Metronome
         met_color = (
             self.theme.BACKGROUND_SELECTED
@@ -95,13 +106,14 @@ class TransportControls(ctk.CTkFrame):
                 self.pm.register_element("content_elements", self.play_button)
                 self.pm.register_element("content_elements", self.record_button)
                 self.pm.register_element("content_elements", self.clear_button)
+                self.pm.register_element("content_elements", self.save_button)
                 self.pm.register_element("content_elements", self.metronome_button)
                 self.pm.register_element("content_elements", self)
             except Exception:
                 pass
 
     def register_callbacks(
-        self, play_cb=None, record_cb=None, clear_cb=None, met_cb=None
+        self, play_cb=None, record_cb=None, clear_cb=None, save_cb=None, met_cb=None
     ):
         if play_cb:
             self.play_button.configure(command=play_cb)
@@ -109,6 +121,8 @@ class TransportControls(ctk.CTkFrame):
             self.record_button.configure(command=record_cb)
         if clear_cb:
             self.clear_button.configure(command=clear_cb)
+        if save_cb:
+            self.save_button.configure(command=save_cb)
         if met_cb:
             self.metronome_button.configure(command=met_cb)
 

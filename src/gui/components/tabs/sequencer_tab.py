@@ -2,11 +2,15 @@
 
 import customtkinter as ctk
 import asyncio
+import os
+import sys
+import logging
 from ..widgets import IncrementDecrementWidget
 from ..layout_utils import LayoutSpacing
 from ..tempo_control import create_tempo_control
 from ..transport_controls import TransportControls
 from ..theme import Theme
+from ..input_dialog import prompt_for_filename
 
 
 def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
@@ -48,6 +52,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         play_cb=lambda: _on_play_clicked(context),
         record_cb=lambda: _on_record_clicked(context),
         clear_cb=lambda: _on_clear_clicked(context),
+        save_cb=lambda: _on_save_clicked(context),
         met_cb=lambda: _on_metronome_clicked(context),
         sequencer=sequencer,
     )
@@ -56,6 +61,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
         transport_controls.play_button,
         transport_controls.record_button,
         transport_controls.clear_button,
+        transport_controls.save_button,
         transport_controls.metronome_button,
     ):
         button.configure(height=compact_transport_height)
@@ -63,6 +69,7 @@ def _build_sequencer_tab(parent: ctk.CTkFrame, context) -> None:
     # Keep compatibility attributes for existing logic/tests
     context.gui._sequencer_play_button = transport_controls.play_button
     context.gui._sequencer_record_button = transport_controls.record_button
+    context.gui._sequencer_save_button = transport_controls.save_button
     context.gui._sequencer_metronome_button = transport_controls.metronome_button
     pm.register_element("content_elements", transport_controls)
 
@@ -342,6 +349,43 @@ def _on_clear_clicked(context):
     """Clear pattern"""
     context.sequencer.clear_pattern()
     _update_info_label(context)
+
+
+def _on_save_clicked(context):
+    """Save pattern to MIDI file"""
+    sequencer = context.sequencer
+
+    # Check if pattern has any events
+    if sequencer.pattern.get_event_count() == 0:
+        # Could show a message - for now just return
+        return
+
+    # Prompt for filename
+    root = getattr(context.gui, "root", None) or getattr(context.gui, "tk_root", None)
+    if not root:
+        return
+
+    filename = prompt_for_filename(root, title="Save Pattern")
+    if not filename:
+        return
+
+    # Build full path - use absolute path relative to project root
+    # main.py is in the project root, so we use its directory
+    if hasattr(sys.modules.get("__main__"), "__file__"):
+        main_dir = os.path.dirname(os.path.abspath(sys.modules["__main__"].__file__))
+        sequences_folder = os.path.join(main_dir, "sequences")
+    else:
+        # Fallback to relative path
+        sequences_folder = "sequences"
+
+    filepath = os.path.join(sequences_folder, filename)
+
+    try:
+        sequencer.save_pattern(filepath)
+        # Could show success message
+    except Exception as e:
+        # Could show error message
+        logging.error(f"Failed to save pattern: {e}")
 
 
 def _on_metronome_clicked(context):

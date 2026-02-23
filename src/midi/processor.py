@@ -167,6 +167,16 @@ class MidiProcessor:
         if self.verbose and original_msg.type not in ["clock", "active_sensing"]:
             logger.info(f"Processing: {original_msg}")
 
+        # Handle MIDI Panic (CC 123 - All Notes Off)
+        if (
+            original_msg.type == "control_change"
+            and original_msg.control == 123
+            and original_msg.value == 0
+        ):
+            self._handle_panic()
+            # Still pass through the CC 123 message to MIDI output
+            return original_msg
+
         # Handle clock for external sync
         if original_msg.type == "clock" and self.arp_state.external_sync:
             self._handle_clock()
@@ -262,6 +272,23 @@ class MidiProcessor:
                 else:
                     self.arp_state.timing.bpm = clamped_bpm
         self.last_clock_time = current_time
+
+    def _handle_panic(self) -> None:
+        """Handle MIDI panic (CC 123 - All Notes Off).
+
+        Clears all internal state that could be generating or holding notes:
+        - Arpeggiator held notes
+        - Harmony engine active voices
+        """
+        logger.info("MIDI PANIC - clearing all internal state")
+
+        # Clear arpeggiator state
+        self.clear_arp_cache()
+
+        # Clear harmony engine state if available
+        if self.harmony_engine:
+            self.harmony_engine.panic()
+            logger.info("Harmony engine panic executed")
 
     def _process_melody_note(self, msg: mido.Message) -> None:
         """Process melody note for harmonizer."""
