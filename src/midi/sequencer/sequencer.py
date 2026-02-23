@@ -136,9 +136,6 @@ class MidiSequencer:
 
         # Add to pattern
         self.pattern.add_event(quantized_tick, message)
-        logger.info(
-            f"Recorded {message.type} at tick {tick} (quantized: {quantized_tick}) - total events: {self.pattern.get_event_count()}"
-        )
 
         # Track held notes
         if message.type == "note_on" and message.velocity > 0:
@@ -151,16 +148,22 @@ class MidiSequencer:
             self._notes_held.pop(key, None)
 
     def _quantize_tick(self, tick: int) -> int:
-        """Quantize a tick to the nearest grid position
+        """Quantize a tick to the nearest grid position, wrapping at loop boundary
 
         Args:
             tick: Unquantized tick position
 
         Returns:
-            Quantized tick (rounded to nearest grid)
+            Quantized tick (rounded to nearest grid, wrapped to stay within loop)
         """
         grid = self._quantization_grid_ticks
-        return round(tick / grid) * grid
+        quantized = round(tick / grid) * grid
+        # Wrap at loop boundary so events near the end round to tick 0
+        # instead of to loop_length_ticks (which the clock never visits)
+        loop_len = self.state.loop_length_ticks
+        if loop_len > 0:
+            quantized = quantized % loop_len
+        return quantized
 
     # ── Playback (Tick Callbacks) ──
 
@@ -187,10 +190,16 @@ class MidiSequencer:
         # Get all events scheduled for this tick
         events = self.pattern.events_at_tick(tick)
         if events:
-            logger.info(f"Playback: tick {tick} has {len(events)} event(s)")
             for event in events:
-                logger.info(f"  Playing: {event.message}")
                 self._send_message_direct(event.message)
+                # Track held notes so stop_playback can release them
+                msg = event.message
+                if msg.type == "note_on" and msg.velocity > 0:
+                    self._notes_held[(msg.channel, msg.note)] = msg.velocity
+                elif msg.type == "note_off" or (
+                    msg.type == "note_on" and msg.velocity == 0
+                ):
+                    self._notes_held.pop((msg.channel, msg.note), None)
 
     def _on_bar_start(self):
         """Called at the start of each bar (when tick wraps to 0)
@@ -290,8 +299,8 @@ class MidiSequencer:
         Process:
         1. Clear is_playing flag
         2. Stop the clock
-        3. Send All Notes Off (CC 123) on all 16 channels
-        4. Send explicit note_off for all 128 notes (some synths ignore CC 123)
+        3. Send CC 123 (All Notes Off) on all 16 channels
+        4. Send explicit note_off only for tracked held notes
         5. Clear held notes tracker
         6. Reset playhead to 0
         """
@@ -308,14 +317,12 @@ class MidiSequencer:
             )
             self._send_message_direct(all_notes_off)
 
-        # Send explicit note_off for all notes on all channels
-        # This ensures notes stop even if the synth doesn't support CC 123
-        for channel in range(16):
-            for note in range(128):
-                note_off = mido.Message(
-                    "note_off", channel=channel, note=note, velocity=0
-                )
-                self._send_message_direct(note_off)
+        # Send explicit note_off only for notes we know are held
+        # (avoids flooding 2048 messages which can drown out early notes
+        #  when playback restarts)
+        for channel, note in list(self._notes_held.keys()):
+            note_off = mido.Message("note_off", channel=channel, note=note, velocity=0)
+            self._send_message_direct(note_off)
 
         # Clear state
         self._notes_held.clear()

@@ -243,8 +243,23 @@ class TestMidiSequencer:
         msg = mido.Message("note_on", note=60)
         sequencer.record_message(msg)
 
+        # 1/16 grid = 240 ticks; tick 150 is closer to 240 than 0
+        events = sequencer.pattern.events_at_tick(240)
+        assert len(events) == 1
+
+    def test_record_message_quantization_wraps_at_loop_boundary(self, sequencer):
+        """Test that quantization wraps at loop boundary instead of producing out-of-range tick."""
+        sequencer.state.is_recording = True
+        # Tick near end of loop: with 1/16 grid (240), ticks 3720-3839 would
+        # round to 3840 which equals loop_length and never plays.
+        # The fix wraps it to tick 0.
+        sequencer.state.current_tick = 3780
+
+        msg = mido.Message("note_on", note=60)
+        sequencer.record_message(msg)
+
         events = sequencer.pattern.events_at_tick(0)
-        assert len(events) == 1  # Should be quantized to nearest grid (0 for 1/16)
+        assert len(events) == 1  # Should wrap to 0, not sit at 3840
 
     def test_record_disable(self, sequencer):
         """Test that messages aren't recorded when recording is disabled."""
@@ -305,9 +320,10 @@ class TestMidiSequencer:
     async def test_start_playback_triggers_initial_downbeat(self, sequencer):
         """Playback should emit the first downbeat immediately at start."""
         sequencer.state.metronome_enabled = True
+        sequencer.state.is_recording = True  # Metronome only clicks during recording
         sequencer.clicker.play_downbeat = Mock()
 
-        await sequencer.start_playback()
+        await sequencer.start_playback(allow_while_recording=True)
 
         assert sequencer.clicker.play_downbeat.call_count == 1
 
@@ -437,7 +453,7 @@ class TestSequencerIntegration:
     def test_sequencer_send_message_direct(self):
         """Test direct message sending to output port."""
         engine = Mock()
-        engine.output_port = Mock()
+        engine.output = Mock()
         context = Mock()
 
         sequencer = MidiSequencer(engine, context)
@@ -445,7 +461,7 @@ class TestSequencerIntegration:
 
         sequencer._send_message_direct(msg)
 
-        engine.output_port.send.assert_called_once_with(msg)
+        engine.output.send.assert_called_once_with(msg)
 
     def test_sequencer_all_notes_off_on_stop(self):
         """Test that All Notes Off messages are sent on stop."""

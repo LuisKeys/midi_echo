@@ -48,7 +48,8 @@ class InternalClock:
             return
 
         self._is_running = True
-        self._last_monotonic = monotonic()
+        # _last_monotonic is set inside _run_clock to avoid first-frame burst
+        # caused by delay between create_task and actual task execution
         self._accumulated_ticks = 0.0
 
         self._task = asyncio.create_task(self._run_clock())
@@ -82,6 +83,14 @@ class InternalClock:
         Drift correction: accumulating fractional ticks ensures timing stays
         synchronized even if sleep intervals are inexact.
         """
+        # Set initial time reference HERE (not in start()) to avoid
+        # a burst of ticks from the asyncio scheduling delay
+        self._last_monotonic = monotonic()
+
+        # Seed 1.0 accumulated tick so tick 0 fires immediately on the
+        # first frame instead of waiting for the first sleep cycle.
+        self._accumulated_ticks = 1.0
+
         try:
             while self._is_running:
                 try:
@@ -102,13 +111,14 @@ class InternalClock:
                     while self._accumulated_ticks >= 1:
                         self._accumulated_ticks -= 1
 
+                        # Fire the main tick callback BEFORE incrementing
+                        # This ensures tick 0 plays on the first iteration
+                        self.sequencer._on_tick(self.state.current_tick)
+
                         # Update playhead position by exactly one tick
                         self.state.current_tick = (
                             self.state.current_tick + 1
                         ) % self.state.loop_length_ticks
-
-                        # Fire the main tick callback (playback happens here)
-                        self.sequencer._on_tick(self.state.current_tick)
 
                         # Check for bar start (reset to 0)
                         if (
