@@ -1,6 +1,7 @@
 """Simple text input dialog for user prompts."""
 
 import customtkinter as ctk
+import tkinter as tk
 import re
 
 
@@ -22,9 +23,11 @@ class InputDialog(ctk.CTkToplevel):
         self.title(title)
         self.geometry("400x150")
 
-        # Make modal
+        # Set background color to make content visible
+        self.configure(fg_color=("gray90", "gray15"))
+
+        # Make modal (but don't grab yet)
         self.transient(parent)
-        self.grab_set()
 
         # Center on parent
         self.update_idletasks()
@@ -40,8 +43,7 @@ class InputDialog(ctk.CTkToplevel):
         self.entry = ctk.CTkEntry(self, width=350, font=("Arial", 12))
         self.entry.pack(pady=10, padx=20)
         self.entry.insert(0, default_value)
-        self.entry.focus_set()
-        self.entry.select_range(0, ctk.END)
+        self.entry.select_range(0, tk.END)
 
         # Bind Enter key to OK
         self.entry.bind("<Return>", lambda e: self._on_ok())
@@ -65,6 +67,13 @@ class InputDialog(ctk.CTkToplevel):
             hover_color="gray40",
         )
         self.cancel_button.pack(side="left", padx=5)
+
+        # Force update to ensure widgets are rendered
+        self.update_idletasks()
+
+        # Now grab focus after window is fully viewable
+        self.grab_set()
+        self.entry.focus_set()
 
     def _on_ok(self):
         """Handle OK button click."""
