@@ -9,3 +9,5 @@ pytest-asyncio
 sounddevice
 numpy
 simpleaudio
+
+mss

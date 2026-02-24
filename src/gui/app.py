@@ -18,6 +18,7 @@ from src.gui.handlers import (
     PanicHandler,
     SequencerHandler,
 )
+from src.gui.screenshot import capture_fullscreen, show_toast
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,9 @@ class MidiGui(ctk.CTk):
         # Bind events
         self.bind("<Escape>", lambda e: self.quit())
         self.bind("<Configure>", lambda e: self._on_window_resize())
+        # Bind full-screen capture to 'c' (both lower and upper)
+        self.bind_all("<KeyPress-c>", lambda e: self._on_capture_key(e))
+        self.bind_all("<KeyPress-C>", lambda e: self._on_capture_key(e))
         self._resize_job = None
         self._last_resize_width = 0
         self._last_resize_height = 0
@@ -257,3 +261,20 @@ class MidiGui(ctk.CTk):
         self.theme.update_window_size(new_width, new_height)
         self.button_panel.update_font_sizes()
         self.popup_manager.update_font_sizes()
+
+    def _on_capture_key(self, event) -> None:
+        """Handle the 'c' key to capture the full screen and show feedback."""
+        try:
+            path = capture_fullscreen()
+            # Show a brief on-screen notification
+            try:
+                show_toast(self, f"Saved: {path}")
+            except Exception:
+                # Fallback to logging if toast fails
+                logger.info("Screenshot saved: %s", path)
+        except Exception as exc:
+            logger.exception("Failed to capture screenshot")
+            try:
+                show_toast(self, f"Capture failed: {exc}")
+            except Exception:
+                pass
