@@ -1,7 +1,13 @@
 """Application configuration management."""
 
 import os
+import platform
 from dataclasses import dataclass
+
+
+def get_system() -> str:
+    """Return the operating system name."""
+    return platform.system()
 
 
 @dataclass
@@ -53,8 +59,16 @@ class AppConfig:
             except ValueError:
                 audio_device_id = None
 
+        system = get_system()
+        if system == "Darwin":
+            output = os.getenv("MAC_OUTPUT", "")
+        elif system == "Linux":
+            output = os.getenv("LINUX_OUTPUT", "")
+        else:
+            output = os.getenv("OUTPUT", "")
+
         return cls(
-            output=os.getenv("OUTPUT", ""),
+            output=output,
             verbose=os.getenv("VERBOSE", "false").lower() == "true",
             list_ports=os.getenv("LIST_PORTS", "false").lower() == "true",
             audio_device_id=audio_device_id,
