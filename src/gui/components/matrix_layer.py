@@ -76,7 +76,7 @@ class MatrixLayer:
         for i in range(self.column_count):
             x = i * self.FONT_SIZE
             y = random.uniform(-self.TRAIL_DEPTH * self.FONT_SIZE, 0)
-            speed = random.uniform(1, 3)
+            speed = random.uniform(1, 6)
             trail_length = random.randint(5, 15)
 
             text_ids = []
