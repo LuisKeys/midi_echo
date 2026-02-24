@@ -304,7 +304,7 @@ def _on_play_clicked(context):
     sequencer = context.sequencer
     loop = context.event_loop
 
-    if sequencer.state.is_recording:
+    if sequencer.state.is_recording or getattr(sequencer, "is_record_arming", False):
         return
 
     if sequencer.state.is_playing:
@@ -320,6 +320,10 @@ def _on_record_clicked(context):
     """Toggle recording"""
     sequencer = context.sequencer
     loop = context.event_loop
+
+    record_arming = bool(getattr(sequencer, "is_record_arming", False)) or bool(
+        getattr(context.gui, "_sequencer_record_arming", False)
+    )
 
     if sequencer.state.is_playing and not sequencer.state.is_recording:
         return
@@ -337,6 +341,8 @@ def _on_record_clicked(context):
             _update_info_label(context)
 
         future.add_done_callback(on_stop_complete)
+    elif record_arming:
+        future = asyncio.run_coroutine_threadsafe(sequencer.cancel_recording(), loop)
     else:
         context.gui._sequencer_record_arming = True
         future = asyncio.run_coroutine_threadsafe(sequencer.start_recording(), loop)
@@ -407,9 +413,11 @@ def _update_button_states(context):
     play_button = getattr(context.gui, "_sequencer_play_button", None)
     record_button = getattr(context.gui, "_sequencer_record_button", None)
 
-    record_arming = bool(getattr(context.gui, "_sequencer_record_arming", False))
+    record_arming = bool(getattr(sequencer, "is_record_arming", False)) or bool(
+        getattr(context.gui, "_sequencer_record_arming", False)
+    )
     play_disabled = sequencer.state.is_recording or record_arming
-    record_disabled = sequencer.state.is_playing
+    record_disabled = sequencer.state.is_playing and not sequencer.state.is_recording
     theme = getattr(context.gui, "theme", None)
 
     def color(key: str, fallback: str) -> str:
@@ -442,6 +450,12 @@ def _update_button_states(context):
                 text="Stop Rec",
                 state="normal",
             )
+        elif record_arming:
+            record_button.configure(
+                fg_color=color("state_active", "#2A2A2A"),
+                text="Cancel",
+                state="normal",
+            )
         elif record_disabled:
             record_button.configure(
                 fg_color=color("state_disabled", "#060606"),
@@ -463,7 +477,9 @@ def _schedule_button_state_refresh(context, future):
         _update_button_states(context)
 
     def on_done(_):
-        context.gui._sequencer_record_arming = False
+        context.gui._sequencer_record_arming = bool(
+            getattr(context.sequencer, "is_record_arming", False)
+        )
         gui = getattr(context, "gui", None)
         root = getattr(gui, "root", None) if gui else None
         tk_root = getattr(gui, "tk_root", None) if gui else None

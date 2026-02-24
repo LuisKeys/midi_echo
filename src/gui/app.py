@@ -58,8 +58,10 @@ class MidiGui(ctk.CTk):
         screen_height = self.winfo_screenheight()
         self.geometry(f"{screen_width}x{screen_height}+0+0")
         self.lift()
-        # self.attributes("-topmost", True)
-        self.focus()
+        self.attributes("-topmost", True)
+        self.attributes("-fullscreen", True)
+        # Focus after the event loop starts so macOS/Windows reliably honor it
+        self.after_idle(self._focus_main_window)
 
         # Setup components — buttons grid on the Matrix canvas so animation shows through gaps
         self.button_panel = ButtonPanel(self.matrix_layer.canvas, self.theme)
@@ -102,6 +104,17 @@ class MidiGui(ctk.CTk):
 
         # Start Matrix animation
         self.matrix_layer.start()
+
+    def _focus_main_window(self) -> None:
+        """Bring the main window to the front and ensure focus."""
+        try:
+            self.lift()
+            self.attributes("-topmost", True)
+            self.attributes("-fullscreen", True)
+            self.focus_force()
+        except tk.TclError:
+            # Fall back to a best-effort focus if attributes are unavailable
+            self.focus_force()
 
     def _create_buttons(self) -> None:
         """Create all buttons for the interface."""

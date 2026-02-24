@@ -373,6 +373,27 @@ class TestMidiSequencer:
         assert sequencer.state.is_recording is False
         assert sequencer.state.is_playing is False
 
+    @pytest.mark.asyncio
+    async def test_record_cancel_during_precount(self, sequencer):
+        """Record arming can be cancelled during pre-count."""
+        sequencer.state.metronome_enabled = True
+        sequencer.state.time_signature_num = 4
+        sequencer.clock.start = AsyncMock()
+
+        start_task = asyncio.create_task(sequencer.start_recording())
+
+        # Allow arming to begin
+        await asyncio.sleep(0.01)
+        assert sequencer.is_record_arming is True
+
+        await sequencer.cancel_recording()
+        await start_task
+
+        assert sequencer.is_record_arming is False
+        assert sequencer.state.is_recording is False
+        assert sequencer.state.is_playing is False
+        sequencer.clock.start.assert_not_awaited()
+
     def test_sequencer_serialization(self, sequencer):
         """Test to_dict and from_dict preserve sequencer state."""
         sequencer.state.tempo = 140

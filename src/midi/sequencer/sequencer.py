@@ -71,6 +71,10 @@ class MidiSequencer:
             device_id=audio_device_id
         )  # Internal audio for metronome
 
+        # Recording coordination
+        self._record_arming: bool = False
+        self._record_cancel_event: asyncio.Event | None = None
+
         # Quantization grid in ticks
         self._quantization_grid_ticks = self._calculate_quantization_grid()
 
@@ -342,12 +346,15 @@ class MidiSequencer:
 
         When recording, all processed MIDI will be captured via record_message().
         """
-        if self.state.is_recording:
+        if self.state.is_recording or self._record_arming:
             return
 
         if self.state.is_playing:
             logger.debug("Ignoring start_recording while playback is active")
             return
+
+        self._record_arming = True
+        self._record_cancel_event = asyncio.Event()
 
         self.pattern.clear()
         self._notes_held.clear()
@@ -355,15 +362,26 @@ class MidiSequencer:
         was_playing = self.state.is_playing
         self.state.is_recording = False
 
-        if not was_playing:
-            await self._run_precount_bar()
+        try:
+            if not was_playing:
+                completed = await self._run_precount_bar(self._record_cancel_event)
+                if not completed:
+                    return
 
-        self.state.is_recording = True
+            if self._record_cancel_event.is_set():
+                return
 
-        await self.start_playback(allow_while_recording=True)
-        logger.info("Sequencer recording started")
+            self.state.is_recording = True
 
-    async def _run_precount_bar(self):
+            await self.start_playback(allow_while_recording=True)
+            logger.info("Sequencer recording started")
+        finally:
+            self._record_arming = False
+            self._record_cancel_event = None
+
+    async def _run_precount_bar(
+        self, cancel_event: asyncio.Event | None = None
+    ) -> bool:
         """Run a one-bar pre-count before recording starts.
 
         Uses the current time signature and tempo. Clicks are emitted only when
@@ -373,13 +391,36 @@ class MidiSequencer:
         seconds_per_beat = self._seconds_per_beat()
 
         for beat_index in range(beats_in_bar):
+            if cancel_event and cancel_event.is_set():
+                return False
             if self.state.metronome_enabled:
                 if beat_index == 0:
                     self.clicker.play_downbeat()
                 else:
                     self.clicker.play_beat()
 
-            await asyncio.sleep(seconds_per_beat)
+            cancelled = await self._wait_or_cancel(seconds_per_beat, cancel_event)
+            if cancelled:
+                return False
+
+        return True
+
+    async def _wait_or_cancel(
+        self, seconds: float, cancel_event: asyncio.Event | None
+    ) -> bool:
+        """Sleep for seconds or return early when cancel_event is set.
+
+        Returns True if cancelled, False otherwise.
+        """
+        if cancel_event is None:
+            await asyncio.sleep(seconds)
+            return False
+
+        try:
+            await asyncio.wait_for(cancel_event.wait(), timeout=seconds)
+            return True
+        except asyncio.TimeoutError:
+            return False
 
     def _seconds_per_beat(self) -> float:
         """Return seconds per beat from current tempo."""
@@ -395,11 +436,28 @@ class MidiSequencer:
 
         Pattern is preserved for playback.
         """
+        self._record_arming = False
+        self._record_cancel_event = None
         self.state.is_recording = False
         await self.stop_playback()
         logger.info(
             f"Sequencer recording stopped ({self.pattern.get_event_count()} events)"
         )
+
+    async def cancel_recording(self):
+        """Cancel recording arming or stop recording if active."""
+        if self._record_arming:
+            if self._record_cancel_event and not self._record_cancel_event.is_set():
+                self._record_cancel_event.set()
+            logger.info("Sequencer recording arming canceled")
+            return
+
+        if self.state.is_recording:
+            await self.stop_recording()
+
+    @property
+    def is_record_arming(self) -> bool:
+        return self._record_arming
 
     def clear_pattern(self):
         """Clear all events from current pattern
