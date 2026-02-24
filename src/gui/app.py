@@ -1,10 +1,11 @@
 """Main GUI window for MIDI Echo."""
 
 import customtkinter as ctk
+import tkinter as tk
 import logging
 from src.config import AppConfig
 from src.gui.context import AppContext
-from src.gui.components import Theme, ButtonPanel, ButtonSpec, PopupManager
+from src.gui.components import Theme, ButtonPanel, ButtonSpec, PopupManager, MatrixLayer
 from src.gui.input import PressDetector
 from src.gui.handlers import (
     TransposeHandler,
@@ -44,10 +45,12 @@ class MidiGui(ctk.CTk):
         # Setup theme
         self.theme = Theme(config)
 
+        # Setup Matrix background (canvas fills root, used as parent for buttons)
+        self.matrix_layer = MatrixLayer(self)
+
         # Setup window
         self.title("MIDI Echo - Live Performance")
         self.geometry(f"{config.window_width}x{config.window_height}")
-        self.configure(fg_color=self.theme.BACKGROUND_UNSELECTED)
 
         # Maximize window (platform-independent)
         self.update_idletasks()
@@ -58,8 +61,8 @@ class MidiGui(ctk.CTk):
         # self.attributes("-topmost", True)
         self.focus()
 
-        # Setup components
-        self.button_panel = ButtonPanel(self, self.theme)
+        # Setup components — buttons grid on the Matrix canvas so animation shows through gaps
+        self.button_panel = ButtonPanel(self.matrix_layer.canvas, self.theme)
         self.popup_manager = PopupManager(self, self.theme)
         self.press_detector = PressDetector(config, self)
 
@@ -96,6 +99,9 @@ class MidiGui(ctk.CTk):
         for key, handler in self.handlers.items():
             if hasattr(handler, "update_ui"):
                 handler.update_ui()
+
+        # Start Matrix animation
+        self.matrix_layer.start()
 
     def _create_buttons(self) -> None:
         """Create all buttons for the interface."""

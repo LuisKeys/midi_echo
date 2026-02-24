@@ -1,7 +1,8 @@
 """Button panel component for managing GUI button grid."""
 
 import customtkinter as ctk
-from typing import Callable, Dict, Optional, Any
+import tkinter as tk
+from typing import Callable, Dict, Optional, Any, Union
 from dataclasses import dataclass
 from src.gui.components.theme import Theme
 from src.gui.components.layout_utils import LayoutSpacing
@@ -29,11 +30,11 @@ class ButtonPanel:
     - Handling button click/long-press events
     """
 
-    def __init__(self, parent: ctk.CTk, theme: Theme):
+    def __init__(self, parent: Union[ctk.CTk, tk.Canvas], theme: Theme):
         """Initialize button panel.
 
         Args:
-            parent: Parent widget (the main window)
+            parent: Parent widget (the main window or a Canvas)
             theme: Theme instance for colors and fonts
         """
         self.parent = parent
@@ -72,11 +73,11 @@ class ButtonPanel:
         # so clicks don't also trigger the primary spec.command
         cmd = (lambda: None) if (on_press and on_release) else spec.command
 
-        # Create wrapper frame
+        # Create wrapper frame — opaque background so button area is clean
         wrapper_frame = ctk.CTkFrame(
             self.parent,
-            fg_color="transparent",
-            bg_color=self.theme.BACKGROUND_UNSELECTED,
+            fg_color=self.theme.BACKGROUND_UNSELECTED,
+            bg_color="#050505",
         )
         wrapper_frame.grid(
             row=spec.row,
