@@ -108,6 +108,14 @@ class MidiProcessor:
         self.app_state.arp.enabled = enabled
 
     @property
+    def multi_channel_enabled(self):
+        return self.app_state.performance.multi_channel_enabled
+
+    @multi_channel_enabled.setter
+    def multi_channel_enabled(self, value):
+        self.app_state.performance.multi_channel_enabled = bool(value)
+
+    @property
     def arp_state(self) -> ArpState:
         return self.app_state.arp
 
@@ -224,6 +232,20 @@ class MidiProcessor:
         # Apply channel mapping
         if self.output_channel is not None and hasattr(new_msg, "channel"):
             new_msg.channel = self.output_channel
+
+        # MultiChannel mapping: map pitch class to channels 0..11 (C->0, C#->1, ..., B->11)
+        # This overrides any global output_channel when enabled.
+        if (
+            getattr(self, "multi_channel_enabled", False)
+            and new_msg.type in ["note_on", "note_off", "polytouch"]
+            and hasattr(new_msg, "channel")
+        ):
+            try:
+                mapped = int(new_msg.note) % 12
+                new_msg.channel = mapped
+            except Exception:
+                # If there's no note attribute or conversion fails, skip mapping
+                pass
 
         # Log outgoing event
         if new_msg and self.event_log:

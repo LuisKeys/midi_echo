@@ -181,3 +181,40 @@ class TestMidiProcessor:
         result = processor.process(msg)
 
         assert result.note == 61
+
+    def test_multi_channel_maps_pitch_to_channel(self):
+        """Test MultiChannel maps pitch classes to channels 0..11."""
+        processor = MidiProcessor()
+        processor.multi_channel_enabled = True
+        # C4 -> 60 % 12 == 0
+        msg = mido.Message("note_on", note=60, velocity=100)
+
+        result = processor.process(msg)
+
+        assert result is not None
+        assert getattr(result, "channel", None) == 0
+
+    def test_multi_channel_overrides_output_channel(self):
+        """Ensure MultiChannel mapping overrides a configured global output_channel."""
+        processor = MidiProcessor()
+        processor.output_channel = 5
+        processor.multi_channel_enabled = True
+        # C#4 -> 61 % 12 == 1
+        msg = mido.Message("note_on", note=61, velocity=100)
+
+        result = processor.process(msg)
+
+        assert result is not None
+        assert getattr(result, "channel", None) == 1
+
+    def test_multi_channel_applies_to_arp_generated(self):
+        """ARP-generated (wrapped) notes should also be mapped when enabled."""
+        processor = MidiProcessor()
+        processor.multi_channel_enabled = True
+        msg = mido.Message("note_on", note=62, velocity=100)  # D -> 62%12==2
+        wrapped = MidiMessageWrapper(msg, is_arp=True)
+
+        result = processor.process(wrapped)
+
+        assert result is not None
+        assert getattr(result, "channel", None) == 2

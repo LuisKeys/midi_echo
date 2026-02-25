@@ -30,6 +30,7 @@ class PerformanceState:
     scale_root: int = 0
     scale_type: ScaleType = ScaleType.MAJOR
     arp_enabled: bool = False
+    multi_channel_enabled: bool = False
 
 
 @dataclass

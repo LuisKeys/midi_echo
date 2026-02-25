@@ -240,3 +240,23 @@ pytest
 ## License
 
 This project is open-source. See LICENSE file for details.
+
+## MultiChannel Feature
+
+The MultiChannel feature maps note pitches to MIDI channels across 12 semitones. When enabled, each pitch class is routed to its own MIDI channel so devices like the Korg Volca Sample/Beat/Drum can receive different pitches on separate channels.
+
+- Mapping: C → channel 1, C# → channel 2, ..., B → channel 12 (internally MIDI channels are 0..11).
+- Applies to: all note messages (live input, arpeggiator-generated, and harmony-generated notes).
+- Precedence: when MultiChannel is enabled it overrides the global `output_channel` setting.
+
+Enable it programmatically by setting the flag on the application state or processor, for example:
+
+```python
+# via processor instance
+processor.multi_channel_enabled = True
+
+# or via app state
+app_state.performance.multi_channel_enabled = True
+```
+
+Note: The GUI does not yet expose a toggle for this feature — consider adding a control in the Advanced or Channel settings to enable/disable MultiChannel at runtime.

@@ -17,6 +17,7 @@ from src.gui.handlers import (
     PresetHandler,
     PanicHandler,
     SequencerHandler,
+    MultiChannelHandler,
 )
 from src.gui.screenshot import capture_fullscreen, show_toast
 
@@ -80,6 +81,7 @@ class MidiGui(ctk.CTk):
             "PS": PresetHandler(context),
             "SQ": SequencerHandler(context),
             "ST": PanicHandler(context),
+            "MC": MultiChannelHandler(context),
         }
 
         # Create buttons
@@ -203,6 +205,15 @@ class MidiGui(ctk.CTk):
                 self.handlers["ST"].on_button_press,
                 self.handlers["ST"].on_button_long_press,
                 "Panic Stop",
+            ),
+            ButtonSpec(
+                "MC",
+                2,
+                1,
+                "cyan",
+                self.handlers["MC"].on_button_press,
+                self.handlers["MC"].on_button_long_press,
+                "Multichannel",
             ),
         ]
 

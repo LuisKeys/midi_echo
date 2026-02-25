@@ -10,6 +10,7 @@ from .arp_handler import ArpHandler
 from .preset_handler import PresetHandler
 from .panic_handler import PanicHandler
 from .sequencer_handler import SequencerHandler
+from .multichannel_handler import MultiChannelHandler
 
 __all__ = [
     "BaseHandler",
@@ -22,4 +23,5 @@ __all__ = [
     "PresetHandler",
     "PanicHandler",
     "SequencerHandler",
+    "MultiChannelHandler",
 ]
