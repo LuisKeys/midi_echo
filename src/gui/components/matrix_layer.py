@@ -18,6 +18,7 @@ class Column:
     trail_length: int
     boost_timer: int
     text_ids: List[int]
+    hidden_mask: List[bool]
 
 
 class MatrixLayer:
@@ -26,11 +27,13 @@ class MatrixLayer:
     Runs a low-CPU animation loop in the UI thread.
     """
 
-    FRAME_MS = 33  # ~30 FPS
+    FRAME_MS = 50  # ~20 FPS
     FONT_SIZE = 14
     FONT_NAME = "Consolas"
     TRAIL_DEPTH = 20
     CHAR_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"
+    # Pre-computed green gradient: index = 0..255 → "#00gg00"
+    _COLOR_TABLE = [f"#00{g:02x}00" for g in range(256)]
 
     def __init__(self, root: tk.Tk):
         """Initialize Matrix layer.
@@ -99,6 +102,7 @@ class MatrixLayer:
                 trail_length=trail_length,
                 boost_timer=0,
                 text_ids=text_ids,
+                hidden_mask=[False] * self.TRAIL_DEPTH,
             )
             self.columns.append(column)
 
@@ -157,24 +161,30 @@ class MatrixLayer:
     def _render(self):
         """Render the animation."""
         height = self.canvas.winfo_height()
+        color_table = self._COLOR_TABLE
+        char_set = self.CHAR_SET
+        font_size = self.FONT_SIZE
         for col in self.columns:
+            hidden = col.hidden_mask
             for i, text_id in enumerate(col.text_ids):
-                offset_y = col.y - i * self.FONT_SIZE
+                offset_y = col.y - i * font_size
                 if 0 <= offset_y <= height:
-                    # Randomize character occasionally
-                    if random.random() < 0.1:  # 10% chance
-                        char = random.choice(self.CHAR_SET)
-                        self.canvas.itemconfig(text_id, text=char)
-
-                    # Calculate color gradient
-                    intensity = max(0, 1 - (i / col.trail_length))
-                    green = int(255 * intensity)
-                    color = f"#{0:02x}{green:02x}{0:02x}"
-
+                    hidden[i] = False
+                    # Pre-computed color lookup — no string formatting per frame
+                    intensity = max(0.0, 1.0 - i / col.trail_length)
+                    color = color_table[int(255 * intensity)]
+                    # Randomize character occasionally (5% chance)
+                    if random.random() < 0.05:
+                        # Merge text + fill into a single canvas call
+                        self.canvas.itemconfig(
+                            text_id, text=random.choice(char_set), fill=color
+                        )
+                    else:
+                        self.canvas.itemconfig(text_id, fill=color)
                     self.canvas.coords(text_id, col.x, offset_y)
-                    self.canvas.itemconfig(text_id, fill=color)
-                else:
-                    # Hide off-screen
+                elif not hidden[i]:
+                    # Only move off-screen once — skip if already hidden
+                    hidden[i] = True
                     self.canvas.coords(text_id, -100, -100)
 
     def react(self, note: int, velocity: int):

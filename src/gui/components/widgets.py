@@ -16,6 +16,7 @@ class IncrementDecrementWidget(ctk.CTkFrame):
         max_val,
         initial_val,
         step=1,
+        hold_step=None,
         callback=None,
         config=None,
         suffix=None,

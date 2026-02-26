@@ -125,7 +125,7 @@ class MidiGui(ctk.CTk):
     def _create_buttons(self) -> None:
         """Create all buttons for the interface."""
         button_specs = [
-            # Row 0 - Main buttons
+            # Row 0 - Sound generation (pipeline order: scale → harmony → arp → pitch shift)
             ButtonSpec(
                 "SC",
                 0,
@@ -136,22 +136,22 @@ class MidiGui(ctk.CTk):
                 "Scale",
             ),
             ButtonSpec(
-                "AR",
-                0,
-                1,
-                "aqua",
-                self.handlers["AR"].on_button_press,
-                self.handlers["AR"].on_button_long_press,
-                "Arpeggiator",
-            ),
-            ButtonSpec(
                 "HZ",
                 0,
-                2,
+                1,
                 "violet",
                 self.handlers["HZ"].on_button_press,
                 self.handlers["HZ"].on_button_long_press,
                 "Harmony",
+            ),
+            ButtonSpec(
+                "AR",
+                0,
+                2,
+                "aqua",
+                self.handlers["AR"].on_button_press,
+                self.handlers["AR"].on_button_long_press,
+                "Arpeggiator",
             ),
             ButtonSpec(
                 "TR",
@@ -162,7 +162,7 @@ class MidiGui(ctk.CTk):
                 self.handlers["TR"].on_button_long_press,
                 "Transpose",
             ),
-            # Row 1 - Supporting buttons
+            # Row 1 - Note routing (pipeline order: octave → channel → multichannel → preset)
             ButtonSpec(
                 "OC",
                 1,
@@ -182,17 +182,27 @@ class MidiGui(ctk.CTk):
                 "Channel",
             ),
             ButtonSpec(
-                "PS",
+                "MC",
                 1,
                 2,
+                "cyan",
+                self.handlers["MC"].on_button_press,
+                self.handlers["MC"].on_button_long_press,
+                "Multichannel",
+            ),
+            ButtonSpec(
+                "PS",
+                1,
+                3,
                 "cyan",
                 self.handlers["PS"].on_button_press,
                 function_name="Preset",
             ),
+            # Row 2 - Transport / session controls
             ButtonSpec(
                 "SQ",
-                1,
-                3,
+                2,
+                0,
                 "cyan",
                 self.handlers["SQ"].on_button_press,
                 function_name="Sequencer",
@@ -200,20 +210,11 @@ class MidiGui(ctk.CTk):
             ButtonSpec(
                 "ST",
                 2,
-                0,
+                1,
                 "grey",
                 self.handlers["ST"].on_button_press,
                 self.handlers["ST"].on_button_long_press,
                 "Panic Stop",
-            ),
-            ButtonSpec(
-                "MC",
-                2,
-                1,
-                "cyan",
-                self.handlers["MC"].on_button_press,
-                self.handlers["MC"].on_button_long_press,
-                "Multichannel",
             ),
         ]
 
