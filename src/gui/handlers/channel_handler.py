@@ -34,16 +34,16 @@ class ChannelHandler(BaseHandler):
 
         self.last_toggle_time = current_time
 
-        # Dummy rotation: None -> 0 -> 1 -> ... -> 15 -> None
+        # Rotate through channels 0-15 (1-16), wrapping from 15 back to 0
         if self.context.processor.output_channel is None:
             self.context.processor.output_channel = 0
         elif self.context.processor.output_channel >= 15:
-            self.context.processor.output_channel = None
+            self.context.processor.output_channel = 0
         else:
             self.context.processor.output_channel += 1
 
         self.update_ui()
-        logger.info(f"Channel changed to: {self.context.processor.output_channel}")
+        logger.info(f"Channel changed to: {self.context.processor.output_channel + 1}")
 
     def on_button_long_press(self) -> None:
         """Reset channel to 1 (index 0) on long press."""
@@ -59,18 +59,26 @@ class ChannelHandler(BaseHandler):
         if not self.context.gui or not self.context.processor:
             return
 
-        ch_text = (
-            "BY"
-            if self.context.processor.output_channel is None
-            else str(self.context.processor.output_channel + 1)
-        )
+        # Ensure channel has a default value (should not be None)
+        channel = self.context.processor.output_channel
+        if channel is None:
+            channel = 0
+            self.context.processor.output_channel = 0
+
+        # If channel is 1 (0-indexed as 0), show just "CH"
+        # Otherwise show the channel number
+        if channel == 0:
+            button_text = "CH"
+        else:
+            ch_text = str(channel + 1)
+            button_text = f"CH\n{ch_text}"
 
         btn = self.context.gui.button_panel.get_button("CH")
         if btn:
-            btn.configure(text=f"CH\n{ch_text}")
-            # Update button colors: active if channel is not set to bypass (None)
+            btn.configure(text=button_text)
+            # Update button colors: selected if channel is not 1 (0-indexed as 0)
             theme = self.context.gui.theme
-            if self.context.processor.output_channel is not None:
+            if channel != 0:
                 btn.configure(
                     fg_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
                     hover_color=(theme.BACKGROUND_SELECTED, theme.BACKGROUND_SELECTED),
