@@ -1,45 +1,49 @@
 # MIDI Echo Architecture
 
-## Overall Layers
+## Overview
 
-- **Entry Point**: `main.py` boots the app by loading `AppConfig.from_env()`, wiring up `AppContext`, creating `MidiGui`, `MidiEngine`, `MidiProcessor`, the arpeggiator/harmony engines, and then launching the GUI and async MIDI loop.
-- **Configuration & Context**: Environment-derived settings live in `src/config/config.py`. `AppContext` centralizes references (`gui`, `engine`, `processor`, `event_loop`, `arp_engine`, `harmony_engine`, `event_log`, `app_config`) so handlers and processors can stay decoupled and testable.
+- **Entry Point (`main.py`)**: Loads `AppConfig` from `.env`, creates shared services (`PortManager`, `EventLog`, `AppState`), instantiates `MidiProcessor`, `MidiEngine`, arpeggiator/harmony engines, optional sequencer, and the full-screen `MidiGui`. The MIDI engine runs on an asyncio loop inside a background thread while the GUI stays on the main thread.
+- **Configuration & Context**: `src/config/config.py` gathers platform-specific environment variables (output port hints, UI thresholds, audio device ID). `AppContext` at `src/gui/context.py` keeps live references to every subsystem (`gui`, `engine`, `processor`, `event_loop`, `arp_engine`, `harmony_engine`, `event_log`, `sequencer`, `app_state`) and exposes helpers such as tempo synchronization for registered widgets.
+- **Shared State (`AppState`)**: Central data model (`src/state/app_state.py`) with explicit sections for performance transformations, transport/clock metadata, UI runtime helpers, `ArpState`, `HarmonyState`, and sequencer state, ensuring every layer reads/writes from the same truth source.
 
-## GUI Layer (`src/gui`)
+## Interface Layer (`src/gui`)
 
-- **`MidiGui` (`src/gui/app.py`)**: The CustomTkinter window that sets the theme, creates the `ButtonPanel`, `PopupManager`, and `PressDetector`, and registers handler callbacks for each control button (Harmony, Arpeggiator, Scale, Transpose, Octave, Channel, Preset, Panic). It also handles debounced resizing and keeps handler UI state in sync after initialization.
-- **Component Suite (`src/gui/components`)**: Modular widgets (button panel, theme manager, popups, layout helpers) encapsulate presentation logic so `MidiGui` stays focused on wiring handlers to buttons.
-- **Handlers (`src/gui/handlers`)**: Each button has a handler class that knows how to mutate `AppContext` and send commands to the MIDI layer. Handlers expose short-press/long-press methods used by the `PressDetector` to distinguish actions.
-- **Input Utilities (`src/gui/input/press_detector.py`)**: Detects short vs. long presses and feeds the right handler method to the GUI.
+- **Main Window (`src/gui/app.py`)**: `MidiGui` sets CustomTkinter to dark mode, fills the screen with a `MatrixLayer`, builds the button grid (`ButtonPanel`, `ButtonSpec`) for SC/AR/HZ/TR/etc., wires short/long press callbacks from handler objects, listens to resize/capture events, and keeps handler UI states consistent after initialization.
+- **Components (`src/gui/components/`)**: Modular widgets handle theming (`theme.py`), button layout, popups, transport controls, event monitoring, matrix animations, tempo controls, and the pattern editor. This keeps the window class thin and focused on orchestration.
+- **Handlers (`src/gui/handlers/`)**: Each control (Transpose, Octave, Channel, Harmony, Scale, Arpeggiator, Preset, Sequencer, Panic, MultiChannel) implements domain logic for short and long presses, mutates `AppContext`/`AppState`, and communicates with MIDI subsystems via injected references.
+- **Input (`src/gui/input/press_detector.py`)**: Distinguishes between short and long presses, debouncing, and triggers the appropriate handler method so each button can offer secondary functions without manual timer management.
 
-## MIDI Layer (`src/midi`)
+## MIDI Processing Layer (`src/midi`)
 
-- **Engine (`src/midi/engine.py`)**: `MidiEngine` runs on an asyncio event loop. It opens MIDI input ports with callback threads that enqueue wrapped messages (`MidiMessageWrapper`) into an `asyncio.Queue`. A consumer task dequeues messages, calls `MidiProcessor.process()`, and forwards resulting messages to the selected MIDI output.
-- **Processor (`src/midi/processor.py`)**: Applies runtime transformations—scale snapping, harmonizer delegation, arpeggiator state updates, transpose/octave shifts, channel remapping, and logging. It holds `ArpState` and `HarmonyState`, toggles features (scale, harmonizer, arpeggiator), and can reject notes that fall outside MIDI range or when arpeggiator short-circuits inputs.
-- **Arpeggiator Subsystem (`src/midi/arp`)**: Houses the logic that builds rhythmic patterns from held notes, enforces timing, and produces output notes. Modules include the refactored engine, state validator, dispatcher, timing calculations, mode definitions, and note producers.
-- **Harmony Subsystem (`src/midi/harmony`)**: Generates harmonic accompaniment by snapping generated intervals to the active scale. `HarmonyEngine` works with `HarmonyState`, `HarmonyGenerator`, and `VoiceManager` to track held voices and emit harmony notes via `MidiProcessor`.
-- **Ports & Message Utilities**: `ports.py` manages discovery/selection of virtual and hardware MIDI endpoints; `message_wrapper.py` tags messages so the processor can differentiate between player input and generated notes.
+- **Port Management (`src/midi/ports.py`)**: Enumerates platform ports, filters unwanted system/feedback ports, and resolves output names via substring matching so `main.py` can avoid loops.
+- **Message Wrapper (`src/midi/message_wrapper.py`)**: Tags messages generated by the arpeggiator/harmony engines to avoid re-processing input notes.
+- **Event Log (`src/midi/event_log.py`)**: Thread-safe deque that stores recent events, formats them for display, and allows listeners to react, providing visibility into inbound/outbound data for debugging.
+- **Scale Utilities (`src/midi/scales.py`)**: Defines `ScaleType`, interval maps, display helpers, and `snap_note_to_scale()` so processor/harmony code align notes with the selected scale.
+- **Pulse Engine (`src/midi/engine.py`)**: Opens MIDI ports with `mido`, uses callback threads to push events into an asyncio queue, consumes messages with `_consume_queue`, logs traffic, runs optional sequencer recording, and forwards processed messages to the selected MIDI output. Its queue is also the target for dispatcher-driven generated notes.
+- **Processor (`src/midi/processor.py`)**: Core pipeline that unwraps messages, filters clocks/panic CCs, snaps input notes to the active scale, pushes harmonizer/arp state updates, drops raw notes when the arpeggiator is enabled, applies transpose/octave/channel/multi-channel transformations, and emits processed messages. It also handles panic/clock synchronization and keeps `AppState` sections updated (performance, transport, arp, harmony).
 
-## Supporting Infrastructure
+## Generated MIDI Subsystems
 
-- **Event Logging (`src/midi/event_log.py`)**: Optional logging hook that records inbound/outbound messages for debugging/performance metrics.
-- **Scales (`src/midi/scales.py`)**: Defines `ScaleType`, interval tables, and helper functions such as `snap_note_to_scale()` used by both the processor and harmonizer.
-- **Contextual Dependency Injection**: `AppContext` is passed around so handlers, GUI, and MIDI components share a single source of truth for configuration, engines, and per-session runtime state.
+- **Arpeggiator (`src/midi/arp/`)**: `ArpEngine` ties together `TimingCalculator`, `NoteProducer`, `MidiDispatcher`, and mode factories to expand held notes, enforce tempo/division/swing, build active indices, dispatch note-ons/off via `MidiDispatcher`, and support start/stop semantics. `state_validator` keeps held notes/pattern integrity across UI changes.
+- **Harmony (`src/midi/harmony/`)**: `HarmonyEngine` maintains `HarmonyState`, produces intervals via `HarmonyGenerator`, tracks polyphonic voices with `VoiceManager`, and sends harmony messages through `MidiDispatcher`. It reacts to melody note-on/off events from `MidiProcessor` and can panic to silence every active voice.
+- **Dispatcher (`src/midi/arp/dispatcher.py`)**: Thread-safe helper that enqueues wrapped messages back into the engine queue via `event_loop.call_soon_threadsafe`, ensuring generated notes traverse the same path as player input.
+
+## Sequencing & Audio
+
+- **Sequencer (`src/midi/sequencer/`)**: `MidiSequencer` records processed output (note_on/off, CC) from `MidiEngine`, quantizes events, stores them in a `Pattern`, plays them back with `InternalClock` (PPQN=960), tracks held notes for clean stops, and exposes transport controls to GUI handlers via `AppContext`. It also incorporates `MetronomeClicker` (using `src/audio/device_selector.py`) for audible ticks when enabled.
+- **Audio Helpers (`src/audio/`)**: `MetronomeClicker` references `device_selector`/`synthesizer` to play clicks on a chosen audio device while the sequencer or tempo-related UI elements run.
 
 ## Event Flow
 
-1. `MidiEngine` receives raw MIDI input via `mido` callbacks, wraps it with metadata, and queues it on the asyncio loop.
-2. `MidiProcessor` dequeues messages. If scale snapping or harmony is enabled, it updates notes before handing off to subsystems. Arpeggiator state is refreshed for player-held notes, and generated notes bypass the held-note dropping logic.
-3. After processing (transpose, octave, channel remap), the processor sends the resulting `mido.Message` to the selected output port and optionally logs the event.
-4. GUI handlers toggle features in the processor and audio engines, passing state through `AppContext` so the MIDI layer reacts immediately to button presses.
-
-## Testing & Quality
-
-- **Unit Tests (`tests/`)**: Structured mirrors of the `src/` packages. MIDI generators, GUI handlers, and harmony/arp subsystems each have dedicated tests, ensuring handlers behave under both short-press and long-press scenarios.
-- **Integration Hooks**: The GUI/engine split allows tests to instantiate `AppContext` with fake engines and processors so logic paths can be validated without launching the full application.
+1. The background `MidiEngine` opens MIDI inputs via `mido`, wraps incoming `mido.Message` (marking whether it came from the arp/harmony engine), and places it on an `asyncio.Queue`.
+2. `_consume_queue` calls `MidiProcessor.process()` for each message. The processor: unwraps the message, ignores system clocks unless syncing, snaps input notes to scale, updates harmony/arp state, filters player notes when arpeggiator is active, applies transpose/octave/channel mappings (including multi-channel mapping), logs events, and returns the message to send.
+3. `MidiEngine` sends processed messages to the output port, records them with `MidiSequencer` (if recording), and the GUI reflects the state changes via handlers bound to `AppContext`.
+4. When features like harmony or arpeggiator produce notes, they call `MidiDispatcher`, which tags their messages and re-enqueues them into the engine queue, letting the same post-processing, logging, and sequencing apply.
+5. GUI handlers mutate `AppState`/`AppContext`, toggling flags that instantly affect how future input is processed.
 
 ## Runtime Notes
 
-- Async GUI/MIDI split keeps the interface responsive: GUI runs in the main thread via CustomTkinter while `MidiEngine` runs async tasks for message consumption.
-- Environment-driven `AppConfig` makes it easy to tweak MIDI ports, thresholds, window size, and theme without code changes.
-- Feature toggles (scale, harmonizer, arpeggiator) operate as binary flags inside `MidiProcessor`, which keep the audio pipeline lean when not needed.
+- The UI runs on the main thread with CustomTkinter, while the MIDI engine/arp/harmony logic live on an asyncio loop in a background thread so MIDI I/O never blocks the interface.
+- Environment config (`AppConfig`) and `AppState` keep every layer wired via DI from `AppContext`, ensuring features such as scale snapping, transpose/octave adjustments, FX, harmonizer, multi-channel routing, and sequencer tempo remain consistent.
+- Logging (via `EventLog`) and the sequencer’s recording clocks provide observability during live performances.
+- Feature toggles behave as binary flags inside `MidiProcessor`, enabling the system to drop or transform notes depending on active modules (scale, arpeggiator, harmony, multi-channel).
