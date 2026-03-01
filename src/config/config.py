@@ -3,11 +3,26 @@
 import os
 import platform
 from dataclasses import dataclass
+from typing import List
 
 
 def get_system() -> str:
     """Return the operating system name."""
     return platform.system()
+
+
+# OS-aware MIDI output patterns for dynamic port discovery
+# These patterns are used to filter available MIDI ports by OS
+OUTPUT_PATTERNS = {
+    "Darwin": ["Virtual Bus", "IAC Driver", "IAC"],  # macOS virtual ports
+    "Linux": [
+        "VirMIDI",
+        "TiMidity",
+        "ALSA",
+        "Midi Through",
+    ],  # Linux virtual/synth ports
+    "Windows": ["loopMIDI", "Virtual", "MIDI Yoke"],  # Windows virtual ports
+}
 
 
 @dataclass
@@ -18,7 +33,8 @@ class AppConfig:
     """
 
     # MIDI Configuration
-    output: str
+    output: str  # Deprecated: kept for backward compatibility
+    preferred_outputs: List[str]  # OS-aware list of preferred MIDI outputs
     verbose: bool
     list_ports: bool
 
@@ -60,15 +76,37 @@ class AppConfig:
                 audio_device_id = None
 
         system = get_system()
+
+        # Try to get explicit output override (for backward compatibility)
+        explicit_output = None
         if system == "Darwin":
-            output = os.getenv("MAC_OUTPUT", "")
+            explicit_output = os.getenv("MAC_OUTPUT", "").strip()
         elif system == "Linux":
-            output = os.getenv("LINUX_OUTPUT", "")
+            explicit_output = os.getenv("LINUX_OUTPUT", "").strip()
         else:
-            output = os.getenv("OUTPUT", "")
+            explicit_output = os.getenv("OUTPUT", "").strip()
+
+        # Build preferred outputs list: explicit override takes priority, then OS defaults
+        preferred_outputs = []
+        if explicit_output:
+            # If explicit output is set, use it as the only preference
+            preferred_outputs = [explicit_output]
+        else:
+            # Use OS-aware defaults
+            preferred_outputs = OUTPUT_PATTERNS.get(system, [])
+
+        # Also check for PREFER_OUTPUTS_OVERRIDE (comma-separated list)
+        prefer_override = os.getenv("PREFER_OUTPUTS_OVERRIDE", "").strip()
+        if prefer_override:
+            preferred_outputs = [
+                p.strip().strip('"').strip("'")
+                for p in prefer_override.split(",")
+                if p.strip()
+            ]
 
         return cls(
-            output=output,
+            output=explicit_output or "",  # Keep for backward compatibility
+            preferred_outputs=preferred_outputs,
             verbose=os.getenv("VERBOSE", "false").lower() == "true",
             list_ports=os.getenv("LIST_PORTS", "false").lower() == "true",
             audio_device_id=audio_device_id,

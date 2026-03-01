@@ -56,15 +56,37 @@ async def main():
             print(f"  {p}")
         return
 
-    if not config.output:
-        logger.error("OUTPUT environment variable not set.")
-        print("Please set OUTPUT in your .env file or environment.")
+    # Validate MIDI output port selection
+    if not config.preferred_outputs:
+        logger.error("No MIDI output patterns configured for this OS.")
+        print(
+            "Please ensure OUTPUT_PATTERNS is set in src/config/config.py for your OS."
+        )
         return
 
-    output_name = port_manager.find_output_port(config.output)
+    output_name, all_available_outputs = port_manager.find_output_port_from_patterns(
+        config.preferred_outputs
+    )
 
     if not output_name:
-        logger.error(f"Could not find output port matching: {config.output}")
+        # Provide helpful error message with available ports
+        error_msg = (
+            f"Could not find an MIDI output port matching the preferred patterns:\n"
+            f"  Patterns: {config.preferred_outputs}\n"
+            f"\nAvailable MIDI output ports on this system:\n"
+        )
+        for i, port in enumerate(all_available_outputs, 1):
+            error_msg += f"  {i}. {port}\n"
+        error_msg += (
+            "\nTo use a specific port, set the environment variable:\n"
+            f"  - macOS: MAC_OUTPUT=<port_name>\n"
+            f"  - Linux: LINUX_OUTPUT=<port_name>\n"
+            f"  - Windows: OUTPUT=<port_name>\n"
+            f"  - Any OS: PREFER_OUTPUTS_OVERRIDE=<port_name1>,<port_name2>\n"
+            f"\nOr run with --list-ports to see all available ports."
+        )
+        logger.error(error_msg)
+        print(error_msg)
         return
 
     input_names = port_manager.get_input_names()
